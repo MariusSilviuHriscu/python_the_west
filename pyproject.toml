@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "python-the-west"
+version = "0.1.0"
+description = "Interact with the browser game 'The west' programatically using http requests."
+authors = ["MariusSilviuHriscu <hriscumarius65536@gmail.com>"]
+readme = "README.md"
+packages = [{include = "python_the_west"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.25.2"
+requests = "^2.31.0"
+bs4 = "^0.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -104,7 +104,7 @@
                 }
               },
               "seconds_flag": {
-                "type": "string"
+                "type": "boolean"
               }
             },
             "required": [

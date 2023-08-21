@@ -1,218 +1,18 @@
 from dataclasses import dataclass
-import typing
 import datetime
 
 from script_data import Script_settings
 
-from ..the_west_inner.equipment import Equipment
-from ..the_west_inner.game_classes import Game_classes
-from ..the_west_inner.gold_finder import parse_map_tw_gold
-from ..the_west_inner.crafting import fa_rost
-from ..the_west_inner.misc_scripts import recompensaZilnica,wait_until_date
-from ..the_west_inner.work_manager import Work_manager
-from ..the_west_inner.work import Work
-from ..the_west_inner.consumable import Consumable_handler
-from ..the_west_inner.bag import Bag
-from ..the_west_inner.login import Game_login
+from ..work_cycle import Cycle_jobs
 
-class Script_constants():
-    OFICIU_JOB_ID:int = 155
-    MOTIVATION_CONSUMABLE_ID : int = 1891000
-    ENERGY_CONSUMABLE_ID : int = 51594000
-    TARGET_PRODUCT : int = 742000
-    PRODUCT_EQUIPMENT_W_16 : Equipment = Equipment(
-        head_item_id= 52176000 ,
-        neck_item_id= 52177000 ,
-        left_arm_item_id= 52183000 ,
-        body_item_id= 52178000 ,
-        right_arm_item_id= 52184000 ,
-        foot_item_id= 52181001 ,
-        animal_item_id= 52097000 ,
-        belt_item_id= 52179000 ,
-        pants_item_id = 52180000 ,
-        yield_item_id = 52098000
-        )
-    PRODUCT_EQUIPMENT_W_27 : Equipment = Equipment(
-        head_item_id= None ,
-        neck_item_id= None ,
-        left_arm_item_id= None ,
-        body_item_id= None ,
-        right_arm_item_id= None ,
-        foot_item_id= None ,
-        animal_item_id= None ,
-        belt_item_id= None ,
-        pants_item_id = None ,
-        yield_item_id = None
-        )
-    COMMERCE_EQUIPMENT : Equipment = Equipment(
-        head_item_id= None ,
-        neck_item_id= None ,
-        left_arm_item_id= None ,
-        body_item_id= None ,
-        right_arm_item_id= None ,
-        foot_item_id= None , 
-        animal_item_id= None ,
-        belt_item_id= None ,
-        pants_item_id = None ,
-        yield_item_id = None
-        )
-
-class Script_work_task:
-    """
-    Handler the logic required for the caracter to do a number of tasks for a certain Work object
-
-    Args:
-        work_manager (Work_manager): The manager responsible for handling work tasks.
-        work_data (Work): The specific work data for the task.
-        number_of_actions (int): The number of work tasks for this work.
-        game_classes (Game_classes): The game-related classes and data.
-
-    Attributes:
-        work_manager (Work_manager): The manager responsible for handling work tasks.
-        work_data (Work): The specific work data for the task.
-        number_of_actions (int): The remaining number of actions to perform for this task.
-        game_classes (Game_classes): The game-related classes and data.
-    """
-
-    def __init__(self, work_manager: Work_manager, work_data: Work, number_of_actions: int, game_classes: Game_classes):
-        self.work_manager = work_manager
-        self.work_data = work_data
-        self.number_of_actions = number_of_actions
-        self.game_classes = game_classes
-
-    def execute(self):
-        """
-        Execute the work task by performing actions until the number_of_actions reaches zero.
-        """
-        while self.number_of_actions != 0:
-            # Wait until the task queue is empty .
-            wait_until_date(self.game_classes.task_queue.get_tasks_expiration(), self.game_classes.handler)
-
-            # Determine the maximum number of tasks allowed
-            maximum_number_of_task_allowed = self.work_manager.allowed_tasks()
-
-            # Perform the work for the minimum of maximum allowed tasks and remaining actions
-            self.work_manager.work(work_object=self.work_data, number_of_tasks=min(maximum_number_of_task_allowed, self.number_of_actions))
-
-            # Reduce the remaining actions
-            self.number_of_actions -= min(maximum_number_of_task_allowed, self.number_of_actions)
-
-        # Wait for the task's expiration time again when the execution of the method is done.
-        wait_until_date(self.game_classes.task_queue.get_tasks_expiration(), self.game_classes.handler)
-
-
-class Ciclu_exp:
-    """
-    Is an object that handles the logic of working jobs and replenishing energy and motivation .
-
-    Args:
-        game_classes (Game_classes): The game-related classes and data.
-        job_data (List[Work]): List of work data representing the targeted jobs.
-        consumable_handler (Consumable_handler): Handler for consumable items.
-
-    Attributes:
-        handler (Handler): The handler for game-related actions.
-        job_data (List[Work]): List of work data representing target jobs.
-        game_classes (Game_classes): The game-related classes and data.
-        work_manager (Work_manager): The manager responsible for handling work tasks.
-        consumable_handler (Consumable_handler): Handler for consumable items.
-    """
-
-    def __init__(self, game_classes: Game_classes, job_data: typing.List[Work], consumable_handler: Consumable_handler):
-        self.handler = game_classes.handler
-        self.job_data = job_data
-        self.game_classes = game_classes
-        self.work_manager = game_classes.work_manager
-        self.consumable_handler = consumable_handler
-
-    def _analize_motivation(self) -> typing.List[Script_work_task]:
-        """
-        Analyze motivation levels and create a list of Script_work_task objects based on available actions.
-
-        Returns:
-            List[Script_work_task]: List of work tasks to be executed.
-        """
-        player_data = self.game_classes.player_data
-        player_data.update_character_variables(self.handler)
-        energy = player_data.energy
-        motivation = self.game_classes.work_list.motivation(self.handler)
-        work_tasks_actions = []
-        possible_actions = energy
-
-        # Loop through available jobs and motivation levels
-        for job in self.job_data:
-            if motivation[str(job.job_id)] > 75 and possible_actions != 0:
-                actions = min(motivation[str(job.job_id)] - 75, possible_actions)
-                possible_actions -= actions
-
-                # Create Script_work_task object with work details
-                work_tasks_actions.append(Script_work_task(work_manager=self.work_manager, work_data=job, number_of_actions=actions, game_classes=self.game_classes))
-
-            if possible_actions == 0:
-                break
-
-        return work_tasks_actions
-
-    def work_cycle(self, motivation_consumable: int):
-        """
-        Execute the work tasks cycle based on available motivation and energy.
-
-        Args:
-            motivation_consumable (int): The ID of the motivation consumable item.
-        """
-        work_data = self._analize_motivation()
-
-        if len(work_data) == 0:
-            return True
-
-        # Execute work tasks in the cycle
-        for work_task in work_data:
-            work_task.execute()
-
-        # Recursive call to continue the cycle
-        return self.work_cycle(motivation_consumable=motivation_consumable)
-
-    def cycle(self, motivation_consumable: int, energy_consumable: int, number_of_cycles=1):
-        """
-        Execute the work cycle for a specified number of cycles.
-
-        Args:
-            motivation_consumable (int): The ID of the motivation consumable item.
-            energy_consumable (int): The ID of the energy consumable item.
-            number_of_cycles (int, optional): Number of cycles to perform. Defaults to 1.
-        """
-        player_data = self.game_classes.player_data
-        initial_number_of_cycles = number_of_cycles
-        player_data = self.game_classes.player_data
-        player_data.update_character_variables(self.handler)
-        energy = player_data.energy
-
-        # Use energy consumable if energy is low in the first cycle
-        if energy <= 2 and number_of_cycles == 1:
-            self.consumable_handler.use_consumable(energy_consumable)
-            player_data.update_character_variables(self.handler)
-
-        # Execute work cycles
-        while number_of_cycles != 0:
-            if energy <= 2 and initial_number_of_cycles == 1:
-                break
-
-            if energy <= 2:
-                # Use energy consumable to continue cycling
-                self.consumable_handler.use_consumable(energy_consumable)
-                player_data.update_character_variables(self.handler)
-                number_of_cycles -= 1
-
-            # Execute the work cycle and update energy
-            solution = self.work_cycle(motivation_consumable=motivation_consumable)
-            player_data = self.game_classes.player_data
-            player_data.update_character_variables(self.handler)
-            energy = player_data.energy
-
-            # Use motivation consumable if cycle was successful and energy is sufficient
-            if solution and energy >= 3:
-                self.consumable_handler.use_consumable(motivation_consumable)
-
+from ...the_west_inner.equipment import Equipment
+from ...the_west_inner.game_classes import Game_classes
+from ...the_west_inner.gold_finder import parse_map_tw_gold
+from ...the_west_inner.crafting import fa_rost
+from ...the_west_inner.misc_scripts import recompensaZilnica
+from ...the_west_inner.work import Work
+from ...the_west_inner.bag import Bag
+from ...the_west_inner.login import Game_login
 
 
 class Work_cycle_judge:
@@ -318,8 +118,8 @@ class Ciclu_munci:
             None
         """
         while self.cycle_judge.should_cycle():
-            # Create a Ciclu_exp instance to perform work cycles
-            Ciclu_exp(
+            # Create a Cycle_jobs instance to perform work cycles
+            Cycle_jobs(
                 game_classes=self.game_classes,
                 job_data=[self.job_data],
                 consumable_handler=self.game_classes.consumable_handler

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import pathlib
 import json
 
-from ..the_west_inner.equipment import Equipment
+from ...the_west_inner.equipment import Equipment
 
 @dataclass
 class Script_settings:

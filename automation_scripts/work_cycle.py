@@ -1,10 +1,10 @@
 import typing
 
-from ..the_west_inner.game_classes import Game_classes
-from ..the_west_inner.misc_scripts import wait_until_date
-from ..the_west_inner.work_manager import Work_manager
-from ..the_west_inner.work import Work
-from ..the_west_inner.consumable import Consumable_handler
+from the_west_inner.game_classes import Game_classes
+from the_west_inner.misc_scripts import wait_until_date
+from the_west_inner.work_manager import Work_manager
+from the_west_inner.work import Work
+from the_west_inner.consumable import Consumable_handler
 
 
 class Script_work_task:

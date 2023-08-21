@@ -5,14 +5,14 @@ from script_data import Script_settings
 
 from ..work_cycle import Cycle_jobs
 
-from ...the_west_inner.equipment import Equipment
-from ...the_west_inner.game_classes import Game_classes
-from ...the_west_inner.gold_finder import parse_map_tw_gold
-from ...the_west_inner.crafting import fa_rost
-from ...the_west_inner.misc_scripts import recompensaZilnica
-from ...the_west_inner.work import Work
-from ...the_west_inner.bag import Bag
-from ...the_west_inner.login import Game_login
+from the_west_inner.equipment import Equipment
+from the_west_inner.game_classes import Game_classes
+from the_west_inner.gold_finder import parse_map_tw_gold
+from the_west_inner.crafting import fa_rost
+from the_west_inner.misc_scripts import recompensaZilnica
+from the_west_inner.work import Work
+from the_west_inner.bag import Bag
+from the_west_inner.login import Game_login
 
 
 class Work_cycle_judge:

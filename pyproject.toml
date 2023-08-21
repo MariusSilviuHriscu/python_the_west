@@ -5,8 +5,7 @@ description = "Interact with the browser game 'The west' programatically using h
 authors = ["MariusSilviuHriscu <hriscumarius65536@gmail.com>"]
 readme = "README.md"
 packages = [{ include = "the_west_inner" },
-    { include = "automation_scripts" },
-    { include = "automation_scripts/default script" }
+    { include = "automation_scripts" }
     ]
 
 [tool.poetry.dependencies]

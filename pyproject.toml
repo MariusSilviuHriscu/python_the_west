@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Interact with the browser game 'The west' programatically using http requests."
 authors = ["MariusSilviuHriscu <hriscumarius65536@gmail.com>"]
 readme = "README.md"
-packages = [{include = "the_west_inner"}]
+packages = [{ include = "the_west_inner" },
+    { include = "automation_scripts" },
+    { include = "automation_scripts/default script" }
+    ]
 
 [tool.poetry.dependencies]
 python = "^3.11"

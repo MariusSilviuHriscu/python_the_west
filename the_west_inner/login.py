@@ -309,7 +309,7 @@ def game_classes_builder(active_world_url : str, game_requests_session: requests
 
 
 class Game_login():
-    def __init__(self,player_name:str , player_password:str, world_id : typing.Union[str,int]):
+    def __init__(self,player_name:str , player_password:str, world_id : typing.Union[str,int] , use_tor_flag : bool = False):
         self.player_name = player_name 
         self.player_password = player_password
         self.world_id = world_id
@@ -318,7 +318,11 @@ class Game_login():
         self.game_html = None
     def _set_url(self,url:str)->None:
         self.url = url
-    def _create_session (self) -> requests.Session :
+    def _create_session (self , use_tor_flag : bool = False) -> requests.Session :
+        if use_tor_flag:
+            
+            pass
+            
         with requests.Session() as session:
             # Set the User-Agent header
             session.headers = {"User-Agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'}
@@ -364,7 +368,7 @@ class Game_login():
         
                 
         return game_state_response
-    def login(self) -> Game_classes :
+    def login(self ) -> Game_classes :
         player_id , password_hash = self._login_account()
         game_raw_data = self._select_world(player_id=player_id,
                                            password_hash= password_hash

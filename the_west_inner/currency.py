@@ -25,7 +25,7 @@ class Currency:
         else:
             self.cash = self.cash - ammount 
     
-    def deposit_money(self , new_cash : int, new_deposit : int):
+    def modify_money(self , new_cash : int, new_deposit : int):
         self.cash = new_cash
         self.deposit = new_deposit
     

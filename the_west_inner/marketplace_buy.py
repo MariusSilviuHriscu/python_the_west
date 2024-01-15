@@ -17,6 +17,7 @@ import datetime
 
 from requests_handler import requests_handler
 from items import Items
+from currency import Currency
 from misc_scripts import server_time
 
 
@@ -197,6 +198,9 @@ class Marketplace_offer():
         if fech_response["error"] == True:
             raise Exception("Could not fetch this offer")
         return fech_response["msg"]
+
+class NotEnoughMoneyException(Exception):
+    pass
 class Marketplace_offer_list():
     def __init__(self, offer_list: typing.List[Marketplace_offer], handler: requests_handler, items: Items):
         """
@@ -211,14 +215,19 @@ class Marketplace_offer_list():
         self.handler = handler
         self.items = items
 
-    def buy_all(self) -> None:
+    def buy_all(self, player_currency : Currency) -> None:
         """
-        This function buys all the offers in the list.
+        This function buys all the offers in the list. Also updates the money values in player currency
         """
+        if player_currency.total_money < self.price:
+            raise NotEnoughMoneyException(f"You can't afford buying this : {self.price} because you only have {player_currency.total_money}")
         for offer in self.offer_list:
-            offer.buy_instantly(handler= self.handler)
+            if player_currency.total_money < offer.item_price:
+                raise NotEnoughMoneyException(f"You can't afford buying this item : {offer.item_price} because you only have {player_currency.total_money}")
+            response = offer.buy_instantly(handler= self.handler)
+            player_currency.modify_money(new_cash=response['money'],new_deposit = response['deposit'])
 
-    def buy_all_using_procentage_increase(self, max_increase: float) -> None:
+    def buy_all_using_procentage_increase(self, max_increase: float , player_currency : Currency) -> None:
         """
         This function buys all the offers in the list that have a percentage increase below the specified maximum.
 
@@ -227,15 +236,47 @@ class Marketplace_offer_list():
         """
         for offer in self.offer_list:
             if offer.price_increase < max_increase:
-                offer.buy_instantly(self.handler)
-
-    def buy_first_in_list(self) -> None:
+                if player_currency.total_money < offer.item_price:
+                    raise NotEnoughMoneyException(f"You can't afford buying this item : {offer.item_price} because you only have {player_currency.total_money}")
+                response = offer.buy_instantly(self.handler)
+                player_currency.modify_money(new_cash=response['money'],new_deposit = response['deposit'])
+    def buy_first_in_list(self , player_currency : Currency ) -> None:
         """
         This function buys the first offer in the list.
         """
-        for offer in self.offer_list:
-            offer.buy_instantly(self.handler)
-            break
+        offer = next(self.offer_list)
+        if player_currency.total_money < offer.item_price:
+            raise NotEnoughMoneyException(f"You can't afford buying this item : {offer.item_price} because you only have {player_currency.total_money}")
+        response = offer.buy_instantly(self.handler)
+        player_currency.modify_money(new_cash = response['money'] , new_deposit = response['deposit'])
+    @property
+    def price(self) -> int :
+        
+        return sum(
+                [int(x.item_price)for x in self.offer_list]
+                )
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return Marketplace_offer_list(offer_list=self.offer_list[key], handler=self.handler, items=self.items)
+        elif isinstance(key, int):
+            return Marketplace_offer_list(offer_list=[self.offer_list[key]], handler=self.handler, items=self.items)
+        else:
+            raise TypeError("Invalid key type. Use int or slice.")
+
+    def filter(self, condition_func:typing.Callable[[Marketplace_offer],bool]) -> typing.Self:
+        """
+        Filter the offer list based on a conditional function.
+
+        Args:
+            condition_func (Callable): A function that takes a Marketplace_offer as an argument
+                                      and returns a boolean indicating whether the offer should be included.
+
+        Returns:
+            Marketplace_offer_list: A new filtered instance of Marketplace_offer_list.
+        """
+        filtered_list = [offer for offer in self.offer_list if condition_func(offer)]
+        return Marketplace_offer_list(offer_list=filtered_list, handler=self.handler, items=self.items)
+
     # make this class iterable
     def __iter__(self):
         for offer in self.offer_list:
@@ -262,29 +303,34 @@ class ItemNotValidException(Exception):
 
 class Marketplace_buy_manager():
     
-    def __init__(self,handler:requests_handler,items:Items):
+    def __init__(self , handler : requests_handler , items : Items , currency):
         self.handler = handler
         self.items = items
+        self.currency = currency
     
-    def _is_on_market(self,item_id:int) -> bool:
+    def _is_on_market(self , item_id : int) -> bool:
         if item_id not in self.items:
             raise ItemNotValidException(f"The required item : {item_id} is not a valid item.")
         item_type = self.items.get_item(item_id = item_id)
-        return item_id in search_marketplace_category(category = item_type,handler = self.handler)
+        return item_id in search_marketplace_category(category = item_type , handler = self.handler)
     
     def _search_item(self,item_id:int) ->Marketplace_offer_list:
         
-        raw_item_offer_list = search_marketplace_item(item_id = item_id,handler = self.handler)
+        raw_item_offer_list = search_marketplace_item(item_id = item_id , handler = self.handler)
         return marketplace_buy_offer_builder(offer_dict_list = raw_item_offer_list)
     
-    def buy_cheapest_marketplace_item(self,item_id:int):
+    def buy_cheapest_marketplace_item(self , item_id : int):
         offer_list = self._search_item(item_id = item_id)
         
         if len(offer_list) != 0 :
-            offer_list.buy_first_in_list()
+            offer_list.buy_first_in_list(player_currency = self.currency)
         else:
             raise ItemNotFoundException(f"No item found :{item_id}")
-    
+    def buy_item_from_player_max_price(self,item_id : int , player_id : int , max_price : int):
+        item_offer_list = self._search_item(item_id = item_id).filter(
+                                                            condition_func= lambda x : x.seller_id == player_id and x.item_price/x.item_count <= max_price
+                                                            )
+        item_offer_list.buy_all(player_currency = self.currency)
     def buy_cheapest_and_pick_up(self,item_id:int):
         self.buy_cheapest_marketplace_item(item_id= item_id)
         raise NotImplementedError("The collect item from marketplace functionality is not implemented yet!")

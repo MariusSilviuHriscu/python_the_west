@@ -7,7 +7,15 @@ from game_classes import Game_classes
 from requests_handler import requests_handler
 from movement import Game_data
 from player_data import Player_data
-from init_data import return_h, return_premium_data, return_bag, return_work_list, return_cooldown , return_wear_data , return_buff_data
+from init_data import (return_h,
+                       return_premium_data,
+                       return_bag,
+                       return_work_list,
+                       return_cooldown ,
+                       return_wear_data ,
+                       return_buff_data ,
+                       return_currency_data
+                       )
 from task_queue import TaskQueue
 from premium import Premium
 from misc_scripts import server_time
@@ -20,6 +28,7 @@ from bag import Bag
 from skills import read_skill
 from equipment import create_initial_equipment , Equipment_manager
 from buffs import build_buff_list
+from currency import build_currency
 
 def game_instance(player_name:str,player_password:str,world_id:str) -> Game_classes:
     """
@@ -283,7 +292,12 @@ def game_classes_builder(active_world_url : str, game_requests_session: requests
         buff_dict = return_buff_data(initialization_html = game_raw_data.text)
         #Create a Buff_list object to handle the player's buffs
         buff_list = build_buff_list(input_dict = buff_dict)
-
+        
+        #Extract the dict associated with the player's currency(money,oup etc.)
+        currency_dict = return_currency_data(initialization_html = game_raw_data.text)
+        #Create a Currency object to keep track of the player's currency
+        currency = build_currency(input_dict = currency_dict)
+        
         # Create a Game_classes object containing all of the game state data
         game_classes = Game_classes(
                         handler = driver , 
@@ -300,7 +314,8 @@ def game_classes_builder(active_world_url : str, game_requests_session: requests
                         buff_list = buff_list ,
                         work_manager = work_manager ,
                         consumable_handler= consumable_handler ,
-                        equipment_manager= equipment_manager
+                        equipment_manager= equipment_manager ,
+                        currency = currency
                         
         )
         

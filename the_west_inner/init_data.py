@@ -78,3 +78,10 @@ def return_buff_data(initialization_html):
     json_item = json.loads(target_string)
     
     return json_item['buffs']
+def return_currency_data(initialization_html:str)->dict[str,int]:
+    search_dict = ['cash','deposit','upb','nuggets','veteranPoints']
+    jsonStr_list = re.findall(r'\{.*\}', str(initialization_html))
+    for string_found in jsonStr_list:
+        if "cash" in string_found:
+            json_player_data = json.loads(string_found)
+            return {key : json_player_data.get(key) for key in search_dict}

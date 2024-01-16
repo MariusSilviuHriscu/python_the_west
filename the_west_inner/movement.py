@@ -17,6 +17,7 @@ from dataclasses import dataclass
 import math
 
 
+
 class character_movement:
     """
     A class for calculating the distance and travel time between two locations for a character in a game.
@@ -72,6 +73,18 @@ class character_movement:
         
         Returns:
             The time it would take for a character to travel from its current position to the final position.
+        """
+        # Calculate the time it would take for a character to travel from its current position to the final position.
+        return self.calc_distanta(self.character_position, final_position)
+    def calculate_distance_to(self, final_position):
+        """
+        Calculates the time it would take for a character to travel from its current position to a specified final position.
+
+        Args:
+            final_position: The final position (x, y coordinates).
+
+        Returns:
+            int: The time it would take for a character to travel from its current position to the final position.
         """
         # Calculate the time it would take for a character to travel from its current position to the final position.
         return self.calc_distanta(self.character_position, final_position)

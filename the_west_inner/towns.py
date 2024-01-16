@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from requests_handler import requests_handler
 from player_data import Player_data
 from work_manager import Work_manager
-
 from town_buildings import Town_buildings,load_town_buildings
 @dataclass
 class Town():
@@ -36,6 +35,30 @@ class Town_list():
                             for town in town_data.values()}
     def __getitem__(self,key):
         return self.town_list[key]
-    def return_populated_towns(self):
+    def return_populated_towns(self) -> list[Town]:
         return [town for town in self.town_list.values() if town.member_count > 0]
+    def get_closest_town(self, player_data : Player_data) -> Town:
+        """
+        Get the closest populated town to the player.
 
+        Args:
+            player_data (Player_data): Player data instance.
+
+        Returns:
+            Town: The closest populated town to the player.
+        """
+        populated_towns = [town for town in self.town_list.values() if town.member_count > 0]
+
+        if not populated_towns:
+            # No populated towns available
+            return None
+        # Calculate distances to all populated towns
+        distances = {
+            town: player_data.absolute_distance_to((town.x, town.y))
+            for town in populated_towns
+        }
+
+        # Find the town with the minimum distance
+        closest_town = min(distances, key=distances.get)
+
+        return closest_town

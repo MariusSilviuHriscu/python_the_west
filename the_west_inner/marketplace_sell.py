@@ -19,7 +19,8 @@ from items import Items
 from dataclasses import dataclass
 from misc_scripts import wait_until_date,orase
 import typing
-from marketplace import Marketplace_offer,Marketplace_offer_list
+from marketplace_buy import Marketplace_offer,Marketplace_offer_list
+from currency import Currency
 
 
 def search_fetch_offers(handler:requests_handler) -> typing.Optional[str]:
@@ -79,13 +80,19 @@ def put_product_on_market(handler:requests_handler,sell_offer_data :Sell_offer_d
     if result["error"] == True :
         raise Exception("Could not put on market")
     return result["msg"]
-
 class Auction_sell_manager:
     """
     This class represents a manager for auctioning and selling products on the marketplace.
     """
 
-    def __init__(self, handler: requests_handler, player_data: Player_data, work_manager: Work_manager, task_queue: TaskQueue, items: Items):
+    def __init__(self,
+                 handler: requests_handler, 
+                 player_data: Player_data,
+                 work_manager: Work_manager,
+                 task_queue: TaskQueue,
+                 items: Items,
+                 currency : Currency
+                 ):
         """
         Initializes the auction sell manager with the given parameters.
 
@@ -101,6 +108,36 @@ class Auction_sell_manager:
         self.work_manager = work_manager
         self.task_queue = task_queue
         self.items = items
+        self.currency = currency
+class Auction_sell_manager:
+    """
+    This class represents a manager for auctioning and selling products on the marketplace.
+    """
+
+    def __init__(self,
+                 handler: requests_handler, 
+                 player_data: Player_data,
+                 work_manager: Work_manager,
+                 task_queue: TaskQueue,
+                 items: Items,
+                 currency : Currency
+                 ):
+        """
+        Initializes the auction sell manager with the given parameters.
+
+        Args:
+        handler (requests_handler): The request handler to use for sending requests.
+        player_data (Player_data): The player data instance.
+        work_manager (Work_manager): The work manager instance.
+        task_queue (TaskQueue): The task queue instance.
+        items (Items): The items instance.
+        """
+        self.handler = handler
+        self.player_data = player_data
+        self.work_manager = work_manager
+        self.task_queue = task_queue
+        self.items = items
+        self.currency = currency
 
     def _go_to_closest_town(self) -> str:
         """

@@ -119,7 +119,7 @@ class Player_data:
         Returns:
             The absolute distance between the player's current position and the final position.
         """
-        return character_movement(self.x, self.y, self.game_data.game_travel_speed, self.character_movement).cal_distanta_catre(final_position)
+        return character_movement(self.x, self.y, self.game_data.game_travel_speed, self.character_movement).calculate_distance_to(final_position)
     
     def update_hp(self, value: int):
         """

@@ -173,6 +173,8 @@ class Marketplace_offer():
     def sell_offer_completed_100_trust(self) -> bool:
         """
         This property checks if the sell offer is completed with 100% trust.
+        This means someone bet the maximum ammount possible and therefore got the item .
+        The situation where someone bet less than maximum money and won is handled by waiting until an offer is expired .
 
         Returns:
         bool: True if the sell offer is completed with 100% trust, False otherwise.

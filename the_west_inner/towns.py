@@ -13,7 +13,9 @@ class Town():
     member_count : int
     npctown : bool
     town_points : int 
-    alliance_id : int 
+    alliance_id : int
+    def __hash__(self) -> int:
+        return hash(self.town_id)
     def inner_data(self,handler:requests_handler,work_manager:Work_manager,player_data : Player_data) -> Town_buildings:
         return load_town_buildings(
                                     handler= handler,

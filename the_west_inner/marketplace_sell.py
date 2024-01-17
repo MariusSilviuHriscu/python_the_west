@@ -213,7 +213,6 @@ class Auction_sell_manager:
             handler = self.handler,
             items = self.items
         )
-
     def collect_all_items(self) -> typing.List[dict]:
         """
         This function collects all items that are available to be collected.

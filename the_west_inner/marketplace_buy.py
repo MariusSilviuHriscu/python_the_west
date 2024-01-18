@@ -148,6 +148,15 @@ class Marketplace_offer():
         int: The number of items in this offer.
         """
         return self.dict_offer["item_count"]
+    @property
+    def item_id(self) -> int:
+        """
+        This property returns the id of items in this offer.
+
+        Returns:
+        int: The id of items in this offer.
+        """
+        return self.dict_offer["item_id"]
 
     @property
     def item_price(self) -> float:

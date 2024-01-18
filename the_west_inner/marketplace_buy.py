@@ -255,7 +255,7 @@ class Marketplace_offer_list():
         """
         This function buys the first offer in the list.
         """
-        offer = next(self.offer_list)
+        offer = next(self.offer_list.__iter__())
         if player_currency.total_money < offer.item_price:
             raise NotEnoughMoneyException(f"You can't afford buying this item : {offer.item_price} because you only have {player_currency.total_money}")
         response = offer.buy_instantly(self.handler)
@@ -328,7 +328,10 @@ class Marketplace_buy_manager():
     def _search_item(self,item_id:int) ->Marketplace_offer_list:
         
         raw_item_offer_list = search_marketplace_item(item_id = item_id , handler = self.handler)
-        return marketplace_buy_offer_builder(offer_dict_list = raw_item_offer_list)
+        return marketplace_buy_offer_builder(offer_dict_list = raw_item_offer_list,
+                                             handler=self.handler,
+                                             items=self.items
+                                             )
     
     def buy_cheapest_marketplace_item(self , item_id : int):
         offer_list = self._search_item(item_id = item_id)

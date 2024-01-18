@@ -8,7 +8,6 @@ from requests_handler import requests_handler
 from player_data import Player_data
 from map import Map
 
-from game_classes import Game_classes
 
 class MovementManager:
     
@@ -44,12 +43,3 @@ class MovementManager:
         town_list = self.map.towns
         closest_town = town_list.get_closest_town(player_data = self.player_data)
         return self.move_to_town(town = closest_town)
-    @staticmethod
-    def load_from_game_classes(game_data:Game_classes) -> typing.Self:
-        
-        return MovementManager(
-                                handler = game_data.handler,
-                                task_queue = game_data.task_queue,
-                                work_manager = game_data.work_manager,
-                                player_data = game_data.player_data
-                                )

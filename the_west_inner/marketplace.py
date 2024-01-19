@@ -29,7 +29,8 @@ def build_marketplace_managers(handler:requests_handler,
         marketplace_sell_manager= Auction_sell_manager(handler=handler,
                                                        items= items,
                                                        currency = currency,
-                                                       movement_manager = movement_manager
+                                                       movement_manager = movement_manager,
+                                                       bag= bag
                                                        ),
         marketplace_buy_manager = Marketplace_buy_manager(
 

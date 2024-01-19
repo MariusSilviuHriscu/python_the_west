@@ -43,3 +43,13 @@ class MovementManager:
         town_list = self.map.towns
         closest_town = town_list.get_closest_town(player_data = self.player_data)
         return self.move_to_town(town = closest_town)
+    def get_distance_to_town(self , town : int|Town) -> int|float:
+        if isinstance(town,Town):
+            coordinates = (town.x , town.y)
+        elif isinstance(town,int) or isinstance(town,str):
+            map_town = self.map.towns[town]
+            coordinates = (map_town.x , map_town.y)
+        else:
+            raise Exception('Invalid type of input')
+        return self.player_data.absolute_distance_to(final_position=coordinates)
+            

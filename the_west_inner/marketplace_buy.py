@@ -287,7 +287,16 @@ class Marketplace_offer_list():
         """
         filtered_list = [offer for offer in self.offer_list if condition_func(offer)]
         return Marketplace_offer_list(offer_list=filtered_list, handler=self.handler, items=self.items)
+    def sort(self, key: typing.Optional[typing.Callable] = None, reverse: bool = False) -> None:
+        """
+        Sorts the offer list in-place based on the specified key function and order.
 
+        Args:
+            key (Optional[Callable]): A function that takes a Marketplace_offer as an argument and returns a value
+                                     to use for sorting. If not provided, the offers will be sorted based on their default order.
+            reverse (bool): If True, the offers will be sorted in descending order. Default is False.
+        """
+        self.offer_list.sort(key=key, reverse=reverse)
     # make this class iterable
     def __iter__(self):
         for offer in self.offer_list:

@@ -16,6 +16,7 @@ from items import Items
 from dataclasses import dataclass
 import typing
 from currency import Currency
+from bag import Bag
 from movement_manager import MovementManager
 
 
@@ -62,6 +63,9 @@ def put_product_on_market(handler:requests_handler,sell_offer_data :Sell_offer_d
         print(result)
         raise Exception("Could not put on market")
     return result["msg"]
+
+class InvalidAuctionException(Exception):
+    pass
 class Auction_sell_manager:
     """
     This class represents a manager for auctioning and selling products on the marketplace.
@@ -71,7 +75,8 @@ class Auction_sell_manager:
                  handler: requests_handler, 
                  items: Items,
                  currency: Currency,
-                 movement_manager: MovementManager
+                 movement_manager: MovementManager,
+                 bag : Bag
                  ):
         """
         Initializes the auction sell manager with the given parameters.
@@ -86,7 +91,17 @@ class Auction_sell_manager:
         self.items = items
         self.currency = currency
         self.movement_manager = movement_manager
-
+        self.bag = bag
+    def validate_auction(self,offer_data : Sell_offer_data) -> bool:
+        sold_item = offer_data.item_id
+        item_sold_ammount = offer_data.itemcount
+        if sold_item not in self.bag :
+            return False
+        if self.bag[sold_item] < item_sold_ammount:
+            return False
+        
+        return True
+        
     def _create_auction(self, item_id: int, number_of_items: int, unitary_price: int, town_id: int, description: str="") -> Sell_offer_data:
         """
         This function creates an auction for the given product.
@@ -119,6 +134,9 @@ class Auction_sell_manager:
                      unitary_price : int,
                      description : str = ''
                      ):
+        
+        
+        
         auction = self._create_auction(
             item_id=item_id,
             number_of_items=number_of_items,
@@ -126,11 +144,14 @@ class Auction_sell_manager:
             town_id=town_id,
             description = description
         )
+        if not self.validate_auction(offer_data=auction):
+            raise InvalidAuctionException('The sell offer has been invalidated')
         result = put_product_on_market(
             handler = self.handler,
             sell_offer_data = auction
         )
         self.currency.modify_money(new_cash = result['money'],new_deposit=result['deposit'])
+        self.bag.consume_item(item_id=item_id,amount=number_of_items)
         
         return result
         

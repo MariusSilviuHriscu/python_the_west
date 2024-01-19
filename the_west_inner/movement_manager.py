@@ -27,10 +27,10 @@ class MovementManager:
         return self.player_data.x == target_x and self.player_data.y == target_y
     def move_to_town(self,town:int|Town):
         if isinstance(town,Town):
-            self._move_to_town(town=town)
+            return self._move_to_town(town=town)
         elif isinstance(town,int) or isinstance(town,str):
             town = self.map.towns[town]
-            self._move_to_town(town = town)
+            return self._move_to_town(town = town)
     def _move_to_town(self,town : Town) -> int:
         if self.check_location(target_x = town.x , target_y=town.y):
             return town.town_id

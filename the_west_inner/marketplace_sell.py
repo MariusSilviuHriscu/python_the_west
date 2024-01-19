@@ -59,6 +59,7 @@ def put_product_on_market(handler:requests_handler,sell_offer_data :Sell_offer_d
     payload = {x:payload[x] for x in payload if not (x == "auctionprice" and payload[x]=="")}
     result = handler.post(window="building_market",action="putup",payload=payload,use_h=True)
     if result["error"] == True :
+        print(result)
         raise Exception("Could not put on market")
     return result["msg"]
 class Auction_sell_manager:
@@ -111,7 +112,28 @@ class Auction_sell_manager:
             auctionprice="",
             maxprice=number_of_items * unitary_price
         )
-
+    def sell_in_town(self,
+                     town_id : int|str,
+                     item_id : int,
+                     number_of_items : int,
+                     unitary_price : int,
+                     description : str = ''
+                     ):
+        auction = self._create_auction(
+            item_id=item_id,
+            number_of_items=number_of_items,
+            unitary_price=unitary_price,
+            town_id=town_id,
+            description = description
+        )
+        result = put_product_on_market(
+            handler = self.handler,
+            sell_offer_data = auction
+        )
+        self.currency.modify_money(new_cash = result['money'],new_deposit=result['deposit'])
+        
+        return result
+        
     def sell_in_nearest_town(self, item_id: int, number_of_items: int, unitary_price: int, description: str="") -> typing.Optional[dict]:
         """
         This function auctions and sells the given product in the nearest town.
@@ -125,14 +147,12 @@ class Auction_sell_manager:
         Returns:
         Optional[dict]: The result of the auction if it was successful, None otherwise.
         """
+        
         town_id = self.movement_manager.move_to_closest_town()
-        auction = self._create_auction(
-            item_id=item_id,
-            number_of_items=number_of_items,
-            unitary_price=unitary_price,
-            town_id=town_id
-        )
-        return put_product_on_market(
-            handler=self.handler,
-            sell_offer_data=auction
-        )
+        
+        return self.sell_in_town(town_id=town_id,
+                                 item_id = item_id,
+                                 number_of_items= number_of_items,
+                                 unitary_price = unitary_price,
+                                 description = description
+                                 )

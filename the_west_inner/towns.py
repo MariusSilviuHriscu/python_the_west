@@ -3,7 +3,13 @@ from dataclasses import dataclass
 from requests_handler import requests_handler
 from player_data import Player_data
 from work_manager import Work_manager
-from town_buildings import Town_buildings,load_town_buildings
+from town_buildings import Town_buildings,load_town_buildings,CityNotFoundError
+
+@dataclass
+class TownBuildingLevelMap:
+    building_name : str
+    level : int
+    max_level : int
 @dataclass
 class Town():
     x : int
@@ -23,7 +29,22 @@ class Town():
                                     player_data = player_data,
                                     coords= (self.x,self.y)
                                     )
-
+    def town_level_map_data(self,city_building_name : str) -> TownBuildingLevelMap:
+        
+        response = self.handler.post(window="town",action="get_town",action_name="mode",payload={"x":f"{self.x}","y":f"{self.y}"})
+    
+        if response['error'] :
+            raise CityNotFoundError(f"Couldn't find the city at the coords ( {self.x} , {self.y} ) !")
+    
+    
+        building_data = response['allBuildings'].get(city_building_name)
+        
+        return TownBuildingLevelMap(
+            building_name = city_building_name,
+            level = building_data.get('stage'),
+            max_level = building_data.get('maxStage')
+        )
+        
 class Town_list():
     def __init__(self,town_data:dict):
         self.town_list = {town["town_id"] : Town( x = town["x"],

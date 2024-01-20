@@ -48,6 +48,10 @@ class Town():
             max_level = building_data.get('maxStage')
         )
     def to_raw_dict(self) -> dict:
+        """
+        This method recreates part of the initial dict that Town_list uses to create itself and instantiate all towns . 
+        This method serves the purpose of easing creating new town_list instances as the logic for instantiating the class requires raw data dict from the game's map
+        """
         town_dict = {}
         town_dict["x"] = self.x
         town_dict["y"] = self.y

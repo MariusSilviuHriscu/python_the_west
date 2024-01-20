@@ -62,7 +62,7 @@ def game_classes_builder(active_world_url : str, game_requests_session: requests
         player_data.update_character_variables(driver)
 
         # Update the location of the Player_data object using the "handler" object
-        player_data.update_location(driver)
+        player_data.update_visible_variables(driver)
 
         # Create a TaskQueue object using the "handler" object and the Player_data object
         task_queue = TaskQueue(handler=driver,

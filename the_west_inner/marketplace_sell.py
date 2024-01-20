@@ -10,6 +10,7 @@ Classes:
 Sell_offer_data: Represents the data required to put a product on the marketplace.
 Auction_sell_manager: A manager for auctioning and selling products on the marketplace, with methods for going to the closest town, finding the best offer for a product, buying a product, and auctioning or selling a product.
 """
+import math
 
 from requests_handler import requests_handler
 from items import Items
@@ -18,7 +19,8 @@ import typing
 from currency import Currency
 from bag import Bag
 from movement_manager import MovementManager
-
+from player_data import Player_data
+from towns import Town
 
 @dataclass
 class Sell_offer_data:
@@ -34,6 +36,44 @@ class Sell_offer_data:
     description: str
     auctionprice: str
     maxprice: str
+
+class AuctionFeeCalculator:
+    def __init__(self, min_price, max_price, max_days, auctions, current_stage,max_stage, is_player_town):
+        self.min_price = min_price
+        self.max_price = max_price
+        self.max_days = max_days
+        self.auctions = auctions
+        self.current_stage = current_stage
+        self.max_stage = max_stage
+        self.is_player_town = is_player_town
+
+    def calculate_fee(self) -> int:
+        # Determine the effective price based on min and max prices
+        effective_price = min(self.max_price, self.min_price) if self.max_price and self.min_price else max(self.max_price, self.min_price)
+    
+        # Calculate the temporary fee based on the effective price and other factors
+        tmp_fee = int((effective_price * 0.02 * self.max_stage) + (self.max_days * 3))
+    
+        # Determine the final fee based on current stage and player's town status
+        base_fee = tmp_fee / self.current_stage
+        final_fee = math.ceil(base_fee * (1 if self.is_player_town else 2) * self.auctions)
+    
+        return final_fee
+
+@dataclass
+class MarketBuildingData:
+    level : int
+    max_level : int
+class AuctionFeeBuilder():
+    def __init__(self,player_data : Player_data,town : Town,sell_offer:Sell_offer_data):
+        
+        self.player_data = player_data
+        self.town = town
+        self.sell_offer = sell_offer
+    
+    def _get_town_market_data(self) -> MarketBuildingData:
+        
+        pass
 
 def put_product_on_market(handler:requests_handler,sell_offer_data :Sell_offer_data) -> typing.Optional[str]:
     """

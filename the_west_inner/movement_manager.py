@@ -36,7 +36,7 @@ class MovementManager:
             return town.town_id
         self.work_manager.move_to_town(town_id = town.town_id)
         wait_until_date(wait_time= self.task_queue.get_tasks_expiration(), handler = self.handler)
-        self.player_data.update_location(handler = self.handler)
+        self.player_data.update_visible_variables(handler = self.handler)
         return town.town_id
     def move_to_closest_town(self) :
         

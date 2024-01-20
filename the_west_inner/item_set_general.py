@@ -10,7 +10,7 @@ class IntString(str):
         return super().__new__(cls, value)
 
 Set_bonus_dict = typing.Dict[IntString,typing.List]
-
+    
 class Item_set():
     """
     Represents an item set with a key, name, list of items, and bonus dictionary

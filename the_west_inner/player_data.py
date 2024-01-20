@@ -4,7 +4,7 @@ This module handles player data and related functions in a game, including updat
 Class:
 - Player_data: A class representing the data for a player in a game.
 Methods:
-    - update_location(handler: requests_handler) -> None: Updates the player's location (x and y coordinates) and profession based on the player's ID and name.
+    - update_visible_variables(handler: requests_handler) -> None: Updates the player's location (x and y coordinates) and profession based on the player's ID and name.
     - update_character_movement(handler: requests_handler) -> None: Updates the character's movement speed.
     - update_character_variables(handler: requests_handler) -> None: Updates the character's hit points, energy, level, and experience.
     - update_crafting(handler: requests_handler) -> None: Updates the character's profession based on the player's ID and name.
@@ -39,10 +39,12 @@ class Player_data:
     experience: int
     profession_id: int = -1
     profession: str = "None"
+    town_id : int|None = None
     
-    def update_location(self, handler: requests_handler):
+    def update_visible_variables(self, handler: requests_handler):
         """
         Updates the player's location (x and y coordinates) and profession based on the player's ID and name.
+        Also updates the player's town_id
         
         Args:
             handler: An instance of the requests_handler class used to make requests to the game API.
@@ -56,6 +58,9 @@ class Player_data:
         else :
             self.profession_id = -1
             self.profession = ""
+        self.town_id = None
+        if profile_search_response['hasTown']:
+            self.town_id = profile_search_response['town']
         time.sleep(0.5)
     def update_character_movement(self, handler: requests_handler):
         """
@@ -106,7 +111,7 @@ class Player_data:
         """
         self.update_character_movement(handler)
         self.update_character_variables(handler)
-        self.update_location(handler)
+        self.update_visible_variables(handler)
         self.update_crafting(handler)
     
     def absolute_distance_to(self, final_position: typing.Tuple[int, int]):

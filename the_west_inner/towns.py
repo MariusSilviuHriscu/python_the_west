@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import typing
 
 from requests_handler import requests_handler
 from player_data import Player_data
@@ -7,6 +8,7 @@ from town_buildings import Town_buildings,load_town_buildings,CityNotFoundError
 
 @dataclass
 class TownBuildingLevelMap:
+    town_id : int
     building_name : str
     level : int
     max_level : int
@@ -29,21 +31,34 @@ class Town():
                                     player_data = player_data,
                                     coords= (self.x,self.y)
                                     )
-    def town_level_map_data(self,city_building_name : str) -> TownBuildingLevelMap:
+    def town_level_map_data(self,handler:requests_handler,city_building_name : str) -> TownBuildingLevelMap:
         
-        response = self.handler.post(window="town",action="get_town",action_name="mode",payload={"x":f"{self.x}","y":f"{self.y}"})
+        response = handler.post(window="town",action="get_town",action_name="mode",payload={"x":f"{self.x}","y":f"{self.y}"})
     
         if response['error'] :
             raise CityNotFoundError(f"Couldn't find the city at the coords ( {self.x} , {self.y} ) !")
     
     
-        building_data = response['allBuildings'].get(city_building_name)
+        building_data = response.get('allBuildings').get(city_building_name)
         
         return TownBuildingLevelMap(
+            town_id= self.town_id,
             building_name = city_building_name,
             level = building_data.get('stage'),
             max_level = building_data.get('maxStage')
         )
+    def to_raw_dict(self) -> dict:
+        town_dict = {}
+        town_dict["x"] = self.x
+        town_dict["y"] = self.y
+        town_dict["town_id"] = self.town_id
+        town_dict["name"] = self.town_name
+        town_dict["member_count"] = self.member_count
+        town_dict["npctown"] = self.npctown
+        town_dict["town_points"] = self.town_points
+        town_dict["alliance_id"] = self.alliance_id
+        
+        return town_dict
         
 class Town_list():
     def __init__(self,town_data:dict):
@@ -58,8 +73,12 @@ class Town_list():
                             for town in town_data.values()}
     def __getitem__(self,key):
         return self.town_list[key]
-    def return_populated_towns(self) -> list[Town]:
-        return [town for town in self.town_list.values() if town.member_count > 0]
+    def __iter__(self):
+        return self.town_list.values().__iter__()
+    def return_populated_towns(self) -> typing.Self:
+        return Town_list(
+                        town_data= {town_id:town.to_raw_dict() for town_id,town in self.town_list.items() if town.member_count > 0}
+                        )
     def get_closest_town(self, player_data : Player_data) -> Town:
         """
         Get the closest populated town to the player.

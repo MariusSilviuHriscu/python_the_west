@@ -5,7 +5,7 @@ from bag import Bag
 from items import Items
 from currency import Currency
 from movement_manager import MovementManager
-
+from player_data import Player_data
 
 from marketplace_buy import Marketplace_buy_manager
 from marketplace_sell import Auction_sell_manager
@@ -22,7 +22,8 @@ def build_marketplace_managers(handler:requests_handler,
                                      items : Items,
                                      currency : Currency,
                                      movement_manager : MovementManager,
-                                     bag : Bag
+                                     bag : Bag,
+                                     player_data : Player_data
                                      ) -> Marketplace_managers:
     
     return Marketplace_managers(
@@ -30,7 +31,8 @@ def build_marketplace_managers(handler:requests_handler,
                                                        items= items,
                                                        currency = currency,
                                                        movement_manager = movement_manager,
-                                                       bag= bag
+                                                       bag= bag,
+                                                       player_data = player_data
                                                        ),
         marketplace_buy_manager = Marketplace_buy_manager(
 

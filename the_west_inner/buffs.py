@@ -143,6 +143,7 @@ def build_buff_list(input_dict) -> Buff_list:
             continue
         if buff_type not in mapping_function_dict:
             print(buff_type,buff_dict)
+            print(input_dict)
             warnings.warn(f"Unknown type of buff : {buff_type}")
             continue
         buff_list.add(

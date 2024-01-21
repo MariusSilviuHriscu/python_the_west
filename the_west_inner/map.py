@@ -16,7 +16,7 @@ Functions:
 import typing
 from requests_handler import requests_handler
 from work_list import Work_list
-from towns import Town_list
+from towns import Town_list,Town
 
 class Map_job_location():
     def __init__(self,job_group_id:int,job_id:int,job_x:int,job_y:int,is_silver:bool) -> None:
@@ -124,12 +124,24 @@ def assemble_map_county_list_from_request_data(county_data:dict) -> Map_county_l
                     county_id = county['county_id']
                     ) for county in county_data] 
                            )
+def assemble_map_town_list_from_request_data(town_dict:dict) -> Town_list:
+    town_list = {town["town_id"] : Town( x = town["x"],
+                                                y = town["y"],
+                                                town_id = town["town_id"],
+                                                town_name= town["name"],
+                                                member_count = town["member_count"],
+                                                npctown = town["npctown"],
+                                                town_points = town["town_points"],
+                                                alliance_id = town["alliance_id"]) 
+                            for town in town_dict.values()}
+    return Town_list(town_list=town_list)
+    
 class Map():
     def __init__(self,handler : requests_handler):
         self.handler = handler
         minimap = self._init_map()
         self.towns = minimap['towns']
-        self.towns = Town_list(town_data= minimap['towns'])
+        self.towns = assemble_map_town_list_from_request_data(town_dict= minimap['towns'])
         self.counties = assemble_map_county_list_from_request_data(minimap['counties'])
         self.fair = minimap['fair']
         self.job_groups = minimap['job_groups']

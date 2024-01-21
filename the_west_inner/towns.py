@@ -47,41 +47,18 @@ class Town():
             level = building_data.get('stage'),
             max_level = building_data.get('maxStage')
         )
-    def to_raw_dict(self) -> dict:
-        """
-        This method recreates part of the initial dict that Town_list uses to create itself and instantiate all towns . 
-        This method serves the purpose of easing creating new town_list instances as the logic for instantiating the class requires raw data dict from the game's map
-        """
-        town_dict = {}
-        town_dict["x"] = self.x
-        town_dict["y"] = self.y
-        town_dict["town_id"] = self.town_id
-        town_dict["name"] = self.town_name
-        town_dict["member_count"] = self.member_count
-        town_dict["npctown"] = self.npctown
-        town_dict["town_points"] = self.town_points
-        town_dict["alliance_id"] = self.alliance_id
-        
-        return town_dict
+
         
 class Town_list():
-    def __init__(self,town_data:dict):
-        self.town_list = {town["town_id"] : Town( x = town["x"],
-                                                y = town["y"],
-                                                town_id = town["town_id"],
-                                                town_name= town["name"],
-                                                member_count = town["member_count"],
-                                                npctown = town["npctown"],
-                                                town_points = town["town_points"],
-                                                alliance_id = town["alliance_id"]) 
-                            for town in town_data.values()}
-    def __getitem__(self,key):
+    def __init__(self,town_list : dict[int,Town]):
+        self.town_list = town_list
+    def __getitem__(self,key ):
         return self.town_list[key]
     def __iter__(self):
         return self.town_list.values().__iter__()
     def return_populated_towns(self) -> typing.Self:
         return Town_list(
-                        town_data= {town_id:town.to_raw_dict() for town_id,town in self.town_list.items() if town.member_count > 0}
+                        town_list = {town_id:town for town_id,town in self.town_list.items() if town.member_count > 0}
                         )
     def get_closest_town(self, player_data : Player_data) -> Town:
         """

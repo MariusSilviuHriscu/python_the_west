@@ -71,7 +71,45 @@ def search_marketplace_item(item_id:int,handler:requests_handler) :
     if result["error"] :
         return None
     return result["msg"]["search_result"]
+def search_marketplace_item(item_id: int | None, handler: requests_handler) :
+    """
+    This function searches the given item in the marketplace using the given request handler.
 
+    Args:
+    item_id (Optional[int]): The id of the item to search in the marketplace. If None, the item_id part of the request is omitted.
+    handler (requests_handler): The request handler to use for sending the request.
+
+    """
+    def recursive_search(page):
+        payload = {
+            "page": str(page),
+            "nav": "first",
+            "sort": "bid",
+            "order": "asc"
+        }
+
+        if item_id is not None:
+            payload["item_id"] = str(item_id)
+
+        result = handler.post(window="building_market", action="search", payload=payload, use_h=True)
+
+        if result["error"]:
+            return None
+
+        search_result = result["msg"]["search_result"]
+        next_page = result["msg"]["next"]
+
+        if next_page:
+            time.sleep(1)
+            # Recursively fetch the next page
+            next_page_result = recursive_search(page + 1)
+            if next_page_result is not None:
+                search_result.extend(next_page_result)
+
+        return search_result
+
+    # Start the recursive search from page 1
+    return recursive_search(1)
 class Marketplace_offer():
     """
     This class represents an offer on the marketplace.
@@ -127,7 +165,8 @@ class Marketplace_offer():
         Returns:
         float: The price increase for the given item.
         """
-        return (float(self.item_price / self.item_count) / item_dict["sell_price"] - 1) * 100
+        item_price = item_dict['sell_price'] if item_dict["sell_price"] != 0 else 1
+        return (float(self.item_price / self.item_count) / item_price - 1) * 100
 
     @property
     def seller_id(self) -> int:
@@ -166,7 +205,7 @@ class Marketplace_offer():
         Returns:
         float: The price of the items in this offer.
         """
-        return self.dict_offer["max_price"]
+        return self.dict_offer["max_price"] if self.dict_offer["max_price"] else 0
 
     @property
     def town_id(self) -> int:
@@ -264,7 +303,7 @@ class Marketplace_offer_list():
     def price(self) -> int :
         
         return sum(
-                [int(x.item_price)for x in self.offer_list]
+                [int(x.item_price)for x in self.offer_list if x.item_price]
                 )
     def __getitem__(self, key):
         if isinstance(key, slice):

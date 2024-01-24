@@ -196,7 +196,6 @@ class Marketplace_offer():
         int: The id of items in this offer.
         """
         return self.dict_offer["item_id"]
-
     @property
     def item_price(self) -> float:
         """
@@ -206,7 +205,15 @@ class Marketplace_offer():
         float: The price of the items in this offer.
         """
         return self.dict_offer["max_price"] if self.dict_offer["max_price"] else 0
+    @property
+    def item_price_per_unit(self) ->float:
+        """
+        This property returns the unitary price of items in this offer.
 
+        Returns:
+        float: The unitary price of items in this offer.
+        """
+        return float(self.item_price) / self.item_count
     @property
     def town_id(self) -> int:
         """

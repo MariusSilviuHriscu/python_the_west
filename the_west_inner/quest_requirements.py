@@ -3,7 +3,7 @@ import typing
 from gold_finder import parse_map_for_quest_employers
 from work_manager import Work_manager
 from requests_handler import requests_handler
-from crafting import Crafting_table,fa_rost
+from crafting import Crafting_table,acquire_product
 from items import Items
 from game_classes import Game_classes
 from marketplace_buy import Marketplace_categories,search_marketplace_category,search_marketplace_item
@@ -73,10 +73,10 @@ class Quest_requirement_item_to_hand_work_product():
         self.quest_id = quest_id
         self.solved = solved
     def solve(self,game_classes:Game_classes):
-        fa_rost(id_item=self.item_id,nr=self.number,game_classes=game_classes)
+        acquire_product(id_item=self.item_id,nr=self.number,game_classes=game_classes)
         while game_classes.bag[self.item_id] < self.number:
             game_classes.work_manager.wait_until_free_queue()
-            fa_rost(id_item=self.item_id,nr=self.number,game_classes=game_classes)
+            acquire_product(id_item=self.item_id,nr=self.number,game_classes=game_classes)
         return True
     def declare_solved(self):
         self.solved = True

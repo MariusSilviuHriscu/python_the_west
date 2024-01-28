@@ -8,7 +8,7 @@ from bag import Bag
 from caching_decorators import cache_function_results
 
 """
-This module contains utility functions and classes for handling items in a game. The return_items function returns a dictionary containing the items data from the server. The Items class represents a list of items and provides methods for finding an item by ID, checking if an item is craftable, and getting the name and price of an item. The isCraftable function returns True if an item is craftable, and nr_item returns the number of items in the bag. The has_automation function returns True if the player has automation premium, and munca_corespunzatoare_id returns the ID of the work corresponding to a given item ID.
+This module contains utility functions and classes for handling items in a game. The return_items function returns a dictionary containing the items data from the server. The Items class represents a list of items and provides methods for finding an item by ID, checking if an item is craftable, and getting the name and price of an item. The isCraftable function returns True if an item is craftable, and nr_item returns the number of items in the bag. The has_automation function returns True if the player has automation premium, and get_corresponding_work_id returns the ID of the work corresponding to a given item ID.
 """
 
 def apply_func_to_numbers(data, func):
@@ -204,7 +204,7 @@ def nr_item(bag:Bag,id_item):
     return bag.get_item_count(id_item)
 def has_automation(premium_data:Premium):
     return premium_data.automation
-def munca_corespunzatoare_id(id_item,work_list:Work_list):
+def get_corresponding_work_id(id_item,work_list:Work_list):
     id_lista_munci = work_list.work_products()
     if str(id_item) not in id_lista_munci:
         return False

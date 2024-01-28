@@ -4,8 +4,8 @@ This module handles functions related to time manipulation, daily rewards, and m
 Functions:
 - server_time(handler:requests_handler) -> datetime: Returns the server time.
 - wait_until_date(wait_time: datetime, handler:requests_handler) -> bool: Waits until the specified date is reached.
-- recompensaZilnica(handler:requests_handler) -> bool: Collects the daily reward.
-- orase(handler:requests_handler, player_data) -> list: Returns the ID, x coordinate, and y coordinate of the town that is closest to the player's location and has a level 5 hotel.
+- collect_daily_reward(handler:requests_handler) -> bool: Collects the daily reward.
+- get_closest_viable_town(handler:requests_handler, player_data) -> list: Returns the ID, x coordinate, and y coordinate of the town that is closest to the player's location and has a level 5 hotel.
 - number_of_tasks(handler:requests_handler) -> int: Returns the number of tasks in the task queue.
 - distance_to(target_coords, player_data) -> float: Calculates the distance between the player and a given set of coordinates.
 """
@@ -59,12 +59,12 @@ def wait_until_date(wait_time: datetime, handler:requests_handler) -> bool:
     return True
 
 
-def recompensaZilnica(handler:requests_handler):
+def collect_daily_reward(handler:requests_handler):
     succes = handler.post("loginbonus","collect",use_h = True)
     return succes["error"] == False
 def distance_to(target_coords,player_data):
     return player_data.absolute_distance_to(target_coords)
-def orase(handler:requests_handler, player_data):
+def get_closest_viable_town(handler:requests_handler, player_data):
     """
     Returns the ID, x coordinate, and y coordinate of the town that is closest to the player's location
     and has a level 5 hotel.
@@ -157,7 +157,7 @@ def queue_sleep(handler:requests_handler, city_id):
     
     # Add a sleep task to the end of the queue.
     return sleep_task(handler, len_queue, city_id)
-def somn_oras_apropiat(handler:requests_handler, player_data):
+def sleep_closest_town(handler:requests_handler, player_data):
     """
     Adds a sleep task for the town with a level 5 hotel that is closest to the player's location.
     
@@ -166,7 +166,7 @@ def somn_oras_apropiat(handler:requests_handler, player_data):
         player_data: The player's location and other relevant data.
     """
     # Find the town with a level 5 hotel that is closest to the player's location.
-    town = orase(handler, player_data)
+    town = get_closest_viable_town(handler, player_data)
     
     # Add a sleep task for the town to the end of the queue.
     queue_sleep(handler, town[0])

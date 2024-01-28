@@ -3,9 +3,9 @@ from task_queue import TaskQueue
 from premium import Premium
 from player_data import Player_data
 from work_list import Work_list
-from work import compara_distanta, munceste_coord
-from misc_scripts import somn_oras_apropiat
-from items import Items,munca_corespunzatoare_id
+from work import get_closest_workplace_data, munceste_coord
+from misc_scripts import sleep_closest_town
+from items import Items,get_corresponding_work_id
 from dataclasses import dataclass
 
 """
@@ -31,7 +31,7 @@ The `craft_item` function takes the following arguments:
 """
             
 
-def munca_ora_produse(job_id,handler:requests_handler,task_queue:TaskQueue,premium:Premium,player_data:Player_data,work_list:Work_list):
+def product_hourly_work(job_id,handler:requests_handler,task_queue:TaskQueue,premium:Premium,player_data:Player_data,work_list:Work_list):
     nr_munci = task_queue.get_tasks_number()
     if task_queue.sleep_task_in_queue():
         if player_data.energy == player_data.energy_max:
@@ -45,16 +45,16 @@ def munca_ora_produse(job_id,handler:requests_handler,task_queue:TaskQueue,premi
     nr_max = nr_max - task_queue.get_tasks_number()
     nr_max_energy = player_data.energy // 12
     if nr_max_energy < nr_max:
-        munca = compara_distanta(handler = handler,
+        munca = get_closest_workplace_data(handler = handler,
                                 job_id=job_id,
                                 job_list= work_list,
                                 player_data= player_data
                                 )
         for i in range(nr_max_energy):
             munceste_coord.ore(munca,handler)
-        somn_oras_apropiat(handler=handler,player_data= player_data)
+        sleep_closest_town(handler=handler,player_data= player_data)
     else:
-        munca = compara_distanta(handler = handler,
+        munca = get_closest_workplace_data(handler = handler,
                                 job_id=job_id,
                                 job_list= work_list,
                                 player_data= player_data
@@ -87,7 +87,7 @@ class OneHourProductWorker:
         return max_nr_of_tasks - self.task_queue.get_tasks_number()
 
     def get_coordinates(self, job_id):
-        return compara_distanta(
+        return get_closest_workplace_data(
             handler=self.handler,
             job_id=job_id,
             job_list=self.work_list,
@@ -111,7 +111,7 @@ class OneHourProductWorker:
             coordinates = self.get_coordinates(work_list["product_id"])
             for _ in range(max_nr_of_tasks_energy):
                 munceste_coord.ore(coordinates, self.handler)
-            somn_oras_apropiat(handler=self.handler, player_data=self.player_data)
+            sleep_closest_town(handler=self.handler, player_data=self.player_data)
         else:
             coordinates = self.get_coordinates(work_list["product_id"])
             for _ in range(max_nr_of_tasks):
@@ -248,7 +248,7 @@ class Crafting():
         print(f"{craft_report['msg']}")
         return craft_report
 
-def fa_rost(id_item:int,nr:int,game_classes):
+def acquire_product(id_item:int,nr:int,game_classes):
     # Create an instance of the OneHourProductWorker class
     #worker = OneHourProductWorker(
     #    handler=game_classes.handler,
@@ -259,15 +259,15 @@ def fa_rost(id_item:int,nr:int,game_classes):
     #)
 
     if id_item in game_classes.crafting_table and game_classes.crafting_table[id_item].profession == game_classes.player_data.profession:
-        lista_resurse = game_classes.crafting_table[id_item]
-        potCrafta = True
-        for ingredient in lista_resurse.resources:
+        resource_list = game_classes.crafting_table[id_item]
+        can_be_crafted = True
+        for ingredient in resource_list.resources:
             nr_inv = game_classes.bag[ingredient['item']]
             if nr_inv < ingredient['count'] * nr:
-                potCrafta = fa_rost(ingredient['item'],nr * ingredient['count']-nr_inv,game_classes)
-                if not potCrafta:
+                can_be_crafted = acquire_product(ingredient['item'],nr * ingredient['count']-nr_inv,game_classes)
+                if not can_be_crafted:
                     break
-        if potCrafta:
+        if can_be_crafted:
             game_classes.player_crafting.craft(id_item,nr)
             return True
         return False
@@ -275,7 +275,7 @@ def fa_rost(id_item:int,nr:int,game_classes):
         print("Nu se poate crafta :" + game_classes.items(id_item).name())
         return False
     if not (id_item in game_classes.crafting_table):
-        munca_ora_produse(job_id= munca_corespunzatoare_id(id_item,work_list=game_classes.work_list) ,
+        product_hourly_work(job_id= get_corresponding_work_id(id_item,work_list=game_classes.work_list) ,
                 handler=game_classes.handler,
                 task_queue=game_classes.task_queue,
                 premium= game_classes.premium,

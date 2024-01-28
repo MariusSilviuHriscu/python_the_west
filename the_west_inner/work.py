@@ -42,14 +42,14 @@ class munceste_coord():
     def ore(id,handler):
         work_data = Work(id[0],id[1],id[2],3600)
         return queue_work(handler,work_data)
-def parse_munci(handler,job_id,job_list:Work_list):
+def get_work_locations(handler,job_id,job_list:Work_list):
     minimap = handler.post("map","get_minimap",action_name="ajax")
     job_group_dictionary = minimap["job_groups"]
     group_id = job_list.get_group_id(job_id)
-    locatii_munca = job_group_dictionary[f"{group_id}"]
-    return locatii_munca
-def compara_distanta(handler,job_id,job_list:Work_list,player_data:Player_data):
-    lista_locatii_munci = parse_munci(handler,job_id,job_list)
-    lista_locatii_munci.sort(key = lambda x:distance_to((x[0],x[1]),player_data))
-    selected_work_coords = lista_locatii_munci[0]
+    work_locations = job_group_dictionary[f"{group_id}"]
+    return work_locations
+def get_closest_workplace_data(handler,job_id,job_list:Work_list,player_data:Player_data):
+    workplace_location_list = get_work_locations(handler,job_id,job_list)
+    workplace_location_list.sort(key = lambda x:distance_to((x[0],x[1]),player_data))
+    selected_work_coords = workplace_location_list[0]
     return (job_id,selected_work_coords[0],selected_work_coords[1])

@@ -6,7 +6,7 @@ import sys
 from crafting import OneHourProductWorker
 import unittest
 from unittest.mock import Mock
-from work import compara_distanta
+from work import get_closest_workplace_data
 
 class TestOneHourProductWorker(unittest.TestCase):
     def test_must_continue_sleep(self):
@@ -63,16 +63,16 @@ class TestOneHourProductWorker(unittest.TestCase):
         self.assertEqual(worker.get_max_nr_of_tasks(), 4)
 
     def test_get_coordinates(self):
-        # Test with mocked compara_distanta function
+        # Test with mocked get_closest_workplace_data function
         handler = Mock()
         player_data = Mock()
         work_list = Mock()
         worker = OneHourProductWorker(handler, None, None, player_data, work_list)
         work_list.work_products.return_value = {"product_id": 123}
-        compara_distanta.return_value = (1, 2)
+        get_closest_workplace_data.return_value = (1, 2)
         
         self.assertEqual(worker.get_coordinates(123), (1, 2))
-        compara_distanta.assert_called_with(handler, 123, work_list, player_data)
+        get_closest_workplace_data.assert_called_with(handler, 123, work_list, player_data)
 
     def test_work(self):
         # Test with max number of tasks less than number of tasks possible based on energy
@@ -94,7 +94,7 @@ class TestOneHourProductWorker(unittest.TestCase):
         worker.work()
         self.assertEqual(task_queue.tasks.cancel.call_count, 0)
         self.assertEqual(coordinates.munceste_coord.ore.call_count, 2)
-        self.assertEqual(somn_oras_apropiat.call_count, 1)
+        self.assertEqual(sleep_closest_town.call_count, 1)
 
         # Test with max number of tasks greater than number of tasks possible based on energy
         handler = Mock()
@@ -115,7 +115,7 @@ class TestOneHourProductWorker(unittest.TestCase):
         worker.work()
         self.assertEqual(task_queue.tasks.cancel.call_count, 0)
         self.assertEqual(coordinates.munceste_coord.ore.call_count, 5)
-        self.assertEqual(somn_oras_apropiat.call_count, 0)
+        self.assertEqual(sleep_closest_town.call_count, 0)
         
         # Test with sleep task in queue
         #handler = Mock()

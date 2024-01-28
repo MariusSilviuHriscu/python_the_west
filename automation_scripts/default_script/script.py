@@ -8,8 +8,8 @@ from ..work_cycle import Cycle_jobs
 from the_west_inner.equipment import Equipment
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.gold_finder import parse_map_tw_gold
-from the_west_inner.crafting import fa_rost
-from the_west_inner.misc_scripts import recompensaZilnica
+from the_west_inner.crafting import acquire_product
+from the_west_inner.misc_scripts import collect_daily_reward
 from the_west_inner.work import Work
 from the_west_inner.bag import Bag
 from the_west_inner.login import Game_login
@@ -211,14 +211,14 @@ class Script_produse():
         """
         Execute the script to perform product creation tasks.
 
-        This method equips the required equipment, uses the fa_rost function to create products.
+        This method equips the required equipment, uses the acquire_product function to create products.
 
         Returns:
             None
         """
         self.game_classes.equipment_manager.equip_equipment(equipment=self.products_equipment, handler=self.game_classes.handler)
-        # Use the fa_rost function to create products
-        fa_rost(
+        # Use the acquire_product function to create products
+        acquire_product(
             id_item=self.target_mass_product_id,
             nr=100,
             game_classes=self.game_classes
@@ -270,7 +270,7 @@ class Script_comert_produs_clona:
         Returns:
             Script_secunde or Script_produse: Instance of the chosen script.
         """
-        recompensaZilnica(handler=self.game_classes.handler)
+        collect_daily_reward(handler=self.game_classes.handler)
 
         if self.work_flag:
             available_silver_job = self._available_silver_job()
@@ -320,7 +320,7 @@ def world_script_instance(script_settings: Script_settings):
     game_data = game.login()
 
     # Ensure daily rewards are collected
-    recompensaZilnica(handler=game_data.handler)
+    collect_daily_reward(handler=game_data.handler)
 
     # Determine whether to use work or product equipment
     if script_settings.work_flag:

@@ -1,4 +1,5 @@
 import re
+import time
 import typing
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
@@ -651,22 +652,57 @@ class Reports_manager():
         - None
         """
         self.last_read_report_id = report_id
-        
-    def _read_reports(self) -> Job_report_reward_data:
+    #def _read_reports(self) -> Job_report_reward_data:
+    #    """
+    #    Reads reports until it reaches the ID of the last read report, updates the last read report ID with the ID of the first unread report, and returns the job rewards data.
+    #    
+    #    Returns:
+    #    - Job_report_reward_data: the rewards data for the read job reports.
+    #    """
+    #    # Step 1: Read reports until the ID of the last read report is reached
+    #    new_data = self.reader.read_pages_until_id(self.last_read_report_id)
+    #    # Step 2: Update the last read report ID with the ID of the first unread report
+    #    if len(new_data) != 0:
+    #        print('found new reports...working fine')
+    #        self._set_last_read_report_id(report_id= new_data[0].report_id)
+    #        # Step 3: Get the rewards data for the new job reports
+    #        new_rewards = new_data.job_rewards( handler=self.handler)
+    #        # Step 4: Add the new rewards data to the rewards variable
+    #        self.rewards += new_rewards
+    #        # Step 5: Return the rewards data for the read job reports
+    #        return self.rewards
+    #    return self.rewards
+    def _read_reports(self, retry_times: int = 0) -> Job_report_reward_data:
         """
-        Reads reports until it reaches the ID of the last read report, updates the last read report ID with the ID of the first unread report, and returns the job rewards data.
+        Reads reports until it reaches the ID of the last read report, updates the last read report ID with the ID of the first unread report,
+        and returns the job rewards data. Retries the read operation if new_data is empty.
+        
+        Args:
+        - retry_times: the number of times to retry if new_data is empty. Default is 0.
         
         Returns:
         - Job_report_reward_data: the rewards data for the read job reports.
         """
         # Step 1: Read reports until the ID of the last read report is reached
         new_data = self.reader.read_pages_until_id(self.last_read_report_id)
-        # Step 2: Update the last read report ID with the ID of the first unread report
-        self._set_last_read_report_id(report_id= new_data[0].report_id)
-        # Step 3: Get the rewards data for the new job reports
-        new_rewards = new_data.job_rewards( handler=self.handler)
-        # Step 4: Add the new rewards data to the rewards variable
-        self.rewards += new_rewards
-        # Step 5: Return the rewards data for the read job reports
-        return self.rewards
+        
+        # Step 2: Retry if new_data is empty and retries are allowed
+        while retry_times > 0 and len(new_data) == 0:
+            print('Retrying read operation...')
+            time.sleep(1)  # Wait for 1 second
+            new_data = self.reader.read_pages_until_id(self.last_read_report_id)
+            retry_times -= 1
 
+        # Step 3: Update the last read report ID with the ID of the first unread report
+        if len(new_data) != 0:
+            print('Found new reports...working fine')
+            self._set_last_read_report_id(report_id=new_data[0].report_id)
+            
+            # Step 4: Get the rewards data for the new job reports
+            new_rewards = new_data.job_rewards(handler=self.handler)
+            
+            # Step 5: Add the new rewards data to the rewards variable
+            self.rewards += new_rewards
+            
+        # Step 6: Return the rewards data for the read job reports
+        return self.rewards

@@ -5,6 +5,8 @@ from simul_items import Item,Animal,Belt,Clothes,Pants,Boots,Headgear,Weapon,Nec
 from simul_sets import Item_set,create_set_instance_list,Item_set_list
 #from simul_skills import Skills
 from simul_work_relevant_bonuses import Work_bonuses
+from the_west_inner.item_set_general import get_item_sets
+from the_west_inner.simulation_data_library.load_items_script import get_simul_items, get_simul_sets
 
 from ..equipment import Equipment
 class Equipment_analysis_tool():

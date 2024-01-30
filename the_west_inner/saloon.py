@@ -112,5 +112,16 @@ class Quest_employer_saloon():
         self.key = key
         self.name = name
     
-    def get_quest_employer(self) -> Quest_employer:
-        pass
+    def get_quest_employer(self,handler:requests_handler) -> Quest_employer:
+        return get_quest_employer_by_key(handler=handler,employer_key=self.key)
+
+def get_saloon_employer(handler:requests_handler) -> list[Quest_employer_saloon]:
+    
+    response = handler.post(window='building_quest')
+    
+    if 'questEmployer' not in response:
+        raise Exception('Saloon could not be found...')
+    
+    employer_data : list[dict] = response['questEmployer']
+    
+    return [Quest_employer_saloon(key=employer['key'],name=employer['name']) for employer in employer_data]

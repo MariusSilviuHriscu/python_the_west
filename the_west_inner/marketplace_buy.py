@@ -312,6 +312,20 @@ class Marketplace_offer_list():
         return sum(
                 [int(x.item_price)for x in self.offer_list if x.item_price]
                 )
+    @property
+    def item_dict(self) -> dict[int,int]:
+        
+        item_dict = {}
+        for offer in self.offer_list:
+            
+            if offer.item_id in item_dict:
+                item_dict[offer.item_id] += offer.item_count
+            else:
+                item_dict[offer.item_id] = offer.item_count
+        
+        return item_dict
+        
+        
     def __getitem__(self, key):
         if isinstance(key, slice):
             return Marketplace_offer_list(offer_list=self.offer_list[key], handler=self.handler, items=self.items)
@@ -395,6 +409,31 @@ class Marketplace_buy_manager():
             offer_list.buy_first_in_list(player_currency = self.currency)
         else:
             raise ItemNotFoundException(f"No item found :{item_id}")
+
+    def buy_cheapest_n_items(self, item_id: int, item_number: int, buy_anyway: bool = False):
+        offer_list = self._search_item(item_id=item_id)
+
+        if item_number == 0:
+            
+            return 0
+            
+        if len(offer_list) < item_number and not buy_anyway:
+            raise ItemNotFoundException(f"Not enough offers found for item: {item_id}")
+    
+        # Sort the offer list by price in ascending order
+        offer_list.sort(key=lambda x: x.item_price_per_unit)
+    
+        # Determine the number of items to buy based on item_number and available offers
+        num_items_to_buy = min(item_number, len(offer_list)) if buy_anyway else item_number
+    
+        try:
+            offer_list[:num_items_to_buy].buy_all(player_currency=self.currency)
+        except NotEnoughMoneyException as e:
+            print(f"Error while buying: {e}")
+            print("Not enough money to complete the purchase.")
+    
+        return num_items_to_buy
+            
     def buy_item_from_player_max_price(self,item_id : int , player_id : int , max_price : int):
         item_offer_list = self._search_item(item_id = item_id).filter(
                                                             condition_func= lambda x : x.seller_id == player_id and x.item_price/x.item_count <= max_price

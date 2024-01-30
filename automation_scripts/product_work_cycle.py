@@ -69,6 +69,7 @@ class CycleJobsProducts():
             possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
                                                          actions = possible_actions - 1
                                                          )
-            cycle_reward = report_manager._read_reports(retry_times=1)
+            cycle_reward = report_manager._read_reports(retry_times=3)
             
-            dropped_items += cycle_reward.item_drop.get(self.product_id,0)
+            dropped_items = cycle_reward.item_drop.get(self.product_id,0)
+        return report_manager.rewards

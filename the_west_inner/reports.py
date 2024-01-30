@@ -688,14 +688,12 @@ class Reports_manager():
         
         # Step 2: Retry if new_data is empty and retries are allowed
         while retry_times > 0 and len(new_data) == 0:
-            print('Retrying read operation...')
             time.sleep(1)  # Wait for 1 second
             new_data = self.reader.read_pages_until_id(self.last_read_report_id)
             retry_times -= 1
 
         # Step 3: Update the last read report ID with the ID of the first unread report
         if len(new_data) != 0:
-            print('Found new reports...working fine')
             self._set_last_read_report_id(report_id=new_data[0].report_id)
             
             # Step 4: Get the rewards data for the new job reports

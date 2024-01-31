@@ -74,7 +74,7 @@ class CycleJobsProducts():
             dropped_items = cycle_reward.item_drop.get(self.product_id,0)
             
         return report_manager.rewards
-    def cycle(self,energy_consumable: int,target_number:int):
+    def cycle(self,energy_consumable: int,target_number:int,number_of_task_groups : int = 9):
         
         dropped_items = 0
         possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
@@ -90,7 +90,7 @@ class CycleJobsProducts():
             print('succesful reading of reports')
         
         while dropped_items < target_number:
-            tasks = min(9,possible_actions)
+            tasks = min(number_of_task_groups,possible_actions)
             work_task = Script_work_task(
                                         work_manager = self.work_manager,
                                         work_data = self.job_data,

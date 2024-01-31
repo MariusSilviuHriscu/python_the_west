@@ -11,8 +11,10 @@ Functions:
 """
 from requests_handler import requests_handler
 import time
+import typing
 import datetime
 from urllib.parse import urlparse
+from concurrent.futures import ThreadPoolExecutor
 
 def server_time(handler:requests_handler) -> datetime:
     """
@@ -58,6 +60,50 @@ def wait_until_date(wait_time: datetime, handler:requests_handler) -> bool:
 
     return True
 
+def wait_until_date_callback(wait_time: datetime,
+                             handler: requests_handler,
+                             callback_function : typing.Callable[[None],None]=None, *args, **kwargs) -> bool:
+    """
+    This function waits until the specified date is reached and executes a callback function concurrently using ThreadPoolExecutor.
+
+    Args:
+    wait_time (datetime): The time to wait until.
+    handler (requests_handler): The request handler to use for sending requests.
+    callback_function (Callable): The callback function to execute concurrently.
+    args (tuple): Arguments to pass to the callback function.
+    kwargs (dict): Keyword arguments to pass to the callback function.
+
+    Returns:
+    bool: True if the specified date was reached, False otherwise.
+    """
+    if wait_time == -1:
+        return True
+
+    def sleep_thread():
+        time_now = datetime.datetime.now()
+        if time_now < wait_time:
+            delta = (wait_time - time_now).seconds
+            print(f'Waiting time is "{wait_time}" while time now: {time_now}. Delta is: {delta}')
+            if delta > 0:
+                time.sleep(delta)
+
+        while server_time(handler=handler) < wait_time:
+            time.sleep(1)
+
+    # Create a ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        # Submit the sleep thread to the executor
+        sleep_future = executor.submit(sleep_thread)
+
+        # If a callback function is provided, submit it to the executor
+        if callback_function:
+            callback_future = executor.submit(callback_function, *args, **kwargs)
+
+        # Wait for both futures to complete
+        callback_result = callback_future.result() if callback_function else None
+        sleep_result = sleep_future.result()
+
+    return True
 
 def collect_daily_reward(handler:requests_handler):
     succes = handler.post("loginbonus","collect",use_h = True)

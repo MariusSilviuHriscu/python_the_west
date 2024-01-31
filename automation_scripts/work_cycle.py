@@ -1,10 +1,11 @@
 import typing
 
 from the_west_inner.game_classes import Game_classes
-from the_west_inner.misc_scripts import wait_until_date
+from the_west_inner.misc_scripts import wait_until_date,wait_until_date_callback
 from the_west_inner.work_manager import Work_manager
 from the_west_inner.work import Work
 from the_west_inner.consumable import Consumable_handler
+from the_west_inner.reports import Reports_manager
 
 
 class Script_work_task:
@@ -30,13 +31,19 @@ class Script_work_task:
         self.number_of_actions = number_of_actions
         self.game_classes = game_classes
 
-    def execute(self):
+    def execute(self ,callback_function : typing.Callable[...,None]=None, *args, **kwargs):
         """
         Execute the work task by performing actions until the number_of_actions reaches zero.
         """
         while self.number_of_actions != 0:
             # Wait until the task queue is empty .
-            wait_until_date(self.game_classes.task_queue.get_tasks_expiration(), self.game_classes.handler)
+            wait_until_date_callback(
+                            wait_time = self.game_classes.task_queue.get_tasks_expiration(),
+                            handler = self.game_classes.handler,
+                            callback_function = callback_function,
+                            *args ,
+                            **kwargs
+                            )
 
             # Determine the maximum number of tasks allowed
             maximum_number_of_task_allowed = self.work_manager.allowed_tasks()
@@ -48,7 +55,13 @@ class Script_work_task:
             self.number_of_actions -= min(maximum_number_of_task_allowed, self.number_of_actions)
 
         # Wait for the task's expiration time again when the execution of the method is done.
-        wait_until_date(self.game_classes.task_queue.get_tasks_expiration(), self.game_classes.handler)
+        wait_until_date_callback(
+                            wait_time = self.game_classes.task_queue.get_tasks_expiration(),
+                            handler = self.game_classes.handler,
+                            callback_function = callback_function,
+                            *args ,
+                            **kwargs
+                            )
 
 
 class Cycle_jobs:

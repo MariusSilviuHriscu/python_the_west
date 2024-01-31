@@ -45,7 +45,7 @@ class CycleJobsProducts():
         
         return actions
         
-    def cycle(self,energy_consumable: int,target_number:int):
+    def cycle_one_by_one(self,energy_consumable: int,target_number:int):
         
         dropped_items = 0
         possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
@@ -72,4 +72,41 @@ class CycleJobsProducts():
             cycle_reward = report_manager._read_reports(retry_times=3)
             
             dropped_items = cycle_reward.item_drop.get(self.product_id,0)
+            
+        return report_manager.rewards
+    def cycle(self,energy_consumable: int,target_number:int):
+        
+        dropped_items = 0
+        possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
+                                                     actions = self.player_data.energy
+                                                     )
+        
+        
+        
+        report_manager = Reports_manager(handler=self.handler)
+        
+        def read_report_rewards():
+            report_manager._read_reports(retry_times=3)
+            print('succesful reading of reports')
+        
+        while dropped_items < target_number:
+            tasks = min(9,possible_actions)
+            work_task = Script_work_task(
+                                        work_manager = self.work_manager,
+                                        work_data = self.job_data,
+                                        number_of_actions = tasks,
+                                        game_classes = self.game_classes
+                                        )
+            
+            work_task.execute(callback_function=read_report_rewards)
+            possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
+                                                         actions = possible_actions - tasks
+                                                         )
+            
+            if dropped_items != report_manager.rewards.item_drop.get(self.product_id,0):
+                print(f'we dropped {report_manager.rewards.item_drop.get(self.product_id,0) - dropped_items}')
+            
+            dropped_items = report_manager.rewards.item_drop.get(self.product_id,0)
+            
+            
         return report_manager.rewards

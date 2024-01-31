@@ -85,7 +85,7 @@ class CycleJobsProducts():
         
         report_manager = Reports_manager(handler=self.handler)
         
-        def read_report_rewards():
+        def read_report_rewards(report_manager:Reports_manager):
             report_manager._read_reports(retry_times=3)
             print('succesful reading of reports')
         
@@ -98,7 +98,7 @@ class CycleJobsProducts():
                                         game_classes = self.game_classes
                                         )
             
-            work_task.execute(callback_function=read_report_rewards)
+            work_task.execute(callback_function=read_report_rewards,report_manager = report_manager)
             possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
                                                          actions = possible_actions - tasks
                                                          )

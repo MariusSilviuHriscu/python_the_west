@@ -63,6 +63,9 @@ class Script_work_task:
                             **kwargs
                             )
 
+def read_report_rewards(report_manager:Reports_manager):
+            report_manager._read_reports(retry_times=3)
+            print(f'succesful reading of reports : {report_manager.rewards}')
 
 class Cycle_jobs:
     """
@@ -87,7 +90,9 @@ class Cycle_jobs:
         self.game_classes = game_classes
         self.work_manager = game_classes.work_manager
         self.consumable_handler = consumable_handler
+        self.reports_manager = Reports_manager(handler=self.handler)
 
+        
     def _analize_motivation(self) -> typing.List[Script_work_task]:
         """
         Analyze motivation levels and create a list of Script_work_task objects based on available actions.
@@ -130,7 +135,7 @@ class Cycle_jobs:
 
         # Execute work tasks in the cycle
         for work_task in work_data:
-            work_task.execute()
+            work_task.execute(callback_function = read_report_rewards,report_manager = self.reports_manager)
 
         # Recursive call to continue the cycle
         return self.work_cycle(motivation_consumable=motivation_consumable)
@@ -152,7 +157,10 @@ class Cycle_jobs:
 
         # Use energy consumable if energy is low in the first cycle
         if energy <= 2 and number_of_cycles == 1:
-            self.consumable_handler.use_consumable(energy_consumable)
+            self.consumable_handler.use_consumable(consumable_id = energy_consumable,
+                                                   function_callback = read_report_rewards,
+                                                   report_manager = self.reports_manager
+                                                   )
             player_data.update_character_variables(self.handler)
 
         # Execute work cycles
@@ -162,7 +170,10 @@ class Cycle_jobs:
 
             if energy <= 2:
                 # Use energy consumable to continue cycling
-                self.consumable_handler.use_consumable(energy_consumable)
+                self.consumable_handler.use_consumable(consumable_id = energy_consumable,
+                                                   function_callback = read_report_rewards,
+                                                   report_manager = self.reports_manager
+                                                   )
                 player_data.update_character_variables(self.handler)
                 number_of_cycles -= 1
 
@@ -174,4 +185,8 @@ class Cycle_jobs:
 
             # Use motivation consumable if cycle was successful and energy is sufficient
             if solution and energy >= 3:
-                self.consumable_handler.use_consumable(motivation_consumable)
+                self.consumable_handler.use_consumable(consumable_id = motivation_consumable,
+                                                   function_callback = read_report_rewards,
+                                                   report_manager = self.reports_manager
+                                                   )
+        return self.reports_manager.rewards

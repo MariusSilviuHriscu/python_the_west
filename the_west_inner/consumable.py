@@ -1,7 +1,8 @@
 import time
+import typing
 import datetime
 from requests_handler import requests_handler
-from misc_scripts import server_time,wait_until_date
+from misc_scripts import server_time,wait_until_date,wait_until_date_callback
 from bag import Bag
 
 """
@@ -127,7 +128,7 @@ class Consumable_handler:
         )
         self.cooldown.update(new_cooldown_date=game_time)
     
-    def use_consumable(self, consumable_id: int):
+    def use_consumable(self, consumable_id: int,function_callback:typing.Callable=None,*args,**kwargs):
         """
         Uses the specified consumable item if the cooldown has passed,
         and updates the bag and cooldown.
@@ -136,7 +137,7 @@ class Consumable_handler:
             consumable_id (int): The ID of the consumable item to use.
         """
         if not self.cooldown.cooldown_passed:
-            wait_until_date(self.cooldown.cooldown, self.handler)
+            wait_until_date_callback(self.cooldown.cooldown, self.handler,callback_function=function_callback,*args,**kwargs)
         new_cooldown = self._use_consumable(consumable_id=consumable_id)["msg"]["cooldown"]
         self._update_cooldown(new_cooldown_raw_date=new_cooldown)
         self._update_bag(consumable_id)

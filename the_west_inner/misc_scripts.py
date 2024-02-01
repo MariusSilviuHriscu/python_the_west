@@ -108,8 +108,10 @@ def wait_until_date_callback(wait_time: datetime,
 def collect_daily_reward(handler:requests_handler):
     succes = handler.post("loginbonus","collect",use_h = True)
     return succes["error"] == False
+
 def distance_to(target_coords,player_data):
     return player_data.absolute_distance_to(target_coords)
+
 def get_closest_viable_town(handler:requests_handler, player_data):
     """
     Returns the ID, x coordinate, and y coordinate of the town that is closest to the player's location

@@ -258,3 +258,6 @@ class Work_manager():
 
         # Return the server's response.
         return response
+    def cancel_all_tasks(self) :
+        
+        self.task_queue.tasks.cancel()

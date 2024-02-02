@@ -1,4 +1,4 @@
-import time
+import typing
 
 from automation_scripts.work_cycle import Script_work_task
 
@@ -10,6 +10,9 @@ from the_west_inner.work import Work
 from the_west_inner.consumable import Consumable_handler
 from the_west_inner.reports import Reports_manager
 
+
+from automation_scripts.sleep_func_callbacks.misc_func_callback import read_report_rewards,recharge_health
+from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 
 class CycleJobsProducts():
     
@@ -29,9 +32,21 @@ class CycleJobsProducts():
         self.player_data = player_data
         self.product_id = product_id
         self.game_classes = game_classes
+        self.report_manager = Reports_manager(handler=handler)
+        self.work_callback_function = None
+        self.consumable_callback_function = None
+    
+    
+    def update_work_callback_function(self,callback_chain : CallbackChainer):
+        self.work_callback_function = callback_chain.chain_function(report_manager = self.report_manager)
+    
+    def update_consumable_callback_function(self,callback_chain:CallbackChainer):
+        self.consumable_callback_function = callback_chain.chain_function(report_manager = self.report_manager)
     
     def _recharge_energy(self,energy_consumable : int):
-        self.consumable_handler.use_consumable(consumable_id = energy_consumable)
+        self.consumable_handler.use_consumable(consumable_id = energy_consumable,
+                                               function_callback = self.consumable_callback_function
+                                               )
         self.player_data.update_character_variables(handler=self.handler)
     
     def _recharge_by_actions(self,energy_consumable:int,actions : int):
@@ -52,10 +67,7 @@ class CycleJobsProducts():
                                                      actions = self.player_data.energy
                                                      )
         
-        
-        
-        report_manager = Reports_manager(handler=self.handler)
-        
+                
         while dropped_items < target_number:
             
             work_task = Script_work_task(
@@ -69,11 +81,11 @@ class CycleJobsProducts():
             possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
                                                          actions = possible_actions - 1
                                                          )
-            cycle_reward = report_manager._read_reports(retry_times=3)
+            cycle_reward = self.report_manager._read_reports(retry_times=3)
             
             dropped_items = cycle_reward.item_drop.get(self.product_id,0)
             
-        return report_manager.rewards
+        return self.report_manager.rewards
     def cycle(self,energy_consumable: int,target_number:int,number_of_task_groups : int = 9):
         
         dropped_items = 0
@@ -81,13 +93,6 @@ class CycleJobsProducts():
                                                      actions = self.player_data.energy
                                                      )
         
-        
-        
-        report_manager = Reports_manager(handler=self.handler)
-        
-        def read_report_rewards(report_manager:Reports_manager):
-            report_manager._read_reports(retry_times=3)
-            print('succesful reading of reports')
         
         while dropped_items < target_number:
             tasks = min(number_of_task_groups,possible_actions)
@@ -97,16 +102,15 @@ class CycleJobsProducts():
                                         number_of_actions = tasks,
                                         game_classes = self.game_classes
                                         )
-            
-            work_task.execute(callback_function=read_report_rewards,report_manager = report_manager)
+            work_task.execute(callback_function=self.work_callback_function)
             possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
                                                          actions = possible_actions - tasks
                                                          )
+            if dropped_items != self.report_manager.rewards.item_drop.get(self.product_id,0):
+                print(f'we dropped {self.report_manager.rewards.item_drop.get(self.product_id,0) - dropped_items}')
             
-            if dropped_items != report_manager.rewards.item_drop.get(self.product_id,0):
-                print(f'we dropped {report_manager.rewards.item_drop.get(self.product_id,0) - dropped_items}')
-            
-            dropped_items = report_manager.rewards.item_drop.get(self.product_id,0)
+            dropped_items = self.report_manager.rewards.item_drop.get(self.product_id,0)
             
             
-        return report_manager.rewards
+            
+        return self.report_manager.rewards

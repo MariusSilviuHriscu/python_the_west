@@ -7,6 +7,8 @@ from the_west_inner.work import Work
 from the_west_inner.consumable import Consumable_handler
 from the_west_inner.reports import Reports_manager
 
+from automation_scripts.sleep_func_callbacks.misc_func_callback import read_report_rewards,recharge_health
+from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 
 class Script_work_task:
     """
@@ -63,9 +65,9 @@ class Script_work_task:
                             **kwargs
                             )
 
-def read_report_rewards(report_manager:Reports_manager):
-            report_manager._read_reports(retry_times=3)
-            print(f'succesful reading of reports : {report_manager.rewards}')
+#def read_report_rewards(report_manager:Reports_manager):
+#            report_manager._read_reports(retry_times=3)
+#            print(f'succesful reading of reports : {report_manager.rewards}')
 
 class Cycle_jobs:
     """
@@ -133,9 +135,19 @@ class Cycle_jobs:
         if len(work_data) == 0:
             return True
 
+        callback_func_chain = CallbackChainer()
+        callback_func_chain.add_callback(callback_function=read_report_rewards,report_manager = self.reports_manager)
+        callback_func_chain.add_callback(callback_function=recharge_health,
+                                         handler = self.handler,
+                                         player_data = self.game_classes.player_data,
+                                         work_manager = self.work_manager,
+                                         consumable_handler = self.consumable_handler,
+                                         recharge_hp_consumable_id = 2117000
+                                         )
+        
         # Execute work tasks in the cycle
         for work_task in work_data:
-            work_task.execute(callback_function = read_report_rewards,report_manager = self.reports_manager)
+            work_task.execute(callback_function = callback_func_chain.chain_function())
 
         # Recursive call to continue the cycle
         return self.work_cycle(motivation_consumable=motivation_consumable)

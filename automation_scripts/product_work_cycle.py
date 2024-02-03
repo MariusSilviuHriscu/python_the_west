@@ -33,19 +33,29 @@ class CycleJobsProducts():
         self.product_id = product_id
         self.game_classes = game_classes
         self.report_manager = Reports_manager(handler=handler)
-        self.work_callback_function = None
-        self.consumable_callback_function = None
+        self.work_callback_chainer = None
+        self.consumable_callback_chainer = None
     
     
-    def update_work_callback_function(self,callback_chain : CallbackChainer):
-        self.work_callback_function = callback_chain.chain_function(report_manager = self.report_manager)
+    def update_work_callback_chainer(self,callback_chain : CallbackChainer):
+        self.work_callback_chainer = callback_chain
     
-    def update_consumable_callback_function(self,callback_chain:CallbackChainer):
-        self.consumable_callback_function = callback_chain.chain_function(report_manager = self.report_manager)
+    def get_work_callback_function(self) -> typing.Callable | None:
+        if self.work_callback_chainer is None:
+            return None
+        return self.work_callback_chainer.chain_function(report_manager = self.report_manager)
+    
+    def update_consumable_callback_chainer(self,callback_chain:CallbackChainer):
+        self.consumable_callback_chainer = callback_chain
+    
+    def get_consumable_callback_function(self) -> typing.Callable | None:
+        if self.consumable_callback_chainer is None:
+            return None
+        return self.consumable_callback_chainer.chain_function(report_manager = self.report_manager)
     
     def _recharge_energy(self,energy_consumable : int):
         self.consumable_handler.use_consumable(consumable_id = energy_consumable,
-                                               function_callback = self.consumable_callback_function
+                                               function_callback = self.get_consumable_callback_function()
                                                )
         self.player_data.update_character_variables(handler=self.handler)
     
@@ -102,10 +112,13 @@ class CycleJobsProducts():
                                         number_of_actions = tasks,
                                         game_classes = self.game_classes
                                         )
-            work_task.execute(callback_function=self.work_callback_function)
+            work_task.execute(callback_function=self.get_work_callback_function())
             possible_actions = self._recharge_by_actions(energy_consumable = energy_consumable,
                                                          actions = possible_actions - tasks
                                                          )
+            
+            self.report_manager._read_reports(retry_times=3)
+            
             if dropped_items != self.report_manager.rewards.item_drop.get(self.product_id,0):
                 print(f'we dropped {self.report_manager.rewards.item_drop.get(self.product_id,0) - dropped_items}')
             

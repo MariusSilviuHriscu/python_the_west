@@ -4,6 +4,7 @@ from the_west_inner.player_data import Player_data
 from the_west_inner.consumable import Consumable_handler
 from the_west_inner.work_manager import Work_manager
 
+from automation_scripts.marketplace_scripts.marketplace_observer import MarketplaceProductObserver
 
 
 def read_report_rewards(report_manager : Reports_manager):
@@ -25,3 +26,7 @@ def recharge_health(handler: requests_handler ,
         consumable_handler.use_consumable(consumable_id = recharge_hp_consumable_id)
         
         player_data.update_character_variables(handler=handler)
+
+def check_marketplace_items(marketplace_observer : MarketplaceProductObserver) -> None:
+
+    marketplace_observer.search_all()

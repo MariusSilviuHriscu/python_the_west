@@ -93,14 +93,25 @@ class Cycle_jobs:
         self.work_manager = game_classes.work_manager
         self.consumable_handler = consumable_handler
         self.reports_manager = Reports_manager(handler=self.handler)
-        self.work_callback_function = None
-        self.consumable_callback_function = None
-
-    def update_work_callback_function(self,callback_chain : CallbackChainer):
-        self.work_callback_function = callback_chain.chain_function(report_manager = self.report_manager)
+        self.work_callback_chainer = None
+        self.consumable_callback_chainer = None
     
-    def update_consumable_callback_function(self,callback_chain:CallbackChainer):
-        self.consumable_callback_function = callback_chain.chain_function(report_manager = self.report_manager)
+    
+    def update_work_callback_chainer(self,callback_chain : CallbackChainer):
+        self.work_callback_chainer = callback_chain
+    
+    def get_work_callback_function(self) -> typing.Callable | None:
+        if self.work_callback_chainer is None:
+            return None
+        return self.work_callback_chainer.chain_function(report_manager = self.report_manager)
+    
+    def update_consumable_callback_chainer(self,callback_chain:CallbackChainer):
+        self.consumable_callback_chainer = callback_chain
+    
+    def get_consumable_callback_function(self) -> typing.Callable | None:
+        if self.consumable_callback_chainer is None:
+            return None
+        return self.consumable_callback_chainer.chain_function(report_manager = self.report_manager)
     def _analize_motivation(self) -> typing.List[Script_work_task]:
         """
         Analyze motivation levels and create a list of Script_work_task objects based on available actions.
@@ -143,7 +154,7 @@ class Cycle_jobs:
         
         # Execute work tasks in the cycle
         for work_task in work_data:
-            work_task.execute(callback_function = self.work_callback_function)
+            work_task.execute(callback_function = self.get_work_callback_function())
 
         self.reports_manager._read_reports(retry_times=3)
         
@@ -168,7 +179,7 @@ class Cycle_jobs:
         # Use energy consumable if energy is low in the first cycle
         if energy <= 2 and number_of_cycles == 1:
             self.consumable_handler.use_consumable(consumable_id = energy_consumable,
-                                                   function_callback = self.consumable_callback_function
+                                                   function_callback = self.get_consumable_callback_function()
                                                    )
             player_data.update_character_variables(self.handler)
 
@@ -180,7 +191,7 @@ class Cycle_jobs:
             if energy <= 2:
                 # Use energy consumable to continue cycling
                 self.consumable_handler.use_consumable(consumable_id = energy_consumable,
-                                                   function_callback = self.consumable_callback_function
+                                                   function_callback = self.get_consumable_callback_function()
                                                    )
                 player_data.update_character_variables(self.handler)
                 number_of_cycles -= 1
@@ -194,6 +205,6 @@ class Cycle_jobs:
             # Use motivation consumable if cycle was successful and energy is sufficient
             if solution and energy >= 3:
                 self.consumable_handler.use_consumable(consumable_id = motivation_consumable,
-                                                   function_callback = self.consumable_callback_function
+                                                   function_callback = self.get_consumable_callback_function()
                                                    )
         return self.reports_manager.rewards

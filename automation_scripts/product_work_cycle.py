@@ -33,9 +33,14 @@ class CycleJobsProducts():
         self.product_id = product_id
         self.game_classes = game_classes
         self.report_manager = Reports_manager(handler=handler)
+        self.used_energy_consumable : int | None = None
         self.work_callback_chainer = None
         self.consumable_callback_chainer = None
     
+    
+    def set_consumable_limit(self,limit_number : int = 0):
+        
+        self.used_energy_consumable = limit_number
     
     def update_work_callback_chainer(self,callback_chain : CallbackChainer):
         self.work_callback_chainer = callback_chain
@@ -64,8 +69,13 @@ class CycleJobsProducts():
         if actions < 0 :
             raise ValueError("Number of actions cannot be smaller than 0")
         
-        if actions == 0:
+        if actions == 0 and self.used_energy_consumable is None :
             self._recharge_energy(energy_consumable=energy_consumable)
+            return self.player_data.energy
+        
+        if actions == 0 and self.used_energy_consumable != 0 :
+            self._recharge_energy(energy_consumable=energy_consumable)
+            self.used_energy_consumable -= 1
             return self.player_data.energy
         
         return actions
@@ -94,7 +104,9 @@ class CycleJobsProducts():
             cycle_reward = self.report_manager._read_reports(retry_times=3)
             
             dropped_items = cycle_reward.item_drop.get(self.product_id,0)
-            
+            if possible_actions == 0:
+                
+                return self.report_manager.rewards
         return self.report_manager.rewards
     def cycle(self,energy_consumable: int,target_number:int,number_of_task_groups : int = 9):
         
@@ -124,6 +136,9 @@ class CycleJobsProducts():
             
             dropped_items = self.report_manager.rewards.item_drop.get(self.product_id,0)
             
+            if possible_actions == 0:
+                
+                return self.report_manager.rewards
             
             
         return self.report_manager.rewards

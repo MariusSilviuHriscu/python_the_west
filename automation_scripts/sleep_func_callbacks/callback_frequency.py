@@ -1,6 +1,8 @@
 import random
+from datetime import datetime, timedelta
 from typing import Protocol
 
+import typing
 class FrequencyRule(Protocol):
     def __init__(self):
         pass
@@ -57,6 +59,29 @@ class IntervalRule:
                     return True
 
         return False
+
+class EveryNSeconds():
+    def __init__(self, time_seconds: int):
+        self.duration = timedelta(seconds=time_seconds)
+        self.time_stamp = datetime.now()
+
+    def should_run(self):
+        current_time = datetime.now()
+
+        if current_time - self.time_stamp >= self.duration:
+            self.time_stamp = current_time
+            return True
+        else:
+            return False
+
+class CallableRunRule():
+    def __init__(self, condition_callable: typing.Callable[[], bool]):
+        self.condition_callable = condition_callable
+
+    def should_run(self):
+        return self.condition_callable()
+
+    
 class CombinedRule():
     def __init__(self, *rules):
         self.rules = rules

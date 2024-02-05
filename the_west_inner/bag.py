@@ -72,3 +72,7 @@ class Bag():
             self.item_dict[item_id] += amount
         else:
             self.item_dict[item_id] = amount
+    def add_item_dict(self,item_dict : dict[int,int]):
+        for item_id,item_number in item_dict.items():
+            
+            self.add_item(item_id = item_id,amount = item_number)

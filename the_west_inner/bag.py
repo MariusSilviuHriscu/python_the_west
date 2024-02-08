@@ -99,10 +99,15 @@ class Bag():
     def handle_buy_sell_change(self , change : dict[str,int]):
         
         changed_item_id = change['item_id']
-        changed_item_inv_id = change['iv_id']
+        changed_item_inv_id = change['inv_id']
         changed_item_count = change['count']
         
         self.item_dict[changed_item_id] = changed_item_count
+        
+        if changed_item_id not in self.complete_item_dict:
+            
+            self.complete_item_dict[changed_item_id] = {'count' : 0,
+                                                        'inv_id' : 0} 
         
         self.complete_item_dict[changed_item_id]['count'] = changed_item_count
         self.complete_item_dict[changed_item_id]['inv_id'] = changed_item_inv_id

@@ -38,6 +38,12 @@ class Currency:
             raise ValueError('Tried to add too many oup')
         
         self.oup = self.oup + oup_delta
+    def set_oup(self,new_oup:int):
+        self.oup = new_oup
+    def set_veteran_points(self,new_veteran_points:int):
+        self.veteran_points = new_veteran_points
+    def set_nuggets(self,new_nuggets:int):
+        self.nuggets = new_nuggets
 
 def build_currency(input_dict:dict) -> Currency:
     return Currency(cash = input_dict['cash'],

@@ -23,7 +23,7 @@ class Quest_requirement_travel(Quest_requirement):
         self.quest_id = quest_id
         self.solved = solved
     def declare_solved(self):
-        self.solved = True
+        return super().declare_solved()
 class Quest_requirement_item_to_hand_work_product_hourly():
     priority = 1
     def __init__(self,item_id:int,number:int,quest_id:int,solved:bool):
@@ -32,7 +32,7 @@ class Quest_requirement_item_to_hand_work_product_hourly():
         self.quest_id = quest_id
         self.solved = solved
     def declare_solved(self):
-        self.solved = True
+        return super().declare_solved()
 class Quest_requirement_item_to_hand_work_product_seconds():
     priority = 1
     def __init__(self,item_id:int,number:int,quest_id:int,solved:bool):
@@ -41,7 +41,7 @@ class Quest_requirement_item_to_hand_work_product_seconds():
         self.quest_id = quest_id
         self.solved = solved
     def declare_solved(self):
-        self.solved = True
+        return super().declare_solved()
 class Quest_requirement_item_to_hand_buy_from_marketplace(Quest_requirement):
     priority = 1
     def __init__(self,item_id:int,number:int,quest_id:int,solved:bool):
@@ -50,10 +50,21 @@ class Quest_requirement_item_to_hand_buy_from_marketplace(Quest_requirement):
         self.quest_id =quest_id
         self.solved = solved
     def declare_solved(self):
-        self.solved = True
+        return super().declare_solved()
 class Quest_requirement_item_to_buy_from_city_building(Quest_requirement):
     priority = 1
     def __init__(self,item_id:int,number:int,quest_id:int,solved:bool):
+        self.item_id = item_id
+        self.number = number
+        self.quest_id = quest_id
+        self.solved = solved
+    def declare_solved(self):
+        return super().declare_solved()
+class Quest_requirement_use_travelling_merchant_item(Quest_requirement):
+    priority = 1
+    
+    def __init__(self,item_id:int , number:int , quest_id : int , solved:bool):
+        
         self.item_id = item_id
         self.number = number
         self.quest_id = quest_id

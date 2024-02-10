@@ -242,19 +242,21 @@ class Consumable_handler:
         # Extract and process the effects of opening the box
         return self._extract_box_result_dict(raw_data=result['effects'])
 
-    def open_box(self, box_id: int, number: int = 1):
+    def open_box(self, box_id: int, number: int = 1,time_sleep: int = None):
         """
         Open a specified number of boxes and accumulate the results.
 
         Args:
             box_id (int): The ID of the box to open.
             number (int): The number of boxes to open. Defaults to 1.
+            time_sleep (int): Optional sleep time in seconds after opening the box. Defaults to None.
+            
 
         Returns:
             dict[int, int]: Accumulated dictionary with combined counts of items obtained from opening the boxes.
         """
         # Use a generator expression to open the box 'number' times and accumulate the results
-        opening_results = (self._open_box(box_id=box_id, time_sleep=1) for _ in range(number))
+        opening_results = (self._open_box(box_id=box_id, time_sleep=time_sleep) for _ in range(number))
 
         # Combine results into a single dictionary using _add_result_dict_iterator
         return self._add_result_dict_iterator(result_dict_iterator=opening_results)

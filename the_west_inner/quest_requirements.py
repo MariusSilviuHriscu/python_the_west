@@ -80,6 +80,62 @@ class Quest_requirement_item_to_get_from_other_quest(Quest_requirement):
         self.solved = solved
     def declare_solved(self):
         return super().declare_solved()
+
+class Quest_requirement_work_n_seconds(Quest_requirement):
+    priority = 1
+    def __init__(self,work_id : int , required_work_time : int,solved:bool):
+        self.work_id = work_id
+        self.required_work_time = required_work_time
+        self.solved = solved
+    
+    def declare_solved(self):
+        return super().declare_solved()
+
+class Quest_requirement_work_n_times(Quest_requirement):
+    priority = 1
+    def __init__(self,work_id : int , required_work_times : int,solved:bool):
+        self.work_id = work_id
+        self.required_work_times = required_work_times
+        self.solved = solved
+    
+    def declare_solved(self):
+        return super().declare_solved()
+
+class Quest_requirement_sell_item(Quest_requirement):
+    priority = 2
+    def __init__(self, item_id: int , solved : bool ):
+        self.item_id = item_id
+        self.solved = solved
+    
+    def declare_solved(self):
+        return super().declare_solved()
+
+class Quest_requirement_accept_other_quest(Quest_requirement):
+    priority = 1
+    def __init__(self , other_quest_id : int , solved : bool ):
+        self.other_quest_id = other_quest_id
+        self.solved = solved
+    
+    def declare_solved(self):
+        return super().declare_solved()
+ 
+class Quest_requirement_solve_other_quest(Quest_requirement):
+    priority = 1
+    def __init__(self , other_quest_id : int , solved : bool ):
+        self.other_quest_id = other_quest_id
+        self.solved = solved
+    
+    def declare_solved(self):
+        return super().declare_solved()
+
+class Quest_requirement_distribute_skill_point(Quest_requirement):
+    priority = 1
+    def __init__(self, solved):
+        self.solved = solved
+    def declare_solved(self):
+        return super().declare_solved()
+
+
 class Quest_requirement_duel_npc(Quest_requirement):
     priority = 1
     def __init__(self,quest_id:int,solved:bool):

@@ -3,6 +3,7 @@ from the_west_inner.reports import Reports_manager
 from the_west_inner.player_data import Player_data
 from the_west_inner.consumable import Consumable_handler
 from the_west_inner.work_manager import Work_manager
+from the_west_inner.skills import read_skill
 
 from automation_scripts.marketplace_scripts.marketplace_observer import MarketplaceProductObserver
 
@@ -59,3 +60,19 @@ def check_marketplace_items(marketplace_observer: MarketplaceProductObserver) ->
     None
     """
     marketplace_observer.search_all()
+
+def check_and_update_skills(handler:requests_handler,target_attribute_key : str , target_skill_key : str):
+    skills = read_skill(handler=handler)
+    free_attribute_points ,free_skill_points = skills.open_attr_points,skills.open_skill_points
+    
+    if free_attribute_points + free_skill_points == 0:
+        return False
+    
+    change_dict = {}
+    
+    if free_attribute_points :
+        change_dict[target_attribute_key] = free_attribute_points
+    if free_skill_points:
+        change_dict[target_skill_key] = free_skill_points
+    
+    return skills.save_additional_skills_attributes(handler=handler,changes=change_dict)

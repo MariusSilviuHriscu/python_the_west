@@ -130,10 +130,16 @@ class Quest_requirement_solve_other_quest(Quest_requirement):
 
 class Quest_requirement_distribute_skill_point(Quest_requirement):
     priority = 1
-    def __init__(self, solved):
+    def __init__(self,number_of_skill_points:int, solved : bool):
         self.solved = solved
+        self.number_of_skill_points = number_of_skill_points
     def declare_solved(self):
         return super().declare_solved()
+
+class Quest_requirement_get_n_skill_points(Quest_requirement):
+    priority = 1
+    def __init__(self, solved):
+        self.solved = solved
 
 
 class Quest_requirement_duel_npc(Quest_requirement):

@@ -23,12 +23,30 @@ class TorSessionHandler:
             if self.tor_controller:
                 self.tor_controller.close()
 
+    def get_proxy_ip(self,url='https://api64.ipify.org?format=json'):
+        try:
+            # Make a request using the proxy-enabled session
+            response = self.session.get(url)
+            data = response.json()
+            return data['ip']   
+        except Exception as e:
+            print(f"Error retrieving proxy IP: {e}")
+            return None
     def renew_connection(self):
         try:
-            self.tor_controller = Controller.from_port(port=9051)
-            self.tor_controller.connect()
-            self.tor_controller.signal(Signal.NEWNYM)
-            time.sleep(self.tor_controller.get_newnym_wait())  # Wait for the new connection to be established
+            
+            with Controller.from_port(port = 9051) as controller:
+                controller.authenticate('password')  # provide the password here if you set one
+
+                
+                controller.signal(Signal.NEWNYM)
+                time.sleep(controller.get_newnym_wait())
+                
+                session = requests.Session()
+                tor_proxy = {'http': 'socks5://127.0.0.1:9150', 'https': 'socks5://127.0.0.1:9150'}
+                session.proxies.update(tor_proxy)
+                self.session = session
+                print(f'We have changes tor ip adress to {self.get_proxy_ip()}')
         except Exception as e:
             print(f"Error renewing Tor connection: {e}")
         finally:
@@ -57,14 +75,3 @@ def create_tor_session():
 
     return tor_handler.session
 
-
-
-# Example usage:
-if __name__ == "__main__":
-    try:
-        tor_session = create_tor_session()
-        # Use tor_session for your requests
-        response = tor_session.get('https://www.example.com')
-        print(response.text)
-    except Exception as e:
-        print(f"Error: {e}")

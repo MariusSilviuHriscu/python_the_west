@@ -181,7 +181,6 @@ class NpcDuelList :
 
         # Find the NPC ID with the smallest value for the specified key
         min_npc_id = min(value_dict, key=lambda npc_id: value_dict[npc_id])
-        print(f'this is {min_npc_id}')
         return min_npc_id
         
     def _duel_npc(self,handler:requests_handler,npc_id:int):

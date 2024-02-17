@@ -157,6 +157,8 @@ class Quest_requirement_duel_quest_npc(Quest_requirement):
 
 
 
+
+
 #class UnknownQuestRequirement(Exception):
 #    pass
 #def sort_quest_requirement(requirement_dict:dict,handler:requests_handler):

@@ -23,7 +23,7 @@ class Quest():
     group_title:str
     group_id : int
     group_title_full : str
-    requirement_list: list[Quest_requirement]
+    requirement_list: list[dict]
     is_duel : bool
     is_acceptable : bool
     is_accepted : bool
@@ -35,7 +35,7 @@ class Quest():
     employer_key : str
     is_completed : bool = False
     employer_coords : bool| tuple[int] = False
-    quest_reward_options : dict[int,Quest_Reward] ={}
+    quest_reward_options : dict[int,dict] ={}
     
     
     def accept_quest(self,handler:requests_handler):
@@ -70,7 +70,32 @@ class Quest():
             raise QuestFinishError(f"Was not able to finish mission :{self.quest_id}.Return msg :{response['msg']}")
         
         self.is_completed = True
-        
+    
+    def get_requirements(self , requirement_parser_func : typing.Callable[[list[dict]],list[Quest_requirement]]):
+        return requirement_parser_func(self.requirement_list)
+    
+    
+    @staticmethod
+    def load_from_response_dict(response_dict:dict) -> typing.Self:
+        return Quest(quest_id = response_dict.get('id'),
+                     solo_title = response_dict.get('soloTitle'),
+                     group_title = response_dict.get('groupTitle'),
+                     group_id = response_dict.get('group'),
+                     group_title_full = response_dict.get('title'),
+                     requirement_list = response_dict.get('requirements'),
+                     is_duel = response_dict.get('duel').get('isNPCDuel'),
+                     is_acceptable = response_dict.get('acceptable'),
+                     is_accepted = response_dict.get('accepted'),
+                     is_accessable = response_dict.get('accessable'),
+                     is_finishable = response_dict.get('finishable'),
+                     description = response_dict.get('description'),
+                     redraw_map = response_dict.get('redrawMap'),
+                     is_challenge = response_dict.get('isChallenge'),
+                     employer_key = response_dict.get('employer'),
+                     is_completed = all((x.get('solved') for x in response_dict.get('requirements'))),
+                     employer_coords = response_dict.get('employer_coords'),
+                     quest_reward_options = response_dict.get('questRewardsOptions') if response_dict.get('questRewardsOptions') else None
+                     )
 class QuestNotFound(Exception):
     pass
 class Quest_list():

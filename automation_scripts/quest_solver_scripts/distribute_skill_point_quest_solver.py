@@ -23,6 +23,6 @@ class DistributeSkillPointsQuestSolver():
             return False
         
         skills.save_additional_skills_attributes({self.skill_target_key : self.quest_requirement.number_of_skill_points})
-        
+        self.quest_requirement.declare_solved()
         
         return True

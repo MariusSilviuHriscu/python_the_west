@@ -138,10 +138,20 @@ class Quest_requirement_distribute_skill_point(Quest_requirement):
 
 class Quest_requirement_get_n_skill_points(Quest_requirement):
     priority = 1
-    def __init__(self, solved):
+    def __init__(self,target_number:int,skill_key : str, solved):
+        self.target_number = target_number
+        self.skill_key = skill_key
         self.solved = solved
-
-
+    def declare_solved(self):
+        return super().declare_solved()
+class Quest_requirement_get_n_attribute_points(Quest_requirement):
+    priority = 1
+    def __init__(self,target_number:int,attribute_key : str, solved):
+        self.target_number = target_number
+        self.attribute_key = attribute_key
+        self.solved = solved
+    def declare_solved(self):
+        return super().declare_solved()
 class Quest_requirement_duel_npc(Quest_requirement):
     priority = 1
     def __init__(self,quest_id:int,solved:bool):

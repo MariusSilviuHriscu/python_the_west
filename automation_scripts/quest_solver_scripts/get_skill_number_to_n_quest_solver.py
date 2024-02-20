@@ -26,7 +26,8 @@ class GetSkillNumberToNQuestSolver():
             return False
         
         skills.save_additional_skills_attributes(
-            {self.quest_requirement.skill_key : self.quest_requirement.target_number}
+            handler=self.handler,
+            changes={self.quest_requirement.skill_key : self.quest_requirement.target_number}
             )
         self.quest_requirement.declare_solved()
         return True

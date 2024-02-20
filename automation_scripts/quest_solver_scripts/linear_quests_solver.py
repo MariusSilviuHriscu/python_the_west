@@ -3,6 +3,7 @@ import typing
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.linear_quest_manager import LinearQuestManager,LinearQuest
+from the_west_inner.quest_requirements import Quest_requirement_duel_quest_npc
 
 from automation_scripts.quest_solver_scripts.quest_solver_builder import QuestSolverBuilder
 
@@ -36,13 +37,18 @@ class LinearQuestSolver :
             
             for requirement in requirements:
                 solver = self.solver_builder.build(quest_requirement = requirement)
+                if solver is None:
+                    continue
                 solve_result = solver.solve()
                 
                 if not solve_result:
                     return False
             
             quest_to_solve = quest_to_solve.update_quest(handler=self.game_classes.handler)
-            if quest_to_solve.finishable or len(requirement) == 0:
+            if (quest_to_solve.finishable or
+                len(requirements) == 0 or 
+                any((isinstance(x,Quest_requirement_duel_quest_npc) for x in quest_to_solve.requirements))
+                ):
                 
                 self.linear_quest_manager.complete_quest()
         

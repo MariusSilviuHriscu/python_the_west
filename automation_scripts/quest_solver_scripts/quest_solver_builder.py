@@ -70,7 +70,7 @@ class QuestSolverBuilder:
         )
     def build(self,quest_requirement:Quest_requirement) -> QuestSolver:
         if isinstance(quest_requirement,Quest_requirement_duel_quest_npc):
-            pass
+            return None
         elif isinstance(quest_requirement,Quest_requirement_work_n_times):
             return self.build_quest_requirement_work_n_times(quest_requirement = quest_requirement)
         elif isinstance(quest_requirement,Quest_requirement_duel_npc):

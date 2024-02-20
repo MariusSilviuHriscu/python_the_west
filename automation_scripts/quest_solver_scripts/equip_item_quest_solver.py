@@ -21,6 +21,7 @@ class EquipItemQuestSolver:
         self.equipment_manager = equipment_manager
     
     def solve(self):
+        self.bag.update_inventory(handler=self.handler)
         if self.bag[self.quest_requirement.item_id] == 0:
             return False
         

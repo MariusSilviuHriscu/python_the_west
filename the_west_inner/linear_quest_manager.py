@@ -39,7 +39,7 @@ class LinearQuest():
         self.accepted = True
     
     def _complete_quest(self,handler:requests_handler,reward_number:int = 0) -> dict:
-        if not self.finishable:
+        if not self.finishable and not any((isinstance(x,Quest_requirement_duel_quest_npc) for x in self.requirements)):
             raise QuestNotFinishable(f"You tried to finish a quest that is not finishable! :{self.quest_id}")
         payload={
                 "groupid": self.group_id,
@@ -79,7 +79,7 @@ class LinearQuest():
             
             raise QuestFinishError('Tried to finished , refreshed and still not finishable')
         
-        if not self.finishable:
+        if not self.finishable and not any((isinstance(x,Quest_requirement_duel_quest_npc) for x in self.requirements)) :
             return self.update_quest(handler=handler).complete_quest(handler=handler,
                                                                      reward_number=reward_number,
                                                                      depth_trial = depth_trial + 1
@@ -92,7 +92,7 @@ class LinearQuest():
 
 
 LINEAR_QUESTS_REQUIREMENTS = {
-    0 : [],
+    0 : [Quest_requirement_duel_quest_npc(quest_id=0,solved=False)],
     1 : [Quest_requirement_duel_npc(quest_id=1,solved=False)],
     2 : [Quest_requirement_get_n_skill_points(target_number=2,skill_key='health',solved = False)],
     3 : [Quest_requirement_work_n_times(work_id = 128,required_work_times=1,solved=False)],

@@ -9,6 +9,7 @@ from the_west_inner.quest_requirements import (Quest_requirement_duel_quest_npc,
                                                Quest_requirement_get_n_skill_points,
                                                Quest_requirement_get_n_attribute_points,
                                                Quest_requirement_equip_item,
+                                               Quest_requirement_work_quest_item,
                                                Quest_requirement
                                                )
 from automation_scripts.quest_solver_scripts.work_n_times_quest_solver import WorkNTimesSolver
@@ -17,6 +18,7 @@ from automation_scripts.quest_solver_scripts.get_skill_number_to_n_quest_solver 
 from automation_scripts.quest_solver_scripts.get_attribute_number_to_n_quest_solver import GetAttributeNumberToNQuestSolver
 from automation_scripts.quest_solver_scripts.second_item_quest_solver import WorkItemSecondsQuestSolver
 from automation_scripts.quest_solver_scripts.equip_item_quest_solver import EquipItemQuestSolver
+from automation_scripts.quest_solver_scripts.work_for_quest_item_quest_solver import WorkForQuestItemQuestSolver
 
 
 class QuestSolverBuilder:
@@ -68,6 +70,15 @@ class QuestSolverBuilder:
             items = self.game_classes.items,
             equipment_manager = self.game_classes.equipment_manager
         )
+    def build_work_for_quest_item_quest_solver(self,quest_requirement:Quest_requirement) -> QuestSolver:
+        return WorkForQuestItemQuestSolver(
+            quest_requirement = quest_requirement,
+            handler = self.game_classes.handler,
+            player_data = self.game_classes.player_data,
+            bag=self.game_classes.bag,
+            work_manager=self.game_classes.work_manager,
+            game_classes=self.game_classes
+        )
     def build(self,quest_requirement:Quest_requirement) -> QuestSolver:
         if isinstance(quest_requirement,Quest_requirement_duel_quest_npc):
             return None
@@ -83,5 +94,7 @@ class QuestSolverBuilder:
             return self.build_work_item_seconds_quest_solver(quest_requirement=quest_requirement)
         elif isinstance(quest_requirement,Quest_requirement_equip_item):
             return self.build_equip_item_quest_solver(quest_requirement = quest_requirement)
+        elif isinstance(quest_requirement,Quest_requirement_work_quest_item):
+            return self.build_work_for_quest_item_quest_solver(quest_requirement=quest_requirement)
         else :
             raise Exception('Unkwnown type of quest requirement')

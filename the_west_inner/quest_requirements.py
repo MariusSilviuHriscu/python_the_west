@@ -175,7 +175,14 @@ class Quest_requirement_equip_item(Quest_requirement):
     def declare_solved(self):
         return super().declare_solved()
 
-
+class Quest_requirement_work_quest_item(Quest_requirement):
+    priority = 1
+    def __init__(self, item_id : int , work_id : int , solved : bool):
+        self.item_id = item_id
+        self.work_id = work_id
+        self.solved = solved
+    def declare_solved(self):
+        return super().declare_solved()
 
 
 

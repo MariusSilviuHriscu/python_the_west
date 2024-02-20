@@ -2,7 +2,7 @@ import typing
 from dataclasses import dataclass
 
 from requests_handler import requests_handler
-from quest_requirements import Quest_requirement,Quest_Reward
+from quest_requirements import Quest_requirement
 
 class QuestNotAcceptable(Exception):
     pass
@@ -35,7 +35,7 @@ class Quest():
     employer_key : str
     is_completed : bool = False
     employer_coords : bool| tuple[int] = False
-    quest_reward_options : dict[int,dict] ={}
+    quest_reward_options : dict[int,dict] = None
     
     
     def accept_quest(self,handler:requests_handler):

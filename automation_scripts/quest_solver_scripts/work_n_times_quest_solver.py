@@ -3,7 +3,7 @@ from the_west_inner.quest_requirements import Quest_requirement_work_n_times
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.work_manager import Work_manager
 from the_west_inner.work import get_closest_workplace_data
-from the_west_inner.work import Work_list
+from the_west_inner.work import Work_list,Work
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.player_data import Player_data
 
@@ -36,9 +36,14 @@ class WorkNTimesSolver:
                                                job_list = self.work_list,
                                                player_data = self.player_data
                                                )
+        work_data = Work(job_id=self.quest_requirement.work_id,
+                         x = workplace[1],
+                         y= workplace[2],
+                         duration=15
+                         )
         tasks = Script_work_task(
                                 work_manager=self.work_manger,
-                                work_data = workplace,
+                                work_data = work_data,
                                 number_of_actions = self.quest_requirement.required_work_times,
                                 game_classes = self.game_classes
                                  )

@@ -24,7 +24,7 @@ class Quest_requirement_travel(Quest_requirement):
         self.solved = solved
     def declare_solved(self):
         return super().declare_solved()
-class Quest_requirement_item_to_hand_work_product_hourly():
+class Quest_requirement_item_to_hand_work_product_hourly(Quest_requirement):
     priority = 1
     def __init__(self,item_id:int,number:int,quest_id:int,solved:bool):
         self.item_id = item_id
@@ -33,7 +33,7 @@ class Quest_requirement_item_to_hand_work_product_hourly():
         self.solved = solved
     def declare_solved(self):
         return super().declare_solved()
-class Quest_requirement_item_to_hand_work_product_seconds():
+class Quest_requirement_item_to_hand_work_product_seconds(Quest_requirement):
     priority = 1
     def __init__(self,item_id:int,number:int,quest_id:int,solved:bool):
         self.item_id = item_id
@@ -164,6 +164,16 @@ class Quest_requirement_duel_quest_npc(Quest_requirement):
     def __init__(self,quest_id:int,solved = True):
         self.quest_id = quest_id
         self.solved = solved
+    def declare_solved(self):
+        return super().declare_solved()
+
+class Quest_requirement_equip_item(Quest_requirement):
+    priority = 1
+    def __init__(self,item_id:int,solved : bool = True):
+        self.item_id = item_id
+        self.solved = solved
+    def declare_solved(self):
+        return super().declare_solved()
 
 
 

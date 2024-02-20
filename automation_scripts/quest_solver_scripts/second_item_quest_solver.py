@@ -1,6 +1,6 @@
 from the_west_inner.quest_requirements import Quest_requirement_item_to_hand_work_product_seconds
 from the_west_inner.game_classes import Game_classes
-from the_west_inner.work import get_closest_workplace_data
+from the_west_inner.work import get_closest_workplace_data,Work
 from the_west_inner.items import get_corresponding_work_id
 
 from automation_scripts.product_work_cycle import CycleJobsProducts
@@ -32,6 +32,7 @@ class WorkItemSecondsQuestSolver:
         self.quest_requirement = quest_requirement
         self.game_classes = game_classes
         self.energy_recharge_id = energy_recharge_id
+        self.one_by_one = True
 
     def solve(self) -> bool:
         """
@@ -56,13 +57,13 @@ class WorkItemSecondsQuestSolver:
             job_list=self.game_classes.work_list,
             player_data=self.game_classes.player_data
         )
-
+        work_data = Work(job_id=job_data[0],x=job_data[1],y=job_data[2],duration=15)
         # Create a cycle to perform work and acquire the required items
         cycle_products = CycleJobsProducts(
             handler=self.game_classes.handler,
             work_manager=self.game_classes.work_manager,
             consumable_handler=self.game_classes.consumable_handler,
-            job_data=job_data,
+            job_data=work_data,
             player_data=self.game_classes.player_data,
             product_id=self.quest_requirement.item_id,
             game_classes=self.game_classes
@@ -73,6 +74,17 @@ class WorkItemSecondsQuestSolver:
 
         # Perform the work cycle
         rewards = cycle_products.cycle(
+            energy_consumable=self.energy_recharge_id,
+            target_number=self.quest_requirement.number - self.game_classes.bag[self.quest_requirement.item_id],
+            number_of_task_groups=9 if self.game_classes.premium.automation else 4
+        )
+        if self.one_by_one:
+            rewards = cycle_products.cycle_one_by_one(energy_consumable =self.energy_recharge_id,
+                                            target_number=self.quest_requirement.number - self.game_classes.bag[self.quest_requirement.item_id]
+                                            )
+        else:
+            # Perform the work cycle
+            rewards = cycle_products.cycle(
             energy_consumable=self.energy_recharge_id,
             target_number=self.quest_requirement.number - self.game_classes.bag[self.quest_requirement.item_id],
             number_of_task_groups=9 if self.game_classes.premium.automation else 4

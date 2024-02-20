@@ -258,7 +258,7 @@ class Skills:
         Returns:
             The value of the given skill.
         """
-        return self.skills[skill] + self.skill_bonuspoints[skill]
+        return self.skills[skill] + self.skill_bonuspoints.get(skill,0)
     def get_attribute(self, attribute: str) -> int:
         """Returns the value of the given attribute.
         
@@ -268,7 +268,7 @@ class Skills:
         Returns:
             The value of the given attribute.
         """
-        return self.attributes[attribute] + self.attribute_bonuspoints[attribute]
+        return self.attributes.get(attribute,0) + self.attribute_bonuspoints.get(attribute,0)
     def save_additional_skills_attributes(self, handler: requests_handler, changes: typing.Dict[str, int]):
         """
         Saves additional skills and attributes.
@@ -306,8 +306,11 @@ class Skills:
             raise Exception(response['msg'])
         
         # Update the instance using the response data
-        self._update(data=response, attribute_to_skill_mapping_dict=verifier.attribute_to_skill_mapping_dict)
-        
+        try:
+            self._update(data=response, attribute_to_skill_mapping_dict=verifier.attribute_to_skill_mapping_dict)
+        except Exception as e:
+            print(response)
+            raise e
         # return the response
         return response
     def _update(self, data: dict, attribute_to_skill_mapping_dict: dict):
@@ -376,7 +379,7 @@ def read_skill(handler: requests_handler) -> Skills:
     )
     # Initialize the Skills instance with the data from the response
     skills = Skills(
-        reskill_buyable = response['reskill_buyable'],
+        reskill_buyable = response.get('reskill_buyable',None),
         skills_buyable = response['skills_buyable'],
         buyskills_costs = response['buyskills_costs'],
         buyattributes_costs = response['buyattributes_costs'],
@@ -388,8 +391,8 @@ def read_skill(handler: requests_handler) -> Skills:
         open_attr_points = response['open_attrPoints'],
         open_skill_points = response['open_skillPoints'],
         skills = response['skills'],
-        skill_bonuspoints = response['skillBonuspoints'],
+        skill_bonuspoints = response['skillBonuspoints'] if response['skillBonuspoints'] != [] else {},
         attributes = response['attributes'],
-        attribute_bonuspoints = response['attributeBonuspoints']
+        attribute_bonuspoints = response['attributeBonuspoints'] if response['attributeBonuspoints'] else {}
     )
     return skills

@@ -16,9 +16,9 @@ class GetAttributeNumberToNQuestSolver():
     def solve(self):
         skills = read_skill(handler=self.handler)
         
-        current_attribute_value = skills.get_attribute(attribute = self.quest_requirement.skill_key)
-        attribute_to_distribute = current_attribute_value - self.quest_requirement.target_number
-        
+        current_attribute_value = skills.get_attribute(attribute = self.quest_requirement.attribute_key)
+        attribute_to_distribute = self.quest_requirement.target_number - current_attribute_value
+                
         if attribute_to_distribute <= 0 :
             return True
         
@@ -26,7 +26,8 @@ class GetAttributeNumberToNQuestSolver():
             return False
         
         skills.save_additional_skills_attributes(
-            {self.quest_requirement.attribute_key : self.quest_requirement.target_number}
+            handler= self.handler,
+            changes = {self.quest_requirement.attribute_key : self.quest_requirement.target_number}
             )
         self.quest_requirement.declare_solved()
         return True

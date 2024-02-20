@@ -17,7 +17,7 @@ class GetSkillNumberToNQuestSolver():
         skills = read_skill(handler=self.handler)
         
         current_skill_value = skills.get_skill_value(skill=self.quest_requirement.skill_key)
-        skills_to_distribute = current_skill_value - self.quest_requirement.target_number
+        skills_to_distribute = self.quest_requirement.target_number - current_skill_value
         
         if skills_to_distribute <= 0 :
             return True

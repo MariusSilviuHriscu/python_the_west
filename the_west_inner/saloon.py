@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from requests_handler import requests_handler
 from quest_requirements import Quest_requirement
+from gold_finder import parse_map_for_quest_employers
 
 class QuestNotAcceptable(Exception):
     pass
@@ -15,6 +16,8 @@ class QuestCancelError(Exception):
 class QuestNotFinishable(Exception):
     pass
 class QuestFinishError(Exception):
+    pass
+class QuestNotCompletedError(Exception):
     pass
 @dataclass
 class Quest():
@@ -101,11 +104,18 @@ class QuestNotFound(Exception):
 class Quest_list():
     def __init__(self,quest_list:list[Quest]):
         self.quest_list = quest_list
-        self.quest_dict ={quest_id:quest_data for quest_id,quest_data in self.quest_list.items()}
+        self.quest_dict ={x.quest_id : x for x in self.quest_list}
     def get_by_id(self,search_id:int):
         if search_id not in self.quest_dict:
             raise QuestNotFound(f"Didn't find the required id :{search_id}")
         return self.quest_dict[search_id]
+    def append(self,quest_list: list[Quest]):
+        
+        self.quest_list.extend(quest_list)
+        self.quest_dict = {**self.quest_dict,**{x.quest_id : x for x in self.quest_list}}
+    def __contains__(self , quest_id:int) -> bool:
+        
+        return quest_id in self.quest_dict
 
     
 class Quest_employer():
@@ -115,38 +125,100 @@ class Quest_employer():
         self.x = x
         self.y = y
         self.quest_list = quest_list
+    def get_quest_by_id(self,quest_id:int) -> Quest:
+        return self.quest_list.get_by_id(search_id=quest_id)
+    def reload_data(self,handler:requests_handler):
+        self = get_quest_employer_by_key(handler=handler,
+                                         employer_key = self.key,
+                                         employer_coords = (self.x,self.y)
+                                         )
 
 class EmployerNotCorresponding(Exception):
     pass
-def get_quest_employer_by_key(handler:requests_handler,employer_key:str,employer_coords:tuple[int]= None) -> Quest_employer:
+
+def get_quest_employer_by_key(handler:requests_handler,employer_key:str,employer_coords:tuple[int,int]= None) -> Quest_employer:
     payload = {"employer":employer_key}
     if employer_coords is not None:
         payload["x"] = employer_coords[0]
         payload["y"] = employer_coords[1]
-    result = handler.post(window="quest_employer",payload=payload)
-    
-    if  "key" not in result or result['key'] != employer_key:
+    result = handler.post(window="quest_employer",action='',payload=payload)
+    if 'employer' not in result or "key" not in result['employer'] or result['employer']['key'] != employer_key:
         raise EmployerNotCorresponding(f"The result employer key and search key do not correspond : {employer_key}")
-    
-    return Quest_employer
+    return Quest_employer(
+        key = result.get('key'),
+        name = result.get('name'),
+        x = result.get('x'),
+        y = result.get('y'),
+        quest_list = Quest_list(
+                                quest_list= [Quest.load_from_response_dict(response_dict=x) for x in result.get('open')]
+                                )
+    )
 
     
 class Quest_employer_saloon():
     
-    def __init__(self,key:str,name:str):
+    def __init__(self,key:str,name:str,location:tuple[int,int]| None = None):
         self.key = key
         self.name = name
-    
+        self.location = location
     def get_quest_employer(self,handler:requests_handler) -> Quest_employer:
-        return get_quest_employer_by_key(handler=handler,employer_key=self.key)
+        return get_quest_employer_by_key(handler=handler,employer_key=self.key,employer_coords=self.location)
 
 def get_saloon_employer(handler:requests_handler) -> list[Quest_employer_saloon]:
     
-    response = handler.post(window='building_quest')
+    response = handler.post(window='building_quest',action='')
     
     if 'questEmployer' not in response:
         raise Exception('Saloon could not be found...')
-    
     employer_data : list[dict] = response['questEmployer']
     
     return [Quest_employer_saloon(key=employer['key'],name=employer['name']) for employer in employer_data]
+
+def get_available_map_employers(handler:requests_handler) -> list[Quest_employer_saloon]:
+    
+    map_employers_raw_map_data = parse_map_for_quest_employers(handler=handler)
+    
+    employer_list = []
+    for location_data in map_employers_raw_map_data:
+        x = location_data.get('x')
+        y = location_data.get('y')
+        employers = location_data.get('employer')
+        
+        employer_list.extend(
+            (Quest_employer_saloon(key = employer_data.get('key'),
+                                   name= employer_data.get('name'),
+                                   location = (x,y)
+                                   )
+                for employer_data in employers if employer_data.get('visible'))
+        )
+    return employer_list
+
+class EmployerNotFoundException(Exception):
+    pass
+
+class QuestEmployerDataList():
+    def __init__(self , quest_employers : list[Quest_employer]):
+        self.quest_employers = quest_employers
+
+    def has_available_quest(self,quest_id:int) -> bool:
+        
+        for quest_employer in self.quest_employers:
+            if quest_id in quest_employer.quest_list:
+                return True
+        return False
+    def get_employer_by_quest_id(self,quest_id : int) ->Quest_employer:
+        for quest_employer in self.quest_employers:
+            if quest_id in quest_employer.quest_list:
+                return quest_employer
+        raise EmployerNotFoundException(f"Couldn't find quest employer that has : {quest_id} quest ! ") 
+
+def load_all_available_quest_employers_data_list(handler:requests_handler) -> QuestEmployerDataList:
+    
+    saloon_employers = get_saloon_employer(handler=handler)
+    available_map_employers = get_available_map_employers(handler=handler)
+    
+    return QuestEmployerDataList(
+        quest_employers= [x.get_quest_employer(handler=handler) for x in saloon_employers + available_map_employers]
+    )
+    
+    

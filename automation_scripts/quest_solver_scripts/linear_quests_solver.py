@@ -1,8 +1,6 @@
-import typing
 
 from the_west_inner.game_classes import Game_classes
-from the_west_inner.requests_handler import requests_handler
-from the_west_inner.linear_quest_manager import LinearQuestManager,LinearQuest
+from the_west_inner.linear_quest_manager import LinearQuestManager
 from the_west_inner.quest_requirements import Quest_requirement_duel_quest_npc
 
 from automation_scripts.quest_solver_scripts.quest_solver_builder import QuestSolverBuilder

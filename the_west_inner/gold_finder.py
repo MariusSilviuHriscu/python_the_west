@@ -98,4 +98,4 @@ def parse_map_for_quest_employers(handler:requests_handler) -> typing.List[dict]
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.map(parse_map_data_for_employers, result)
     solution = itertools.chain.from_iterable(list(future))
-    return solution
+    return list(solution)

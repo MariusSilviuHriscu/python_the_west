@@ -87,9 +87,18 @@ class Map_county():
 class Map_county_list():
     def __init__(self,counties:typing.List[Map_county]) -> None:
         self.counties = counties
+    def are_counties_neighbors(self, county1: Map_county, county2: Map_county) -> bool:
+        return (
+            county1.start_x <= county2.end_x
+            and county1.end_x >= county2.start_x
+            and county1.start_y <= county2.end_y
+            and county1.end_y >= county2.start_y
+        )
+    
     # method that establishes the neighbours of each county based on the start and end coords
     # a county is a neighbour of another county if it has at least one point in common with it
     # counties are not of the same size but they are all rectangles
+    
     def create_neighbours(self) -> None:
         for county in self.counties:
             county.neighbours = []
@@ -103,11 +112,16 @@ class Map_county_list():
                 for neighbour in neighbours:
                     if neighbour not in neighbour.neighbours and neighbour.county_id != county.county_id:
                         county.add_neighbour(neighbour.county_id)
+    def create_neighbours(self) -> None:
+        for county1 in self.counties:
+            for county2 in self.counties:
+                if county1.county_id != county2.county_id and self.are_counties_neighbors(county1, county2):
+                    county1.add_neighbour(county2.county_id)
     def __getitem__(self,county_id:int)-> Map_county:
         for county in self.counties:
             if county.county_id == county_id:
                 return county
-            raise Exception("County does not exist")
+        raise Exception("County does not exist")    
     # make this class iterable
     def __iter__(self):
         for offer in self.counties:

@@ -220,5 +220,65 @@ def load_all_available_quest_employers_data_list(handler:requests_handler) -> Qu
     return QuestEmployerDataList(
         quest_employers= [x.get_quest_employer(handler=handler) for x in saloon_employers + available_map_employers]
     )
+
+QuestIDType = int
+QuestGroupIDType = int
+
+SolvedQuestGroupDictType = dict[QuestGroupIDType:dict[QuestIDType:str]]
+
+
+class SolvedQuestData:
+    
+    def __init__(self , solved_quest_group_dict : SolvedQuestGroupDictType):
+        
+        self.solved_quest_group_dict = solved_quest_group_dict
+    
+    def has_solved(self,quest_id) -> bool:
+        
+        return any(
+            (quest_id in x for x in self.solved_quest_group_dict.values())
+            )
+    def __contains__(self,quest_id:int):
+        
+        return self.has_solved(quest_id=quest_id)
+
+class SolvedQuestManager:
+    def __init__(self, handler: requests_handler):
+        self.handler = handler
+        self._solved_quest_data = None
     
     
+    
+    def _process_data(self,response_dict : dict) -> SolvedQuestData:
+        
+        group_dict = {}
+        for group_id,group_data in response_dict.items():
+            quest_data = group_data.get('quests')
+            if isinstance(quest_data,list):
+                quest_data = {quest_id:quest_title for quest_id,quest_title in enumerate(quest_data)}
+            group_dict.update({group_id : quest_data})
+        return SolvedQuestData(solved_quest_group_dict = group_dict)
+            
+    def load_solved_quests(self) -> SolvedQuestData:
+        
+        response = self.handler.post(window='building_quest',action='get_solved_groups',action_name='mode')
+        
+        if 'solved' not in response:
+            
+            raise Exception('Could not load solved quests!')
+
+        
+        return  self._process_data(response_dict = response['solved'])
+    def update_data(self):
+        
+        self._solved_quest_data = self.load_solved_quests()
+    
+    @property
+    def solved_quest_data(self) -> SolvedQuestData:
+        if not self._solved_quest_data:
+            self.update_data()
+        return self._solved_quest_data
+    
+    def has_completed_quest(self,quest_id: int) -> bool:
+        
+        return quest_id in self.solved_quest_data

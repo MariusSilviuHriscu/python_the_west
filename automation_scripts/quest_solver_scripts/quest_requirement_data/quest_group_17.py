@@ -6,8 +6,8 @@ from the_west_inner.quest_requirements import (Quest_requirement_item_to_hand_wo
 
 
 GROUP_17 = QuestGroupData(
-    group_id = 1,
-    required_group_id = None,
+    group_id = 17,
+    required_group_id = 5,
     quest_requirements = {
         120 : [Quest_requirement_work_n_times(work_id = 1,
                                               required_work_times = 4,

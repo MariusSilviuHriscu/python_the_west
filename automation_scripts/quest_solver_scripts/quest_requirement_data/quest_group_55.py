@@ -10,8 +10,8 @@ from the_west_inner.quest_requirements import (Quest_requirement_duel_quest_npc,
 
 
 GROUP_55 = QuestGroupData(
-    group_id = 1,
-    required_group_id = None,
+    group_id = 55,
+    required_group_id = 17,
     quest_requirements = {
         530 : [Quest_requirement_duel_quest_npc(quest_id=530,
                                                 solved=True)

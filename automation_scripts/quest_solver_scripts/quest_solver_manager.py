@@ -1,6 +1,6 @@
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.quest_requirements import Quest_requirement,Quest_requirement_travel
-from the_west_inner.saloon import Quest,QuestEmployerDataList,Quest_employer,QuestNotAcceptable,QuestNotAccepted
+from the_west_inner.saloon import Quest,QuestEmployerDataList,Quest_employer,SolvedQuestManager
 from the_west_inner.saloon import (QuestNotCompletedError,
                                    QuestNotAcceptable,
                                    QuestNotAccepted,
@@ -91,11 +91,30 @@ class QuestGroupSolverManager:
     def __init__(self , 
                  game_classes : Game_classes,
                  requirement_solution_builder : QuestSolverBuilder ,
-                 available_employer_data : QuestEmployerDataList, 
+                 available_employer_data : QuestEmployerDataList,
+                 solved_quest_manager : SolvedQuestManager , 
                  quest_group_data : QuestGroupData
                  ):
         self.game_classes = game_classes
         self.requirement_solution_builder = requirement_solution_builder
         self.quest_group_data = quest_group_data
         self.available_employer_data = available_employer_data
+        self.solved_quest_manager = solved_quest_manager
     
+    def quest_is_solved(self,quest_id:int) -> bool:
+        
+        return self.solved_quest_manager.has_completed_quest(quest_id=quest_id)
+    @property
+    def quest_group_is_completed(self) -> bool:
+    
+        last_quest_id = self.quest_group_data.last_quest_id
+        
+        return self.quest_is_solved(quest_id=last_quest_id)
+    
+    def _solve(self,quest_group_data :QuestGroupData) ->bool:
+        
+        for quest_id,quest_requirements in self.quest_group_data.iter_requirements(reverse=True):
+            
+            if self.solved_quest_manager.has_completed_quest(quest_id = quest_id) :
+                
+                return True

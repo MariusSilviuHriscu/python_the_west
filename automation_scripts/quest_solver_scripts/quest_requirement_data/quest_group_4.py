@@ -7,8 +7,8 @@ from the_west_inner.quest_requirements import (Quest_requirement_item_to_hand_wo
 
 
 GROUP_4 = QuestGroupData(
-    group_id = 1,
-    required_group_id = 17,
+    group_id = 4,
+    required_group_id = 1,
     quest_requirements = {
         23 : [Quest_requirement_item_to_hand_work_product_seconds(item_id=743000,
                                                                   number = 1,

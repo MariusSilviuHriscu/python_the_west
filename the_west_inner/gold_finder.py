@@ -37,7 +37,9 @@ def tiles_map_search_by_key_word(handler:requests_handler,key_word:str,chuncks =
     cautare_locatii_munci = handler.post(
                                 window="map",
                                 action="get_minimap",
-                                action_name= "ajax") [key_word]
+                                action_name= "ajax").get(key_word)
+    if cautare_locatii_munci == []:
+        return []
     for each in cautare_locatii_munci.values():
         for coord_munci in each:
             x_tile = math.floor(coord_munci[0] / TILE_SIZE)

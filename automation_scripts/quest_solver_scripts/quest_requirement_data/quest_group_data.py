@@ -58,7 +58,7 @@ class QuestGroupData:
                 for quest_id,quest_requirements in start.iter_requirements(reverse=True) )
            )
            start = start.previous_quest_group
-        
+        list.reverse()
         return list
 
     @property

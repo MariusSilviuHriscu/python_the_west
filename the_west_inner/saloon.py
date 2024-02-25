@@ -64,10 +64,15 @@ class Quest():
         self.is_acceptable = True
         self.is_finishable = False
     def complete_quest(self,handler:requests_handler,reward_number:int = 0):
-        if not self.is_finishable:
+        if not self.is_finishable and not self.is_duel:
             raise QuestNotFinishable(f"You tried to finish a quest that is not finishable! :{self.quest_id}")
+        payload = {"quest_id": self.quest_id}
+        if self.quest_reward_options is not None:
+            reward_number = next(self.quest_reward_options.keys())
+            
+        payload.update({"reward_option_id": f"{reward_number}"})
         
-        response = handler.post(window="quest",action="finish_quest",payload={"quest_id": self.quest_id ,"reward_option_id": f"{reward_number}"})
+        response = handler.post(window="quest",action="finish_quest",payload=payload,use_h=True)
         
         if response['error']:
             raise QuestFinishError(f"Was not able to finish mission :{self.quest_id}.Return msg :{response['msg']}")
@@ -76,8 +81,9 @@ class Quest():
     
     def get_requirements(self , requirement_parser_func : typing.Callable[[list[dict]],list[Quest_requirement]]):
         return requirement_parser_func(self.requirement_list)
-    
-    
+    @property
+    def is_solved(self)->bool:
+        return all((x.get('solved') for x in self.requirement_list))
     @staticmethod
     def load_from_response_dict(response_dict:dict) -> typing.Self:
         return Quest(quest_id = response_dict.get('id'),
@@ -128,7 +134,7 @@ class Quest_employer():
     def get_quest_by_id(self,quest_id:int) -> Quest:
         return self.quest_list.get_by_id(search_id=quest_id)
     def reload_data(self,handler:requests_handler):
-        self = get_quest_employer_by_key(handler=handler,
+        return get_quest_employer_by_key(handler=handler,
                                          employer_key = self.key,
                                          employer_coords = (self.x,self.y)
                                          )
@@ -144,6 +150,7 @@ def get_quest_employer_by_key(handler:requests_handler,employer_key:str,employer
     result = handler.post(window="quest_employer",action='',payload=payload)
     if 'employer' not in result or "key" not in result['employer'] or result['employer']['key'] != employer_key:
         raise EmployerNotCorresponding(f"The result employer key and search key do not correspond : {employer_key}")
+    result = result.get('employer')
     return Quest_employer(
         key = result.get('key'),
         name = result.get('name'),
@@ -197,28 +204,34 @@ class EmployerNotFoundException(Exception):
     pass
 
 class QuestEmployerDataList():
-    def __init__(self , quest_employers : list[Quest_employer]):
+    def __init__(self , quest_employers : list[Quest_employer],handler:requests_handler):
         self.quest_employers = quest_employers
-
+        self.handler = handler
     def has_available_quest(self,quest_id:int) -> bool:
         
         for quest_employer in self.quest_employers:
             if quest_id in quest_employer.quest_list:
                 return True
         return False
-    def get_employer_by_quest_id(self,quest_id : int) ->Quest_employer:
+    def get_employer_by_quest_id(self,quest_id : int,iteration_layer = 0) -> Quest_employer:
         for quest_employer in self.quest_employers:
             if quest_id in quest_employer.quest_list:
                 return quest_employer
+        if iteration_layer < 3:
+            return load_all_available_quest_employers_data_list(handler=self.handler).get_employer_by_quest_id(quest_id=quest_id,
+                                                                                                               iteration_layer=iteration_layer + 1
+                                                                                                               )
         raise EmployerNotFoundException(f"Couldn't find quest employer that has : {quest_id} quest ! ") 
+    def update(self):
+        self = load_all_available_quest_employers_data_list(handler = self.handler)
 
 def load_all_available_quest_employers_data_list(handler:requests_handler) -> QuestEmployerDataList:
     
     saloon_employers = get_saloon_employer(handler=handler)
     available_map_employers = get_available_map_employers(handler=handler)
-    
     return QuestEmployerDataList(
-        quest_employers= [x.get_quest_employer(handler=handler) for x in saloon_employers + available_map_employers]
+        quest_employers= [x.get_quest_employer(handler=handler) for x in saloon_employers + available_map_employers],
+        handler = handler
     )
 
 QuestIDType = int
@@ -250,7 +263,8 @@ class SolvedQuestManager:
     
     
     def _process_data(self,response_dict : dict) -> SolvedQuestData:
-        
+        if response_dict == []:
+            return SolvedQuestData(solved_quest_group_dict={})
         group_dict = {}
         for group_id,group_data in response_dict.items():
             quest_data = group_data.get('quests')

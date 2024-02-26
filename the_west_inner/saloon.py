@@ -17,6 +17,8 @@ class QuestNotFinishable(Exception):
     pass
 class QuestFinishError(Exception):
     pass
+class DuelQuestFinishError(QuestFinishError):
+    pass
 class QuestNotCompletedError(Exception):
     pass
 @dataclass
@@ -56,7 +58,8 @@ class Quest():
             raise QuestNotAccepted(f"You tried to cancel a quest that is not accepted! :{self.quest_id}")
         
         response = handler.post(window="quest",action="cancel_quest",payload={"quest_id": self.quest_id},use_h=True)
-        
+        if response['error'] and self.is_duel:
+            raise 
         if response['error']:
             raise QuestCancelError(f"Was not able to cancel mission :{self.quest_id}.Return msg :{response['msg']}")
         
@@ -73,7 +76,8 @@ class Quest():
         payload.update({"reward_option_id": f"{reward_number}"})
         
         response = handler.post(window="quest",action="finish_quest",payload=payload,use_h=True)
-        
+        if response['error'] and self.is_duel:
+            raise DuelQuestFinishError(f"Duel quest couldn't be finished as you lost the duel !")
         if response['error']:
             raise QuestFinishError(f"Was not able to finish mission :{self.quest_id}.Return msg :{response['msg']}")
         

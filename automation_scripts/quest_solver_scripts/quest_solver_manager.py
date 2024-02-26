@@ -1,15 +1,19 @@
 import time
+import typing
 
 from the_west_inner.game_classes import Game_classes
+from the_west_inner.equipment import Equipment,Equipment_manager
 from the_west_inner.quest_requirements import Quest_requirement,Quest_requirement_travel
 from the_west_inner.saloon import Quest,QuestEmployerDataList,Quest_employer,SolvedQuestManager,load_all_available_quest_employers_data_list
 from the_west_inner.saloon import (QuestNotCompletedError,
                                    QuestNotAcceptable,
                                    QuestNotAccepted,
-                                   QuestNotFinishable
+                                   QuestNotFinishable,
+                                   DuelQuestFinishError
                                    )
 from the_west_inner.quest_requirements import Quest_requirement_duel_quest_npc
 
+from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 
 from automation_scripts.quest_solver_scripts.quest_solver_builder import QuestSolverBuilder
 
@@ -48,6 +52,8 @@ class QuestSolver :
                 return False
         return True
     def reload_quest(self):
+        
+        # The server takes a while to process the quest state so if I didn't sleep here the returned data would be the same as before , making the whole call useless
         time.sleep(1)
         self.employer = self.employer.reload_data(handler = self.game_classes.handler)
         self.quest = self.employer.get_quest_by_id(quest_id=self.quest.quest_id)
@@ -115,7 +121,21 @@ class QuestGroupSolverManager:
         self.quest_group_data = quest_group_data
         self.available_employer_data = available_employer_data
         self.solved_quest_manager = solved_quest_manager
-    
+
+        self._duel_equipment = None
+        self._callback_chainer : CallbackChainer = None
+    def set_failed_duel_callback(self,callback_chainer:CallbackChainer):
+        
+        self.callback_chainer = callback_chainer
+    @property
+    def duel_equipment(self) -> Equipment|None:
+        return self._duel_equipment
+    def callback_function(self) -> typing.Callable:
+        return self.callback_chainer.chain_function()
+    def set_duel_equipment(self,equipment : Equipment) :
+        
+        self._duel_equipment = equipment
+        
     def quest_is_solved(self,quest_id:int) -> bool:
         
         return self.solved_quest_manager.has_completed_quest(quest_id=quest_id)
@@ -148,7 +168,26 @@ class QuestGroupSolverManager:
                                  )
             if not solver.accept_quest_solver():
                 return False
-            if not solver.solve_quest():
-                return False
+            if quest.is_duel and self.duel_equipment is not None:
+                current_equipment = self.game_classes.equipment_manager.current_equipment
+                self.game_classes.equipment_manager.equip_equipment(equipment=self._duel_equipment,
+                                                                    handler=self.game_classes.handler
+                                                                    )
+            try:
+                if not solver.solve_quest():
+                    return False
+            except DuelQuestFinishError as e:
+                if self._callback_chainer is not None:
+                    self.callback_function()
+                if not solver.solve_quest():
+                    return False
+            except Exception as e:
+                raise e
+            finally :
+                if quest.is_duel and self.duel_equipment is not None:
+                    self.game_classes.equipment_manager.equip_equipment(equipment=current_equipment,
+                                                                        handler=self.game_classes.handler
+                                                                        )
+                
             self.solved_quest_manager.update_data()
         return True

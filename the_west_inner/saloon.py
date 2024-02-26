@@ -1,4 +1,5 @@
 import typing
+import time
 from dataclasses import dataclass
 
 from requests_handler import requests_handler
@@ -222,9 +223,11 @@ class QuestEmployerDataList():
             if quest_id in quest_employer.quest_list:
                 return quest_employer
         if iteration_layer < 3:
+            time.sleep(0.3)
             return load_all_available_quest_employers_data_list(handler=self.handler).get_employer_by_quest_id(quest_id=quest_id,
                                                                                                                iteration_layer=iteration_layer + 1
-                                                                                                               )
+            )
+        print([x.__dict__ for x in self.quest_employers])
         raise EmployerNotFoundException(f"Couldn't find quest employer that has : {quest_id} quest ! ") 
     def update(self):
         self = load_all_available_quest_employers_data_list(handler = self.handler)
@@ -273,8 +276,10 @@ class SolvedQuestManager:
         for group_id,group_data in response_dict.items():
             quest_data = group_data.get('quests')
             if isinstance(quest_data,list):
-                quest_data = {quest_id:quest_title for quest_id,quest_title in enumerate(quest_data)}
-            group_dict.update({group_id : quest_data})
+                quest_data = {quest_id : quest_title for quest_id,quest_title in enumerate(quest_data)}
+            
+            quest_data = {int(quest_id) : quest_title for quest_id,quest_title in quest_data.items()}
+            group_dict.update({int(group_id) : quest_data})
         return SolvedQuestData(solved_quest_group_dict = group_dict)
             
     def load_solved_quests(self) -> SolvedQuestData:

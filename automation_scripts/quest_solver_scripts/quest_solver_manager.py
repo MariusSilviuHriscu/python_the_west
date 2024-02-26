@@ -48,6 +48,7 @@ class QuestSolver :
             if solver is None:
                 return False
             solution_status = solver.solve()
+            time.sleep(1)
             if not solution_status :
                 return False
         return True
@@ -146,16 +147,16 @@ class QuestGroupSolverManager:
         
         return self.quest_is_solved(quest_id=last_quest_id)
     
-    def _solve(self,quest_group_data :QuestGroupData) ->bool:
+    def solve(self) ->bool:
         
-        for quest_info in quest_group_data.list_quest_info():
+        for quest_info in self.quest_group_data.list_quest_info():
             
-            print(f"We are solving quest {quest_info.quest_id} from the group {quest_info.quest_group}")
             
             if self.solved_quest_manager.has_completed_quest(quest_id = quest_info.quest_id) :
-                
+                print(f"We already solved quest {quest_info.quest_id} from the group {quest_info.quest_group}")
                 continue
             
+            print(f"We are solving quest {quest_info.quest_id} from the group {quest_info.quest_group}")
             quest_employer_data = load_all_available_quest_employers_data_list(handler = self.game_classes.handler)
             quest_employer = quest_employer_data.get_employer_by_quest_id(quest_id = quest_info.quest_id)
             quest = quest_employer.get_quest_by_id(quest_id=quest_info.quest_id)
@@ -191,3 +192,24 @@ class QuestGroupSolverManager:
                 
             self.solved_quest_manager.update_data()
         return True
+
+def build_quest_group_solver_manager(game_classes : Game_classes ,
+                                    target_quest_group_data : QuestGroupData,
+                                    chainer :CallbackChainer = None
+                                    ):
+    solver_manager = QuestGroupSolverManager(
+        game_classes = game_classes,
+        requirement_solution_builder = QuestSolverBuilder(
+                                                        game_classes = game_classes,
+                                                        energy_consumable_id = None
+                                                        ),
+        available_employer_data = load_all_available_quest_employers_data_list(handler=game_classes.handler),
+        solved_quest_manager = SolvedQuestManager(
+            handler = game_classes.handler),
+        quest_group_data = target_quest_group_data
+
+    )
+    if chainer is not None:
+        solver_manager.set_failed_duel_callback(callback_chainer=chainer)
+    
+    return solver_manager

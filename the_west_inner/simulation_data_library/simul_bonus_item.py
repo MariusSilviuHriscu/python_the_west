@@ -1,3 +1,5 @@
+from simul_items import Weapon
+
 class Character_attribute_bonus_chain():
     def __init__(self,bonus_dict,item,next_chain=None):
         self.bonus_dict = bonus_dict
@@ -128,7 +130,25 @@ class Character_bonus_regen_bonus_chain():
             self.next_chain.item = self.item
             self.next_chain.bonus_dict = self.bonus_dict
             self.next_chain.check_bonus()
-
+class Character_weapon_damage_bonus_chain():
+    def __init__(self,bonus_dict,item,next_chain=None):
+        self.bonus_dict = bonus_dict
+        self.next_chain = next_chain
+        self.item = item
+    def add_bonus_to_item(self,value):
+        self.item.damage += value
+        if 'key' in self.bonus_dict and self.bonus_dict['key'] == 'level':
+            self.item.updates.damage_updates = True
+    def check_bonus(self):
+        if (self.bonus_dict.get('type','') == 'character' 
+            and self.bonus_dict.get('bonus',{}).get('type','') == 'damage'
+            and isinstance(self.item,Weapon)):
+            print(f'found_damage for item {self.item.item_id}')
+            self.add_bonus_to_item(self.bonus_dict.get('bonus').get('value'))
+        elif self.next_chain is not None:
+            self.next_chain.item = self.item
+            self.next_chain.bonus_dict = self.bonus_dict
+            self.next_chain.check_bonus()
 
 def create_chain():
     character_attribute_checker = Character_attribute_bonus_chain(None,None)
@@ -139,6 +159,7 @@ def create_chain():
     character_workpoints_checker = Character_workpoints_bonus_chain(None,None)
     character_bonus_speed_checker = Character_bonus_speed_bonus_chain(None,None)
     character_bonus_regen_checker = Character_bonus_regen_bonus_chain(None,None)
+    character_weapon_damage_checker = Character_weapon_damage_bonus_chain(None,None)
     character_attribute_checker.next_chain = character_skill_checker
     character_skill_checker.next_chain = character_item_drop_checker
     character_item_drop_checker.next_chain = character_product_drop_checker
@@ -146,7 +167,8 @@ def create_chain():
     character_exp_checker.next_chain = character_workpoints_checker
     character_workpoints_checker.next_chain = character_bonus_speed_checker
     character_bonus_speed_checker.next_chain = character_bonus_regen_checker
-    character_bonus_regen_checker.next_chain = None
+    character_bonus_regen_checker.next_chain = character_weapon_damage_checker
+    character_weapon_damage_checker.next_chain = None
     return character_attribute_checker
 
 

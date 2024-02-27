@@ -34,7 +34,7 @@ def null_simul_set_instance() -> Item_set_item_model:
                             speed = 0,
                             exp_bonus = 0
                             )
-def get_simul_set_instance(sets:Item_sets) -> Item_set:
+def get_simul_set_instance(sets:Item_sets) -> Item_set: # type: ignore
     for set_name,set in sets.set_list.items():
         yield Item_set(
             name = set.name,

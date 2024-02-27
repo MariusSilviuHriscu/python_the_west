@@ -285,6 +285,31 @@ class Produs(Item_model):
     @property
     def item_type(self):
         return "produs"
+
+class Weapon_damage_range:
+    def __init__(self, min_damage : int , max_damage : int):
+        self.min_damage = min_damage
+        self.max_damage = max_damage
+        self.__radd__ = self.__add__
+    def __str__(self):
+        
+        return f"{{ min_damage : {self.min_damage} , max_damage : {self.max_damage} }}"
+    def __add__(self,other : int | typing.Self) -> typing.Self:
+        if isinstance(other,Weapon_damage_range):
+            return Weapon_damage_range(
+                min_damage = self.min_damage + other.min_damage,
+                max_damage = self.max_damage + other.max_damage
+            )
+        elif isinstance(other , int):
+            return Weapon_damage_range(
+                min_damage = self.min_damage + other ,
+                max_damage = self.max_damage + other 
+            )
+        else :
+            raise TypeError('Inapropriate type of object added to Weapon_damage_range')
+    def average(self) -> int:
+        return int( (self.max_damage + self.min_damage) / 2 )
+    
 class Weapon(Item_model):
     def __init__(self, name: str, 
                  item_id: int,
@@ -322,6 +347,10 @@ class Weapon(Item_model):
                         sellable,
                         actionable,
                         upgradeable)
+        self.weapon_damage = Weapon_damage_range(
+            min_damage = 0,
+            max_damage = 0
+        )
     @property
     def item_type(self):
         return "weapon"

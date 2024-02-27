@@ -1,6 +1,6 @@
 from simul_bonus_item import Bonus_checker_complete
 from simul_sets import Item_set_item_model
-from simul_items import Animal,Belt,Clothes,Pants,Boots,Headgear,Weapon,Necklace,Fort_weapon,Produs,Item_update_table
+from simul_items import Animal,Belt,Clothes,Pants,Boots,Headgear,Weapon,Necklace,Fort_weapon,Produs,Item_update_table,Weapon_damage_range
 from simul_skills import Skills
 
 def create_null_skill():
@@ -13,9 +13,9 @@ class Item_builder():
                  'pants': Pants,
                  'foot': Boots,
                  'head': Headgear,
-                 'left_arm': Weapon,
+                 'left_arm': Fort_weapon,
                  'neck': Necklace,
-                 'right_arm': Fort_weapon,
+                 'right_arm': Weapon,
                  'yield': Produs,
                  'recipe': Produs,
                  'collection': Produs,
@@ -53,6 +53,14 @@ class Item_builder():
         self.item.name = self.item_specific_dict['name']
     def set_item_value(self):
         self.item.value = self.item_specific_dict['price']
+    def set_item_damage_range(self):
+        if isinstance(self.item,Weapon):
+            damage_dict = self.item_specific_dict.get('damage')
+            min_damage = damage_dict.get('damage_min')
+            max_damage = damage_dict.get('damage_max')
+            self.item.weapon_damage = Weapon_damage_range(min_damage=min_damage,
+                                                          max_damage = max_damage
+                                                          )
     def set_item_level(self):
         self.item.level = self.item_specific_dict['level']
     def set_item_set(self):
@@ -67,7 +75,7 @@ class Item_builder():
         else:
             return None
     def set_item_bonuses(self):
-        checker = Bonus_checker_complete(self.item,self.item_specific_dict['bonus'])
+        checker = Bonus_checker_complete(self.item , self.item_specific_dict['bonus'])
         checker.check_inbuilt_bonus()
         checker.check_item_bonus()
     def set_dropable(self):
@@ -82,6 +90,7 @@ class Item_builder():
         self.set_auctionable()
         self.set_item_bonuses()
         self.set_dropable()
+        self.set_item_damage_range()
         return self.item
 
 class Item_set_stage_builder():

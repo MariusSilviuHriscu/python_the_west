@@ -157,6 +157,9 @@ class Equipment_simul():
     @property
     def exp_bonus(self):
         return self.analysis_tool.exp_bonus
+    @property   
+    def weapon_damage(self):
+        return self.weapon.weapon_damage + self.damage
     def _swap_items(self,value1:Item,value2:Item) -> None:
         item_dict = {"weapon":self.weapon,
                      "headgear":self.headgear,
@@ -205,14 +208,15 @@ def create_simul_equipment_by_current_equipment(current_equipment : Equipment,
                                             list(current_equipment.__dict__.values())
                                             )
     
-    return Equipment_simul(weapon = filtered_item_list.get_model_by_id(current_equipment.left_arm_item_id) ,
+    return Equipment_simul(
+        weapon = filtered_item_list.get_model_by_id(current_equipment.right_arm_item_id) ,
         headgear = filtered_item_list.get_model_by_id(current_equipment.head_item_id) ,
         clothes = filtered_item_list.get_model_by_id(current_equipment.body_item_id) ,
         pants = filtered_item_list.get_model_by_id(current_equipment.pants_item_id) ,
         boots = filtered_item_list.get_model_by_id(current_equipment.foot_item_id) ,
         belt = filtered_item_list.get_model_by_id(current_equipment.belt_item_id) ,
         necklace = filtered_item_list.get_model_by_id(current_equipment.neck_item_id) ,
-        fort_weapon = filtered_item_list.get_model_by_id(current_equipment.right_arm_item_id) ,
+        fort_weapon = filtered_item_list.get_model_by_id(current_equipment.left_arm_item_id) ,
         animal = filtered_item_list.get_model_by_id(current_equipment.animal_item_id) ,
         produs = filtered_item_list.get_model_by_id(current_equipment.yield_item_id) ,
         item_set_list = Item_set_list(set_list = item_set_list) ,

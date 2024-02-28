@@ -143,7 +143,6 @@ class Character_weapon_damage_bonus_chain():
         if (self.bonus_dict.get('type','') == 'character' 
             and self.bonus_dict.get('bonus',{}).get('type','') == 'damage'
             and isinstance(self.item,Weapon)):
-            print(f'found_damage for item {self.item.item_id}')
             self.add_bonus_to_item(self.bonus_dict.get('bonus').get('value'))
         elif self.next_chain is not None:
             self.next_chain.item = self.item

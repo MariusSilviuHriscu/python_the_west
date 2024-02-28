@@ -24,6 +24,8 @@ class Equipment_analysis_tool():
             element  = indiv_item.item_set
             if element == "":
                 continue
+            if element is None:
+                continue
             if element in sets:
                 sets[element] += 1
             else:
@@ -160,7 +162,7 @@ class Equipment_simul():
     @property   
     def weapon_damage(self):
         return self.weapon.weapon_damage + self.damage
-    def _swap_items(self,value1:Item,value2:Item) -> None:
+    def get_by_key(self,key:str) -> Item_model:
         item_dict = {"weapon":self.weapon,
                      "headgear":self.headgear,
                      "clothes":self.clothes,
@@ -171,16 +173,37 @@ class Equipment_simul():
                      "fort_weapon":self.fort_weapon,
                      "animal":self.animal,
                      "produs":self.produs}
+        return item_dict[key]
+    def _swap_items(self,value1:Item,value2:Item) -> None:
+        
+        item_dict = {Weapon:'weapon',
+                     Headgear:'headgear',
+                     Clothes:'clothes',
+                     Pants:'pants',
+                     Boots:'boots',
+                     Belt:'belt',
+                     Necklace:'necklace',
+                     Fort_weapon:'fort_weapon',
+                     Animal:'animal',
+                     Produs:'produs'}
+        if value1 is None and value2 is None:
+            raise Exception('Changing none to none is nonsense! Abort')
+        
+        
+        
         if value1 is not None:
-            item_dict[value1.__class__.__name__] = value2
+            for item_type in item_dict:
+                if isinstance(value1,item_type):
+                    setattr(self, item_dict[item_type],value2)
         else:
-            item_dict[value2.__class__.__name__] = value2
+            for item_type in item_dict:
+                if isinstance(value2,item_type):
+                    setattr(self, item_dict[item_type],value2)
     def replace_item(self,replaced_item:Item = None, replacement_item:Item = None) -> None:
         if replaced_item is not None and replacement_item is not None and type(replacement_item) != type(replaced_item):
             raise ValueError("The equipment swap is not a valid one! ")
         
         self._swap_items(value1= replaced_item,value2= replacement_item)
-        
         self.analysis_tool = Equipment_analysis_tool(
                                                     player_level = self.player_level,
                                                     item_list = [self.weapon,
@@ -197,6 +220,18 @@ class Equipment_simul():
                                                     )
     def copy(self):
         return copy.deepcopy(self)
+    def pretty_print(self) -> str:
+        return " ".join((str(x.item_id) for x in 
+            [self.weapon,
+             self.headgear,
+             self.clothes,
+             self.pants,
+             self.boots,
+             self.belt,
+             self.necklace,
+             self.fort_weapon,
+             self.animal,
+             self.produs] if x is not None))
 def create_simul_equipment_by_current_equipment(current_equipment : Equipment,
                                                 player_level : int,
                                                 item_set_list : list[Item_set],

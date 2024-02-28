@@ -69,6 +69,9 @@ class Item_builder():
         self.item.sellable = self.item_specific_dict['sellable']
     def set_auctionable(self):
         self.item.auctionable = self.item_specific_dict['auctionable']
+    def set_is_mapdrop(self):
+        if 'spec_type' in self.item_specific_dict and self.item_specific_dict.get('spec_type') == 'mapdrop':
+            self.item.is_mapdrop = True
     def check_item_speed(self):
         if 'speed' in self.item_specific_dict:
             return self.item_specific_dict['speed']
@@ -90,6 +93,7 @@ class Item_builder():
         self.set_auctionable()
         self.set_item_bonuses()
         self.set_dropable()
+        self.set_is_mapdrop()
         self.set_item_damage_range()
         return self.item
 

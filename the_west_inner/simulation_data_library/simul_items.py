@@ -282,6 +282,7 @@ class Produs(Item_model):
                         sellable,
                         actionable,
                         upgradeable)
+        self.is_mapdrop = False
     @property
     def item_type(self):
         return "produs"
@@ -294,6 +295,9 @@ class Weapon_damage_range:
     def __str__(self):
         
         return f"{{ min_damage : {self.min_damage} , max_damage : {self.max_damage} }}"
+    
+    def __repr__(self) -> str:
+        return f"Weapon_damage_range( {self.__str__()} )"
     def __add__(self,other : int | typing.Self) -> typing.Self:
         if isinstance(other,Weapon_damage_range):
             return Weapon_damage_range(
@@ -686,7 +690,25 @@ class Item_model_list():
         return Item_model_list(
             item_model_list= [x for x in self.item_model_list if x.has_bonus( attribute_key= attribute_key) ]
         )
-    
+    def __len__(self):
+        return len(self.item_model_list)
+    def count_item_types(self) -> dict[str,int]:
+        item_count_dict = {}
+        for item_model in self.item_model_list:
+            item_type = item_model.item_type
+            if item_model.item_type in item_count_dict:
+                item_count_dict[item_type] += 1
+            else:
+                item_count_dict[item_type] = 1
+        return item_count_dict
+    def calc_permutations(self) -> int:
+        item_dict = self.count_item_types()
+        
+        return math.prod(item_dict.values())
+    def filter_by_player_level(self,player_level:int) -> typing.Self:
+        return Item_model_list(
+            item_model_list = [x for x in self.item_model_list if x.level <= player_level]
+        )
     def filter_by_set_keys(self,*sets:list[str]|str) -> typing.Self:
         return Item_model_list(
             item_model_list= [x for x in self.item_model_list if x in sets]
@@ -699,6 +721,10 @@ class Item_model_list():
         return Item_model_list(
             item_model_list = [x for x in self.item_model_list if x.item_id in sets]
         )
+    def filter_mapdrop_items(self) -> typing.Self:    
+        return Item_model_list(
+            item_model_list = [x for x in self.item_model_list if not (x.item_type == 'produs' and x.is_mapdrop) ]
+        ) 
     def get_model_by_id(self,item_id:int):
         if item_id is None:
             return None

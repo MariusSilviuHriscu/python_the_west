@@ -107,7 +107,7 @@ class Item_set_list():
         for item_set in self.set_list:
             if key == item_set.set_id:
                 return item_set
-        raise Exception("Could not find the desired set!")
+        raise Exception(f"Could not find the desired set! {key}")
     def filter_by_name(self,*key_list:str)-> typing.Self:
         set_list = []
         for key in key_list:

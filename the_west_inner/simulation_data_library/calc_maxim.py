@@ -49,6 +49,14 @@ class Equipment_permutation_generator():
                     )
         for v in values:
             yield dict(zip(keys, v))
+    def get_dict_permutations(self):
+        keys = list(
+                    self.equipment_dict.keys()
+                    )
+        values = [self.equipment_dict[key] for key in keys]
+        permutations = list(itertools.product(*values))
+        for perm in permutations:
+            yield {keys[i]: perm[i] for i in range(len(keys))}
 class Greedy_simulation_bonus_check():
     def __init__(self,equipment_reader:Equipment_simul,item_model_list:Item_model_list,set_model_list:Item_set_list):
         self.equipment_reader = equipment_reader
@@ -59,12 +67,13 @@ class Greedy_simulation_bonus_check():
         item_type_dict = self.item_model_list.get_item_dict()
         permutation_generator = Equipment_permutation_generator(equipment_dictionary = item_type_dict).get_dict_permutations()
         for equipment_permutation in permutation_generator:
-            for item_type,item_int in equipment_permutation.items():
+            for item_type,item in equipment_permutation.items():
+                
                 self.equipment_reader.replace_item(
-                                                    replaced_item =  getattr(self.equipment_reader,item_type),
-                                                    replacement_item = item_int
+                                                    replaced_item =  self.equipment_reader.get_by_key(key = item_type),
+                                                    replacement_item = item
                                                     )
-                yield self.equipment_permutation_generator.copy()
+            yield self.equipment_reader.copy()
     def maximul_equipment_value(self,value_key:str,minimum_value:typing.Any):
         maximum_value = minimum_value
         maximum_equipment = None

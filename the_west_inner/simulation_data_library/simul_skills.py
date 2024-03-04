@@ -1,6 +1,44 @@
 import math
 import typing
+from enum import Enum, auto
 
+class CharacterSkillsEnum(Enum):
+    # Attributes
+    STRENGTH = auto()
+    MOBILITY = auto()
+    DEXTERITY = auto()
+    CHARISMA = auto()
+
+    # Strength-based skills
+    BUILD = auto()
+    PUNCH = auto()
+    TOUGH = auto()
+    ENDURANCE = auto()
+    HEALTH = auto()
+
+    # Mobility-based skills
+    RIDE = auto()
+    REFLEX = auto()
+    DODGE = auto()
+    HIDE = auto()
+    SWIM = auto()
+
+    # Dexterity-based skills
+    AIM = auto()
+    SHOT = auto()
+    PITFALL = auto()
+    FINGER_DEXTERITY = auto()
+    REPAIR = auto()
+
+    # Charisma-based skills
+    LEADERSHIP = auto()
+    TACTIC = auto()
+    TRADE = auto()
+    ANIMAL = auto()
+    APPEARANCE = auto()
+
+    def __str__(self):
+        return self.name.lower()
 class Attributes():
     def __init__(self,strength:int,mobility:int,dexterity:int,charisma:int):
         self.strength = strength

@@ -72,6 +72,9 @@ class Item_builder():
     def set_is_mapdrop(self):
         if 'spec_type' in self.item_specific_dict and self.item_specific_dict.get('spec_type') == 'mapdrop':
             self.item.is_mapdrop = True
+    def set_is_usable(self):
+        if 'usetype' in self.item_specific_dict and self.item_specific_dict.get('usetype') == 'use':
+            self.item.is_usable = True
     def check_item_speed(self):
         if 'speed' in self.item_specific_dict:
             return self.item_specific_dict['speed']
@@ -94,6 +97,7 @@ class Item_builder():
         self.set_item_bonuses()
         self.set_dropable()
         self.set_is_mapdrop()
+        self.set_is_usable()
         self.set_item_damage_range()
         return self.item
 

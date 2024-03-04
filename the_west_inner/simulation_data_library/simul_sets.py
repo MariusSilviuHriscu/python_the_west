@@ -155,6 +155,12 @@ class Item_set_equipment_list():
     @property
     def exp_bonus(self):
         return self.get_bonus_by_name("exp_bonus")
+    @property
+    def status(self):
+        skills = Skills.null_skill()
+        for x in self.get_sets():
+            skills += x.item_skills
+        return skills
 
 def create_set_instance_list(item_set_list:list[Item_set],number_set_dict:dict[str:int],player_level:int) -> Item_set_equipment_list:
     item_set_list = Item_set_list(

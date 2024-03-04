@@ -283,6 +283,7 @@ class Produs(Item_model):
                         actionable,
                         upgradeable)
         self.is_mapdrop = False
+        self.is_usable = False
     @property
     def item_type(self):
         return "produs"
@@ -713,6 +714,14 @@ class Item_model_list():
         return Item_model_list(
             item_model_list= [x for x in self.item_model_list if x in sets]
         )
+    def filter_setless_items(self) -> typing.Self:
+        return Item_model_list(
+            item_model_list = [x for x in self.item_model_list if x.item_set != None]
+        )
+    def filter_out_usables(self) -> typing.Self:
+        return Item_model_list(
+            item_model_list= [x for x in self.item_model_list if not (x.item_type == 'produs' and x.is_usable)]
+        )
     def union(self,other:typing.Self) -> typing.Self:
         return Item_model_list(
             item_model_list= list(set(self.item_model_list + other.item_model_list))
@@ -797,6 +806,12 @@ class Item_list():
     @property
     def exp_bonus(self):
         return self.get_bonus_by_name("exp_bonus")
+    @property
+    def status(self):
+        skills = Skills.null_skill()
+        for x in self.get_items():
+            skills += x.item_skills
+        return skills
 
 def create_item_list_from_model(item_model_list : Item_model_list,player_level : int):
     items_dict = {x.item_id : {"item":Item( item_model = x , player_level = player_level),

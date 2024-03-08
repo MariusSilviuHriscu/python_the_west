@@ -39,6 +39,14 @@ class CharacterSkillsEnum(Enum):
 
     def __str__(self):
         return self.name.lower()
+    @classmethod
+    def get_all_skills(cls):
+        attributes = {'STRENGTH', 'MOBILITY', 'DEXTERITY', 'CHARISMA'}
+        return [skill.name.lower() for skill in cls if skill.name not in attributes]
+    @classmethod
+    def get_all_attributes(cls):
+        attributes = {'STRENGTH', 'MOBILITY', 'DEXTERITY', 'CHARISMA'}
+        return [attribute.name.lower() for attribute in cls if attribute.name in attributes]
 class Attributes():
     def __init__(self,strength:int,mobility:int,dexterity:int,charisma:int):
         self.strength = strength

@@ -3,7 +3,6 @@ import typing
 
 from simul_skills import Skills
 
-
 class Item_update_table():
     """A class to store the update information for an item.
 
@@ -812,6 +811,7 @@ class Item_list():
         for x in self.get_items():
             skills += x.item_skills
         return skills
+
 
 def create_item_list_from_model(item_model_list : Item_model_list,player_level : int):
     items_dict = {x.item_id : {"item":Item( item_model = x , player_level = player_level),

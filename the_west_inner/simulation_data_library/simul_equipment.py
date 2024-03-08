@@ -1,7 +1,23 @@
 import copy
 
 
-from simul_items import Item,Animal,Belt,Clothes,Pants,Boots,Headgear,Weapon,Necklace,Fort_weapon,Produs,Item_model,create_item_list_from_model,Item_model_list,create_item_list_from_model
+from simul_items import (Item,
+                         Animal,
+                         Belt,
+                         Clothes,
+                         Pants,
+                         Boots,
+                         Headgear,
+                         Weapon,
+                         Necklace,
+                         Fort_weapon,
+                         Produs,
+                         Item_model,
+                         create_item_list_from_model,
+                         Item_model_list,
+                         create_item_list_from_model,
+                         Weapon_damage_range
+                         )
 from simul_sets import Item_set,create_set_instance_list,Item_set_list
 from simul_skills import Skills
 from simul_work_relevant_bonuses import Work_bonuses
@@ -172,6 +188,10 @@ class Equipment_simul():
         return self.analysis_tool.exp_bonus
     @property   
     def weapon_damage(self):
+        if self.weapon is None:
+            return Weapon_damage_range(min_damage = 0,
+                                       max_damage = 0
+                                       )
         return self.weapon.weapon_damage + self.damage
     @property
     def status(self):
@@ -218,20 +238,6 @@ class Equipment_simul():
             raise ValueError("The equipment swap is not a valid one! ")
         
         self._swap_items(value1= replaced_item,value2= replacement_item)
-        #self.analysis_tool = Equipment_analysis_tool(
-        #                                            player_level = self.player_level,
-        #                                            item_list = [self.weapon,
-        #                                                              self.headgear,
-        #                                                              self.clothes,
-        #                                                              self.pants,
-        #                                                              self.boots,
-        #                                                              self.belt,
-        #                                                              self.necklace,
-        #                                                              self.fort_weapon,
-        #                                                              self.animal,
-        #                                                              self.produs] ,
-        #                                            item_set_list = self.item_set_list
-        #                                            )
         self.analysis_tool.update_item_list(new_item_list = [self.weapon,
                                                                       self.headgear,
                                                                       self.clothes,
@@ -256,6 +262,28 @@ class Equipment_simul():
              self.fort_weapon,
              self.animal,
              self.produs] if x is not None))
+    def empty(self):
+        self.weapon = None
+        self.headgear = None
+        self.clothes = None
+        self.pants = None
+        self.boots = None
+        self.belt = None
+        self.necklace = None
+        self.fort_weapon = None
+        self.animal = None
+        self.produs = None
+        self.analysis_tool.update_item_list(new_item_list = [self.weapon,
+                                                                      self.headgear,
+                                                                      self.clothes,
+                                                                      self.pants,
+                                                                      self.boots,
+                                                                      self.belt,
+                                                                      self.necklace,
+                                                                      self.fort_weapon,
+                                                                      self.animal,
+                                                                      self.produs])
+
     def create_status_dict(self) -> dict:
         return {
             'item_drop' : self.item_drop,

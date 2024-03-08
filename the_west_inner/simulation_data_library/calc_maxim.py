@@ -1,41 +1,17 @@
 import itertools
 import typing
 
+from the_west_inner.game_classes import Game_classes
+from the_west_inner.item_set_general import get_item_sets
 
-from the_west_inner.simulation_data_library.simul_items import Item_model_list,create_item_list_from_model,Weapon_damage_range
-from the_west_inner.simulation_data_library.simul_equipment import Equipment_simul,Equipment_analysis_tool
+from the_west_inner.simulation_data_library.simul_items import Item_model_list,create_item_list_from_model,Item_model
+from the_west_inner.simulation_data_library.simul_equipment import Equipment_simul
 from the_west_inner.simulation_data_library.simul_sets import Item_set_list
-from the_west_inner.simulation_data_library.load_items_script import get_simul_items
 from the_west_inner.simulation_data_library.simul_equip_fitnes import SimulFitnessRuleSet
-
-from the_west_inner.simulation_data_library.simul_skills import Skills
+from the_west_inner.simulation_data_library.load_items_script import get_simul_items,get_simul_sets
+from the_west_inner.simulation_data_library.simul_equipment import _game_data_to_current_equipment
 from the_west_inner.simulation_data_library.simul_permutation_data import EquipmentPermutationData
 
-from ..bag import Bag
-from ..items import Items
-from ..equipment import Equipment
-from ..item_set_general import Item_sets
-
-
-
-class Simulation_data_loader():
-    def __init__(self,bag:Bag,items:Items,sets:Item_sets,current_equipment:Equipment,player_level:int):
-        self.bag = bag
-        self.items = items
-        self.sets = sets
-        self.current_equipment = current_equipment
-        self.player_level = player_level
-    def assemble_item_list_from_game_data(self):
-        item_list = create_item_list_from_model(
-                                        item_model_list = get_simul_items(
-                                                                        bag = self.bag,
-                                                                        current_equipment = self.current_equipment,
-                                                                        items = self.items),
-                                        player_level= self.player_lever
-                                        )
-        return item_list
-    def assemble_item_sets_from_game_data(self):
-        pass
 
 class Equipment_permutation_generator():
     def __init__(self,equipment_dictionary: dict[str,int]) -> None:
@@ -83,7 +59,7 @@ class Brute_force_simulation_bonus_check():
                 **self.equipment_reader.create_status_dict(),
                    **{"permutation" : equipment_permutation})
 
-    def maximum_equipment_value(self,simul_rule_set : SimulFitnessRuleSet) -> EquipmentPermutationData|None :
+    def maximum_equipment_value_brute_force(self,simul_rule_set : SimulFitnessRuleSet) -> EquipmentPermutationData|None :
         
         maximum = simul_rule_set.generate_empty_result()
         result_permutation = None
@@ -98,20 +74,99 @@ class Brute_force_simulation_bonus_check():
                 result_permutation = equip_permutation_data
         
         return result_permutation
-
+    
+    def _get_max_item(self,simul_rule_set : SimulFitnessRuleSet ,item_list : list[Item_model]) -> Item_model:
+        
+        equipment = self.equipment_reader.copy()
+        maximum = simul_rule_set.generate_empty_result()
+        max_item = None
+        for item in item_list:
+            equipment.empty()
+            equipment.replace_item(replacement_item = item)
             
+            result = simul_rule_set.get_fitness_result(equipment_data = equipment)
+            if result >= maximum :
+                maximum = result
+                max_item = item
         
+        return max_item
+    
+    def maximum_equipment_greedy(self, simul_rule_set: SimulFitnessRuleSet) ->EquipmentPermutationData|None:
+        item_type_dict = self.item_model_list.get_item_dict()
         
+        target_equipment_list = {item_type : self._get_max_item(simul_rule_set=simul_rule_set,item_list=same_item_list)
+                                        for item_type,same_item_list in item_type_dict.items()
+        }
+        self.equipment_reader.empty()
+        for equipment_item in target_equipment_list.values():
+            if equipment_item is not None:
+                self.equipment_reader.replace_item(replacement_item = equipment_item)
+        return EquipmentPermutationData(
+                **self.equipment_reader.create_status_dict(),
+                   **{"permutation" : target_equipment_list})
         
 class Item_cycle_simulation():
     def __init__(self,equipment_reader:Equipment_simul,item_model_list:Item_model_list,set_model_list:Item_set_list):
         self.equipment_reader = equipment_reader
         self.item_model_list = item_model_list
         self.set_model_list = set_model_list
-    def greedy(self,check_for_bonus:str) -> Brute_force_simulation_bonus_check:
-        target_set_keys_list : list = self.set_model_list.filter_by_bonus(attribute_key = check_for_bonus).return_set_key_list()
+    def sort_items(self,player_level : int) -> Item_model_list:
+        return self.item_model_list.filter_mapdrop_items(
+                        ).filter_out_usables(
+                        ).filter_by_player_level(
+                            player_level = player_level
+                            )
+    def brute_force(self , simul_rule_set: SimulFitnessRuleSet,player_level : int) -> EquipmentPermutationData:
+        
         return Brute_force_simulation_bonus_check(
-                                            equipment_reader = self.equipment_reader,
-                                            item_model_list = self.item_model_list.filter_by_item_id_list(sets = target_set_keys_list),
-                                            set_model_list = self.set_model_list
-                                            )
+            equipment_reader= self.equipment_reader,
+            item_model_list = self.sort_items(player_level=player_level),
+            set_model_list= self.set_model_list
+        ).maximum_equipment_value_brute_force(simul_rule_set=simul_rule_set)
+    
+    def greedy_sort(self, simul_rule_set : SimulFitnessRuleSet , player_level : int) -> EquipmentPermutationData:
+        
+        return Brute_force_simulation_bonus_check(
+            equipment_reader = self.equipment_reader,
+            item_model_list = self.sort_items(player_level=player_level)
+        ).maximum_equipment_greedy(simul_rule_set=simul_rule_set)
+
+
+class Simulation_data_loader():
+    def __init__(self,game_data: Game_classes):
+        
+        self.game_data = game_data
+
+    def assemble_item_list_from_game_data(self):
+        current_equipment = self.game_data.equipment_manager.current_equipment
+        item_list = create_item_list_from_model(
+                                        item_model_list = get_simul_items(
+                                                                        bag = self.game_data.bag,
+                                                                        current_equipment = current_equipment,
+                                                                        items = self.game_data.items),
+                                        player_level= self.game_data.player_data.level
+                                        )
+        return item_list
+
+    def assemble_item_model_list_from_game_data(self) -> Item_model_list:
+        current_equipment = self.game_data.equipment_manager.current_equipment
+        list_of_item_models = get_simul_items(
+                                        bag = self.game_data.bag,
+                                        current_equipment = current_equipment,
+                                        items = self.game_data.items
+                                        )
+        return Item_model_list(item_model_list = list_of_item_models)
+    
+    def _request_set_data(self):
+        
+        return get_item_sets(requests_handler = self.game_data.handler)
+    
+    def assemble_item_set_model_list_from_game_data(self) -> Item_set_list:
+        
+        sets = get_simul_sets(
+                        sets= self._request_set_data()
+                        )
+        return Item_set_list(sets)
+    def assemble_simul_equipment_from_game_data(self) -> Equipment_simul:
+        
+        return _game_data_to_current_equipment(game_data=self.game_data)

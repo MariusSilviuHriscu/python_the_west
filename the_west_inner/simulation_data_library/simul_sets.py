@@ -73,7 +73,7 @@ class Item_set():
         if type(number) == int:
             number = str(number)
         return self.bonuses_dict_by_number[number]
-    def yield_bonuses(self,number:int|str) -> Item_set_item:
+    def yield_bonuses(self,number:int|str) -> typing.Generator[Item_set_item,None,None]:
         if type(number) == int:
             number = str(number)
         for set_number,bonus in self.bonuses_dict_by_number.items():

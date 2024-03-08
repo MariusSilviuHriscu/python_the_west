@@ -37,7 +37,7 @@ def make_check_health_funct(health_percentage: float, game_classes: Game_classes
 
     return check_health
 
-def make_check_inventory_item_func(item_id: int, item_number: int, game_classes: Game_classes):
+def make_check_inventory_item_func(item_id: int, item_number: int, game_classes: Game_classes)-> typing.Callable[[], bool]:
     """
     Creates a callable function to check if the player's inventory has a certain number of a specific item.
 

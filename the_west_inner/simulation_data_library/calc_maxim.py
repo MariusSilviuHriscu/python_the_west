@@ -128,7 +128,8 @@ class Item_cycle_simulation():
         
         return Brute_force_simulation_bonus_check(
             equipment_reader = self.equipment_reader,
-            item_model_list = self.sort_items(player_level=player_level)
+            item_model_list = self.sort_items(player_level=player_level),
+            set_model_list = self.set_model_list
         ).maximum_equipment_greedy(simul_rule_set=simul_rule_set)
 
 

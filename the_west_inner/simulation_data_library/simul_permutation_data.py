@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from the_west_inner.requests_handler import requests_handler
 from the_west_inner.equipment import Equipment,Equipment_manager
 
 from the_west_inner.simulation_data_library.simul_items import Weapon_damage_range
@@ -18,17 +19,19 @@ class EquipmentPermutationData:
     permutation : dict
     
     
-    def equip(self):
-        
+    def equip(self,handler:requests_handler , equipment_manager : Equipment_manager):
+        get_id = lambda x , y : x.get(y,None).item_id if x.get(y,None) else None
         equipment = Equipment(
-            head_item_id = 0,
-            neck_item_id= 0,
-            left_arm_item_id= 0,
-            body_item_id= 0 ,
-            right_arm_item_id= 0,
-            foot_item_id=0,
-            animal_item_id=0,
-            belt_item_id=0,
-            pants_item_id=0,
-            yield_item_id=0
+            head_item_id = get_id(self.permutation,'headgear'),
+            neck_item_id= get_id(self.permutation,'necklace'),
+            left_arm_item_id= get_id(self.permutation,'fort_weapon'),
+            body_item_id= get_id(self.permutation,'clothes' ),
+            right_arm_item_id= get_id(self.permutation,'weapon'),
+            foot_item_id=get_id(self.permutation,'boots'),
+            animal_item_id=get_id(self.permutation,'animal'),
+            belt_item_id=get_id(self.permutation,'belt'),
+            pants_item_id=get_id(self.permutation,'pants'),
+            yield_item_id=get_id(self.permutation,'produs')
         )
+        print(equipment)
+        equipment_manager.equip_equipment(equipment = equipment , handler = handler)

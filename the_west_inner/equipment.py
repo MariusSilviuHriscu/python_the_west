@@ -68,7 +68,7 @@ class Equipment_manager():
         )
         
         if response['error'] :
-            raise Exception(f"Error when trying to equip something : {response['error']}")
+            raise Exception(f"Error when trying to equip id_{item_id} : {response['error']}")
         
         return response
     def equipment_change_skill_update(self,skill_change:dict)->None:

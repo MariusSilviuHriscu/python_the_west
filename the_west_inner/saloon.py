@@ -127,6 +127,8 @@ class Quest_list():
     def __contains__(self , quest_id:int) -> bool:
         
         return quest_id in self.quest_dict
+    def __iter__(self) :
+        return iter(self.quest_list)
 
     
 class Quest_employer():

@@ -75,6 +75,12 @@ class MapJobLocationData:
                 raise ValueError("Silver job loaction couldn't be found !")
             
             job.set_to_silver()
+        
+        self._loaded_silver_jobs = True
+    
+    @property
+    def loaded_silver_job(self) -> bool:
+        return self._loaded_silver_jobs
                     
         
     def get_closest_job(self ,job_id : id , player_data : Player_data) -> Map_job_location:
@@ -220,33 +226,18 @@ def assemble_map_town_list_from_request_data(town_dict:dict) -> Town_list:
     return Town_list(town_list=town_list)
     
 class Map():
-    def __init__(self,handler : requests_handler):
-        self.handler = handler
-        minimap = self._init_map()
-        self.towns = minimap['towns']
-        self.towns = assemble_map_town_list_from_request_data(town_dict= minimap['towns'])
-        self.counties = assemble_map_county_list_from_request_data(minimap['counties'])
-        self.fair = minimap['fair']
-        self.job_groups = minimap['job_groups']
-    def _init_map(self) -> dict:
-        response = self.handler.post(window = "map",
-                                     action_name="ajax",
-                                     action = "get_minimap")
-        if response['error'] == True :
-            raise Exception("Invalid minimap response")
-        return response
-    def get_map_job_location_list(self , work_list : Work_list) -> list[Map_job_location]:
-        
-        return create_map_job_location_list(
-            work_list = work_list,
-            job_group_locations = self.job_groups
-        )
-
-class Map():
     def __init__(self ,
                  minimap_data : dict,
                  towns : Town_list,
-                 counties : Map_county_list
+                 counties : Map_county_list,
+                 fair : dict ,
+                 job_location_data : MapJobLocationData):
+        
+        self.minimap_data = minimap_data
+        self.towns = towns
+        self.counties = counties
+        self.fair = fair
+        self.job_location_data = job_location_data
 
 class MapLoader:
     
@@ -308,4 +299,12 @@ class MapLoader:
         counties = self._build_counties(minimap = minimap_data)
         fairs = self._build_fairs(minimap = minimap_data)
         job_groups = self._build_map_job_location_data(minimap = minimap_data , load_silver_jobs = load_silver_jobs)
+        
+        return Map(
+            minimap_data = minimap_data,
+            towns = towns,
+            counties = counties,
+            fair = fairs,
+            job_location_data=job_groups
+        )
         

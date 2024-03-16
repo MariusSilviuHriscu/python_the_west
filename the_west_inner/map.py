@@ -12,11 +12,13 @@ Functions:
     create_job_group_jobs_dict: Takes a Work_list object and returns a dictionary with job group IDs as keys and lists of job IDs as values.
     create_map_job_location_list: Takes a Work_list object and a dictionary of job group locations, and returns a list of Map_job_location objects.
 """
-
+import random
 import typing
 from requests_handler import requests_handler
 from work_list import Work_list
 from towns import Town_list,Town
+from player_data import Player_data
+from gold_finder import parse_map_tw_gold
 
 class Map_job_location():
     def __init__(self,job_group_id:int,job_id:int,job_x:int,job_y:int,is_silver:bool) -> None:
@@ -25,7 +27,7 @@ class Map_job_location():
         self.job_x = job_x
         self.job_y = job_y
         self.is_silver = is_silver
-    def is_silver(self)-> bool:
+    def job_is_silver(self)-> bool:
         return self.is_silver
     def set_to_silver(self)-> None:
         self.is_silver = True
@@ -33,6 +35,73 @@ class Map_job_location():
         return f"job_group_id:{self.job_group_id},job_id:{self.job_id},job_x:{self.job_x},job_y:{self.job_y},is_silver:{self.is_silver}"
     def __repr__(self) -> str:
         return f"job_group_id:{self.job_group_id},job_id:{self.job_id},job_x:{self.job_x},job_y:{self.job_y},is_silver:{self.is_silver}"
+
+    def __hash__(self) -> int:
+        
+        return hash(
+            (self.job_id,
+             self.job_x,
+             self.job_y)
+        )
+
+MapJobLocationDictType = dict[
+    tuple[int,int,int] | Map_job_location , Map_job_location   
+]
+
+class MapJobLocationData:
+    def __init__(self , map_job_location_list : list[Map_job_location]):
+        
+        self.map_job_location_dict : MapJobLocationDictType  = {x : x for x in map_job_location_list}
+        
+        self._loaded_silver_jobs = any([x.is_silver for x in map_job_location_list])
+    
+    def complete_silver_jobs(self, handler: requests_handler ) -> None:
+        
+        silver_jobs = parse_map_tw_gold(handler = handler)
+        
+        for silver_job in silver_jobs:
+            
+            if not silver_job.get('silver'):
+                continue
+            id_location_tuple = (
+                silver_job['job_id'],
+                silver_job['x'],
+                silver_job['y']
+            )
+            
+            job = self.map_job_location_dict.get(id_location_tuple , None)
+            
+            if job is None:
+                raise ValueError("Silver job loaction couldn't be found !")
+            
+            job.set_to_silver()
+                    
+        
+    def get_closest_job(self ,job_id : id , player_data : Player_data) -> Map_job_location:
+        
+        minimum_job = None
+        min_distance = None
+        
+        job_list = [x for x in self.map_job_location_dict.values() if x.job_id == job_id]
+        
+        for job in job_list :
+            
+            distance = player_data.absolute_distance_to(final_position= (job.job_x, job.y)
+                                                        )
+            
+            if min_distance is None or distance < min_distance :
+                
+                min_distance = distance
+                minimum_job = job
+        
+        return minimum_job
+    
+    def get_random_job(self,job_id : int) -> Map_job_location:
+        
+        return random.choice(
+            [x for x in self.map_job_location_dict.values() if x.job_id == job_id]
+        )
+
 def create_job_group_jobs_dict(work_list:Work_list)-> dict:
     '''
     This looks at all the jobs in the work list and creates a dictionary where the key is the job_group_id and the value is a list of all the jobs in that group
@@ -166,3 +235,77 @@ class Map():
         if response['error'] == True :
             raise Exception("Invalid minimap response")
         return response
+    def get_map_job_location_list(self , work_list : Work_list) -> list[Map_job_location]:
+        
+        return create_map_job_location_list(
+            work_list = work_list,
+            job_group_locations = self.job_groups
+        )
+
+class Map():
+    def __init__(self ,
+                 minimap_data : dict,
+                 towns : Town_list,
+                 counties : Map_county_list
+
+class MapLoader:
+    
+    def __init__(self ,
+                 handler: requests_handler ,
+                 player_data : Player_data ,
+                 work_list : Work_list):
+        self.handler = handler
+        self.player_data = player_data
+        self.work_list = work_list
+        
+    def _init_map(self) -> dict:
+        response = self.handler.post(window = "map",
+                                     action_name="ajax",
+                                     action = "get_minimap")
+        if response['error'] == True :
+            raise Exception("Invalid minimap response")
+        return response
+    
+    def _build_towns(self, minimap : dict) -> Town_list:
+        
+        return assemble_map_town_list_from_request_data(town_dict= minimap['towns'])
+    
+    def _build_counties(self, minimap : dict) -> Map_county_list:
+        
+        return assemble_map_county_list_from_request_data(minimap['counties'])
+    
+    def _build_fairs(self, minimap : dict) -> dict:
+    
+        return minimap['fair']
+    def _build_job_groups(self,minimap : dict) -> dict:
+        
+        return minimap['job_groups']
+    
+    def _build_map_job_location_list(self,minimap : dict) -> list[Map_job_location]:
+        
+        
+        
+        return create_map_job_location_list(
+            work_list = self.work_list,
+            job_group_locations = self._build_job_groups(minimap = minimap)
+        )
+    
+    def _build_map_job_location_data(self , minimap : dict , load_silver_jobs : bool) -> MapJobLocationData:
+        
+        map_job_location_data = MapJobLocationData(
+            map_job_location_list = self._build_map_job_location_list(minimap = minimap )
+        )
+        
+        if load_silver_jobs :
+            map_job_location_data.complete_silver_jobs(handler=self.handler)
+        
+        return map_job_location_data
+    
+    def build(self, load_silver_jobs : bool = False) -> Map:
+        
+        minimap_data = self._init_map()
+        towns = self._build_towns(minimap = minimap_data)
+        counties = self._build_counties(minimap = minimap_data)
+        fairs = self._build_fairs(minimap = minimap_data)
+        job_groups = self._build_map_job_location_data(minimap = minimap_data , load_silver_jobs = load_silver_jobs)
+        

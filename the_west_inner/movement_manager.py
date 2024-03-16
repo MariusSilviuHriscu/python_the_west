@@ -6,8 +6,6 @@ from work_manager import Work_manager
 from misc_scripts import wait_until_date
 from requests_handler import requests_handler
 from player_data import Player_data
-from map import Map
-
 
 class MovementManager:
     
@@ -22,7 +20,6 @@ class MovementManager:
         self.task_queue = task_queue
         self.work_manager = work_manager
         self.player_data = player_data
-        self.map : Map = Map(handler = self.handler)
     def check_location(self,target_x : int , target_y : int) -> bool:
         return self.player_data.x == target_x and self.player_data.y == target_y
     def move_to_town(self,town:int|Town):
@@ -52,4 +49,3 @@ class MovementManager:
         else:
             raise Exception('Invalid type of input')
         return self.player_data.absolute_distance_to(final_position=coordinates)
-            

@@ -51,7 +51,7 @@ MapJobLocationDictType = dict[
 class MapJobLocationData:
     def __init__(self , map_job_location_list : list[Map_job_location]):
         
-        self.map_job_location_dict : MapJobLocationDictType  = {x : x for x in map_job_location_list}
+        self.map_job_location_dict : MapJobLocationDictType  = {(x.job_id,x.job_x,x.job_y) : x for x in map_job_location_list}
         
         self._loaded_silver_jobs = any([x.is_silver for x in map_job_location_list])
     
@@ -92,7 +92,7 @@ class MapJobLocationData:
         
         for job in job_list :
             
-            distance = player_data.absolute_distance_to(final_position= (job.job_x, job.y)
+            distance = player_data.absolute_distance_to(final_position= (job.job_x, job.job_y)
                                                         )
             
             if min_distance is None or distance < min_distance :
@@ -107,6 +107,7 @@ class MapJobLocationData:
         return random.choice(
             [x for x in self.map_job_location_dict.values() if x.job_id == job_id]
         )
+
 
 def create_job_group_jobs_dict(work_list:Work_list)-> dict:
     '''
@@ -238,6 +239,14 @@ class Map():
         self.counties = counties
         self.fair = fair
         self.job_location_data = job_location_data
+    def load_silver_jobs(self , handler: requests_handler) -> None:
+        
+        if not self.job_location_data.loaded_silver_job:
+            self.job_location_data.complete_silver_jobs(handler=handler)
+    
+    def get_closest_job(self,job_id:int,player_data:Player_data):
+        
+        return self.job_location_data.get_closest_job(job_id = job_id , player_data = player_data)
 
 class MapLoader:
     

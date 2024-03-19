@@ -142,7 +142,7 @@ class FrequencyDamageValidationRule():
                                    y = work_map_obj.job_y
                                    )
         
-        return work_data.job_data_damage().damage_probability  < self.max_allowed_damage_frequency
+        return work_data.job_data_damage().damage_probability / 100  < self.max_allowed_damage_frequency
         
 class ExpDamageRule():
     

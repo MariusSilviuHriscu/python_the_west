@@ -1,9 +1,5 @@
-import typing
-from dataclasses import dataclass
 
 from requests_handler import requests_handler
-from player_data import Player_data
-from work_job_data import WorkData,WorkJobData
     
 class Work_list():
     """A class for managing a list of work items.
@@ -71,33 +67,3 @@ class Work_list():
 
         # Return a dictionary mapping each work item's ID to its motivation level.
         return {x: int(float(motivation_dict[x]['motivation']) * 100) for x in motivation_dict}
-    def _load_work_data(self , work_data : dict) -> WorkData:
-        return WorkData(
-            cost = work_data.get('cost'),
-            money = work_data.get('money'),
-            xp = work_data.get('xp'),
-            luck = work_data.get('luck'),
-            duration = work_data.get('duration'),
-            product_id_list = [x.get('itemid',None) for x in work_data.get('items') if x.get('itemid',None) is not None]
-        )
-    def _load_work_info(self , job_id:int|str , job_dict: dict) -> WorkJobData:
-        work_time_info = job_dict.get('durations')
-        return WorkJobData(
-            work_id = int(job_id),
-            skill_points_required = job_dict.get('jobSkillPoints'),
-            work_points = job_dict.get('workpoints'),
-            motivation = job_dict.get('motivation'),
-            item_drop_interval = (job_dict.get('minMaxItemVal')[0] , job_dict.get('minMaxItemVal')[1]),
-            stage = job_dict.get('stage').get('stage'),
-            malus= job_dict.get('stage').get('malus'),
-            timed_work_data = {x.get('duration') : self._load_work_data(work_data = x) 
-                                                    for x in work_time_info}
-        )
-        
-    def get_work_info(self,handler:requests_handler) -> list[WorkJobData]:
-        
-        response = handler.post(window="work", action="index", action_name="mode")['jobs']
-        
-        return [self._load_work_info(job_id = job_id,
-                                     job_dict = job_dict
-                                     ) for job_id,job_dict in response.items()]

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from requests_handler import requests_handler
 from player_data import Player_data
-from map import Map, MapLoader
+from map import Map
 
 @dataclass
 class WorkData:

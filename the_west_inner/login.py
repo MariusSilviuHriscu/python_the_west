@@ -6,7 +6,7 @@ import typing
 from game_classes import Game_classes
 from requests_handler import requests_handler
 from movement import Game_data
-from player_data import Player_data
+from player_data import Player_data,ExpData
 from init_data import (return_h,
                        return_premium_data,
                        return_bag,
@@ -52,7 +52,8 @@ def game_classes_builder(active_world_url : str, game_requests_session: requests
                     energy=0,
                     energy_max=0,
                     level=0,
-                    experience=0
+                    experience=0,
+                    exp_data = ExpData(0,0,0)
                     )
 
         # Update the character_movement attribute of the Player_data object using the "handler" object

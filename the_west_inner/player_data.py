@@ -21,6 +21,14 @@ from movement import character_movement,Game_data
 import typing
 
 @dataclass
+class ExpData:
+    experience : int
+    curent_level_exp : int
+    level_exp_requirement : int
+    
+    def required_exp(self) -> int:
+        return self.level_exp_requirement - self.curent_level_exp
+@dataclass
 class Player_data:
     """
     A class representing the data for a player in a game.
@@ -37,6 +45,7 @@ class Player_data:
     energy_max: int
     level: int
     experience: int
+    exp_data : ExpData
     profession_id: int = -1
     profession: str = "None"
     town_id : int|None = None
@@ -87,7 +96,16 @@ class Player_data:
         self.energy_max = response["energyMax"]
         self.level = response["level"]
         self.experience = response["exp"]
-    
+
+        exp_current_level = response['expThis']
+        exp_next_level = response['expNext']
+        
+        self.exp_data = ExpData(
+            experience = self.experience,
+            curent_level_exp = self.experience - exp_current_level,
+            level_exp_requirement = exp_next_level - exp_current_level
+        )
+        
     def update_crafting(self, handler: requests_handler):
         """
         Updates the character's profession based on the player's ID and name.
@@ -95,7 +113,7 @@ class Player_data:
         Args:
             handler: An instance of the requests_handler class used to make requests to the game API.
         """
-        profile_search_response = handler.post("profile", "init", payload={"playerId": f"{self.id}", "name": f"{self.name}"}, use_h=False, action_name="mode")
+        profile_search_response = handler.post("profile", "init", payload={"playerId": f"{id}", "name": f"{self.name}"}, use_h=False, action_name="mode")
         
         if profile_search_response["profession"] is not None:
             self.profession_id = profile_search_response["profession"]["id"]
@@ -143,3 +161,7 @@ class Player_data:
             value: The new value for the character's energy.
         """
         self.energy = value
+    @property
+    def required_exp(self) -> int:
+        
+        return self.exp_data.required_exp()

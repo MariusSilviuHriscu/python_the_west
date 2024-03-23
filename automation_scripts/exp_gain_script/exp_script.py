@@ -71,17 +71,51 @@ class ExpScriptActionList:
     def calc_worktime(self) -> int:
         
         return sum([x.calc_worktime() for x in self.exp_action_list])
-
+    
+    def copy(self) -> typing.Self:
+        
+        return ExpScriptActionList(
+            exp_action_list = [ ExpScriptAction(action_number = x.action_number,
+                                                duration = x.duration,
+                                                job_data = x.job_data
+                                                ) 
+                                                for x in self.exp_action_list]
+        )
+    
+    def pop_last_action_number(self):
+        if self.exp_action_list:
+            last_action = self.exp_action_list[-1]
+            last_action.action_number -= 1
+            if last_action.action_number == 0:
+                self.exp_action_list.pop()
+                print(self.exp_action_list[-1])
+    
+    def filter_to_exp_target(self, exp_target : int) -> None:
+        if self.calc_exp() < exp_target or len(self.exp_action_list) == 0:
+            return 
+        practice_action_list = self.copy()
+        
+        practice_action_list.pop_last_action_number()
+        
+        while exp_target < practice_action_list.calc_exp() and len(self.exp_action_list) != 0:
+            
+            self.pop_last_action_number()
+            
+            practice_action_list.pop_last_action_number()
+        
+            
+    
 class ExpScriptJobSelector():
     def __init__(self,
                  duration : int,
                  work_data_list : list[WorkJobData],
+                 player_data : Player_data
                  ):
         
         
         self.duration = duration
         self.work_data_list = work_data_list
-    
+        self.player_data = player_data
     def get_possible_action_list(self , work_job_data : list[WorkJobData] , duration : int) -> ExpScriptActionList:
         
         job_target_data = ExpScriptActionList()

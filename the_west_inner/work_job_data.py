@@ -236,7 +236,6 @@ class WorkDataLoader():
     def get_work_info(self) -> list[WorkJobData]:
         
         response = self.handler.post(window="work", action="index", action_name="mode")['jobs']
-        
         return [self._load_work_info(job_id = job_id,
                                      job_dict = job_dict
                                      ) for job_id,job_dict in response.items()]

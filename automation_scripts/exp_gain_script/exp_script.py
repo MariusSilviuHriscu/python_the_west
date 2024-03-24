@@ -239,7 +239,9 @@ class ExpScript:
                 number_of_actions = action.action_number,
                 game_classes = self.game_classes
             ).execute()
-    
+
+        self.game_classes.work_manager.wait_until_free_queue()
+        
     def cycle_exp(self) :
         
         if self.game_classes.player_data.energy == 0:

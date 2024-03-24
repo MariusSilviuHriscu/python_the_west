@@ -1,7 +1,11 @@
 import typing
 
+from the_west_inner.game_classes import Game_classes
 from the_west_inner.player_data import Player_data
-from the_west_inner.equipment import Equipment_manager,Equipment
+from the_west_inner.equipment import Equipment_manager
+from the_west_inner.work_manager import Work_manager
+from the_west_inner.work import Work
+from the_west_inner.map import Map
 
 from the_west_inner.work_job_data import (WorkDataLoader,
                                           WorkJobDataManager,
@@ -11,6 +15,7 @@ from the_west_inner.work_job_data import (WorkDataLoader,
                                           WorkData
                                           )
 
+from automation_scripts.work_cycle import Script_work_task
 
 class ExpScriptJobDataManager:
     
@@ -55,6 +60,12 @@ class ExpScriptAction:
         
         return self.duration * self.action_number
 
+    def __str__(self) -> str:
+        return f'ExpScriptAction(action_number={self.action_number},duration={self.duration},job_data={self.job_data})'
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+    
 class ExpScriptActionList:
     def __init__(self , exp_action_list : list[ExpScriptAction]|None = None):
         self.exp_action_list = exp_action_list
@@ -82,13 +93,16 @@ class ExpScriptActionList:
                                                 for x in self.exp_action_list]
         )
     
+    def __iter__(self) -> typing.Iterator[ExpScriptAction]:
+        
+        return iter(self.exp_action_list)
+    
     def pop_last_action_number(self):
         if self.exp_action_list:
             last_action = self.exp_action_list[-1]
             last_action.action_number -= 1
             if last_action.action_number == 0:
                 self.exp_action_list.pop()
-                print(self.exp_action_list[-1])
     
     def filter_to_exp_target(self, exp_target : int) -> None:
         if self.calc_exp() < exp_target or len(self.exp_action_list) == 0:
@@ -102,19 +116,23 @@ class ExpScriptActionList:
             self.pop_last_action_number()
             
             practice_action_list.pop_last_action_number()
+
+    def __len__(self) -> int:
+        return sum([x.action_number for x in self.exp_action_list])
+    
+    def __str__(self) -> str:
         
+        return f'{self.exp_action_list}'
             
     
 class ExpScriptJobSelector():
     def __init__(self,
                  duration : int,
-                 work_data_list : list[WorkJobData],
                  player_data : Player_data
                  ):
         
         
         self.duration = duration
-        self.work_data_list = work_data_list
         self.player_data = player_data
     def get_possible_action_list(self , work_job_data : list[WorkJobData] , duration : int) -> ExpScriptActionList:
         
@@ -130,7 +148,7 @@ class ExpScriptJobSelector():
             
             
             script_action = ExpScriptAction(
-                action_number = min(possible_actions , actions),
+                action_number = int(min(possible_actions , actions)),
                 duration = duration,
                 job_data = job
             )
@@ -144,9 +162,9 @@ class ExpScriptJobSelector():
                 return job_target_data
         return job_target_data
     
-    def target_simulate(self, exp_target : int) -> ExpScriptActionList:
+    def target_simulate(self,work_data_list : list[WorkJobData] , exp_target : int) -> ExpScriptActionList:
         
-        work_list = self.work_data_list.copy()
+        work_list = work_data_list.copy()
         work_list.reverse()
         
         while len(work_list) != 0:
@@ -165,17 +183,79 @@ class ExpScriptJobSelector():
 class ExpScript:
     
     def __init__(self,
-                 player_data : Player_data,
-                 equipment_manager : Equipment_manager,
-                 script_job_manager : ExpScriptJobDataManager):
-        self.player_data = player_data
-        self.equipment_manager = equipment_manager
+                 game_classes : Game_classes ,
+                 script_job_manager : ExpScriptJobDataManager,
+                 script_selector : ExpScriptJobSelector,
+                 map : Map
+                 ):
+        self.game_classes = game_classes
         self.script_job_manager = script_job_manager
+        self.script_selector = script_selector
+        self.map = map
     
     def _get_job_data_list(self) -> list[WorkJobData]:
         
         return self.script_job_manager.get_filtered_job_data()
     
     def target_exp(self) -> int:
-        return self.player_data.required_exp
+        return self.game_classes.player_data.required_exp
     
+    def get_script_actions(self) -> ExpScriptActionList:
+        print('Started analysing the job offers')
+        actions = self.script_selector.target_simulate(
+            work_data_list = self._get_job_data_list(),
+            exp_target = self.target_exp()
+        )
+        print('Filtering...')
+        actions.filter_to_exp_target(exp_target = self.game_classes.player_data.required_exp)
+        
+        print(f'Finished. Result is {actions} with a total exp gain of {actions.calc_exp()} . Required {self.game_classes.player_data.required_exp}')
+        return actions
+    
+    def get_work(self, script_action : ExpScriptAction) -> Work:
+        
+        job_id = script_action.job_data.work_id
+        
+        location = self.map.get_closest_job(job_id = job_id,player_data= self.game_classes.player_data)
+        
+        work = Work(
+            job_id = script_action.job_data.work_id,
+            x = location.job_x,
+            y = location.job_y,
+            duration = script_action.duration
+        )
+        
+        return work
+        
+    
+    def _work_jobs(self , script_action_list : ExpScriptActionList) -> None:
+        
+        
+        for action in script_action_list:
+            
+            Script_work_task(
+                work_manager = self.game_classes.work_manager,
+                work_data = self.get_work(script_action = action),
+                number_of_actions = action.action_number,
+                game_classes = self.game_classes
+            ).execute()
+    
+    def cycle_exp(self) :
+        
+        if self.game_classes.player_data.energy == 0:
+            
+            return
+        
+        actions = self.get_script_actions()
+        print(f'{len(actions)}')
+        while len(actions) != 0 :
+            
+            level = self.game_classes.player_data.level
+            
+            print(f'Started work , current level is {level}')
+            self._work_jobs(script_action_list = actions)
+            
+            self.game_classes.player_data.update_character_variables(handler=self.game_classes.handler)
+            print(f'finished working the level is now : {self.game_classes.player_data.level}')
+            
+            actions = self.get_script_actions()

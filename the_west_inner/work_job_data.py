@@ -46,7 +46,13 @@ class WorkJobData:
 
         self._job_data_damage = None
         self._job_data = None
-        
+    
+    def __str__(self) -> str:
+        return f'WorkJobData(work_id = {self.work_id})'
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+    
     def _load_job_data(self , handler : requests_handler , x : int, y : int) -> None :
         
         payload = {

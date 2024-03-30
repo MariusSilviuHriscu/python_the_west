@@ -230,7 +230,7 @@ class ExpScript:
     
     def _work_jobs(self , 
                    script_action_list : ExpScriptActionList ,
-                   callback_functions : typing.Callable ,
+                   callback_function : typing.Callable ,
                    *args ,
                    **kwargs) -> None:
         
@@ -242,14 +242,14 @@ class ExpScript:
                 work_data = self.get_work(script_action = action),
                 number_of_actions = action.action_number,
                 game_classes = self.game_classes
-            ).execute(callback_function = callback_functions,
+            ).execute(callback_function = callback_function,
                     *args,
                     **kwargs
                       )
 
         self.game_classes.work_manager.wait_until_free_queue()
         
-    def cycle_exp(self , callback_functions : typing.Callable , *args , **kwargs) :
+    def cycle_exp(self , callback_function : typing.Callable , *args , **kwargs) :
         
         if self.game_classes.player_data.energy == 0:
             
@@ -263,7 +263,7 @@ class ExpScript:
             
             print(f'Started work , current level is {level}')
             self._work_jobs(script_action_list = actions,
-                            callback_functions = callback_functions,
+                            callback_function = callback_function,
                             *args,
                             **kwargs
                             )

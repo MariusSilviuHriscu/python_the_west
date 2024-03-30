@@ -3,7 +3,7 @@ from task_queue import TaskQueue
 from premium import Premium
 from player_data import Player_data
 import math
-from misc_scripts import wait_until_date
+from misc_scripts import wait_until_date,wait_until_date_callback
 
 class Work_manager():
     """A class for managing work tasks in a task queue.
@@ -192,9 +192,21 @@ class Work_manager():
         """
         # Return True if the task queue is empty, False otherwise.
         return self.allowed_tasks() == self.max_allowed_tasks()
-    def wait_until_free_queue(self):
-        """Waits until the queue is empty."""
-        wait_until_date(wait_time=self.task_queue.get_tasks_expiration(), handler=self.handler)
+    #def wait_until_free_queue(self):
+    #    """Waits until the queue is empty."""
+    #    wait_until_date(wait_time=self.task_queue.get_tasks_expiration(), handler=self.handler)
+        
+    def wait_until_free_queue(self , callback , *args , **kwargs):
+        """Waits until the queue is empty but uses the asynchronous method to callback other functions on wait."""
+
+        wait_until_date_callback(
+            wait_time = self.task_queue.get_tasks_expiration(),
+            handler= self.handler ,
+            callback_function = callback , 
+            *args ,
+            **kwargs 
+        )
+    
     def sleep_task(self,room_type:str,town_id:int):
         """Add a task to sleep in a given room of a town.
 

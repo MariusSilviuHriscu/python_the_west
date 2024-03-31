@@ -2,8 +2,6 @@ import typing
 
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.player_data import Player_data
-from the_west_inner.equipment import Equipment_manager
-from the_west_inner.work_manager import Work_manager
 from the_west_inner.work import Work
 from the_west_inner.map import Map
 

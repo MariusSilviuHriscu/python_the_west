@@ -1,4 +1,3 @@
-import typing
 
 from the_west_inner.game_classes import Game_classes
 
@@ -16,7 +15,7 @@ class ExpScriptExecutor:
     
     def execute( self , exp_script: ExpScript ) :
         
-        exp_script.cycle_exp(callback_function= self.script_chainer)
+        exp_script.cycle_exp(callback_function= self.script_chainer.chain_function())
     
 
 

@@ -1,13 +1,5 @@
 import typing
 
-from gold_finder import parse_map_for_quest_employers
-from work_manager import Work_manager
-from requests_handler import requests_handler
-from crafting import Crafting_table, acquire_product
-from items import Items
-from game_classes import Game_classes
-from marketplace_buy import Marketplace_categories, search_marketplace_category, search_marketplace_item
-from marketplace import Marketplace_buy_manager
 
 
 class Quest_requirement:

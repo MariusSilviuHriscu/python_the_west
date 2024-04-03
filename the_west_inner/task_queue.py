@@ -121,6 +121,10 @@ class TaskQueue():
             list: A list of tasks.
         """
         data = self.handler.post("task","","action",None)
+        
+        if 'queue' not in data:
+            raise Exception(f'Could not find the queue field in the response : {data}')
+        
         return data["queue"]
 
     def update(self, data= None):

@@ -364,7 +364,8 @@ class ExpScript:
                  game_classes: Game_classes,
                  script_job_manager: ExpScriptJobDataManager,
                  script_selector: ExpScriptJobSelector,
-                 map: Map
+                 map: Map,
+                 level : int
                  ):
         """
         Initializes an ExpScript object.
@@ -374,11 +375,13 @@ class ExpScript:
             script_job_manager (ExpScriptJobDataManager): An instance of ExpScriptJobDataManager for managing job data.
             script_selector (ExpScriptJobSelector): An instance of ExpScriptJobSelector for selecting work actions.
             map (Map): An instance of Map representing the game map.
+            level (int) : Target level
         """
         self.game_classes = game_classes
         self.script_job_manager = script_job_manager
         self.script_selector = script_selector
         self.map = map
+        self.level = level
 
     def _get_job_data_list(self) -> list[WorkJobData]:
         """
@@ -485,14 +488,14 @@ class ExpScript:
             **kwargs: Additional keyword arguments for the callback function.
         """
         # Check if the player has energy to perform work
-        if self.game_classes.player_data.energy == 0:
+        if self.game_classes.player_data.energy == 0 or self.level <= self.game_classes.player_data.level :
             return
 
         # Get the list of script actions
         actions = self.get_script_actions()
         print(f'{len(actions)}')
         # Iterate until there are no more actions or the target experience is reached
-        while len(actions) != 0:
+        while len(actions) != 0 and self.game_classes.player_data.level < self.level:
 
             level = self.game_classes.player_data.level
 

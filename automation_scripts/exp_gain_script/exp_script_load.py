@@ -85,7 +85,7 @@ class ExpScriptLoader:
         self.script_selector = script_selector
         self.map = map
 
-    def load(self) -> ExpScript:
+    def load(self , level :int) -> ExpScript:
         """
         Loads an instance of ExpScript.
 
@@ -95,11 +95,12 @@ class ExpScriptLoader:
         return ExpScript(game_classes=self.game_classes,
                          script_job_manager=self.job_script_manager_loader.load(map=self.map),
                          script_selector=self.script_selector,
-                         map=self.map
+                         map=self.map,
+                         level = level
                          )
 
 
-def load_exp_script(game_classes: Game_classes):
+def load_exp_script(game_classes: Game_classes, level : int):
     """
     Loads an instance of ExpScript using the provided Game_classes.
 
@@ -152,4 +153,4 @@ def load_exp_script(game_classes: Game_classes):
     )
 
     # Return the loaded ExpScript
-    return exp_script_loader.load()
+    return exp_script_loader.load(level=level)

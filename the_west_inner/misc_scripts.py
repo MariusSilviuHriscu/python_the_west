@@ -14,7 +14,9 @@ import time
 import typing
 import datetime
 from urllib.parse import urlparse
-from concurrent.futures import ThreadPoolExecutor
+
+import threading
+from concurrent.futures import ThreadPoolExecutor, Future
 
 def server_time(handler:requests_handler) -> datetime:
     """
@@ -104,6 +106,66 @@ def wait_until_date_callback(wait_time: datetime,
         sleep_result = sleep_future.result()
 
     return True
+
+def wait_until_date_callback(wait_time: datetime.datetime,
+                             handler: requests_handler,
+                             callback_function: typing.Callable[[None], None] = None,
+                             *args, **kwargs) -> bool:
+    """
+    This function waits until the specified date is reached and executes a callback function concurrently using ThreadPoolExecutor.
+
+    Args:
+    wait_time (datetime): The time to wait until.
+    handler (requests_handler): The request handler to use for sending requests.
+    callback_function (Callable): The callback function to execute concurrently.
+    args (tuple): Arguments to pass to the callback function.
+    kwargs (dict): Keyword arguments to pass to the callback function.
+
+    Returns:
+    bool: True if the specified date was reached, False otherwise.
+    """
+    if wait_time == -1:
+        return True
+
+    event = threading.Event()
+
+    def sleep_thread():
+        time_now = datetime.datetime.now()
+        if time_now < wait_time:
+            delta = wait_time - time_now
+            print(f'Waiting time is "{wait_time}" while time now: {time_now}. Delta is: {delta}')
+            if delta.total_seconds() > 0:
+                # Divide the delta into 0.01-second chunks
+                while delta.total_seconds() > 0 and not event.is_set():
+                    sleep_duration = min(0.01, delta.total_seconds())
+                    time.sleep(sleep_duration)
+                    delta -= datetime.timedelta(seconds=sleep_duration)
+
+        while server_time(handler=handler) < wait_time and not event.is_set():
+            time.sleep(0.01)
+
+    def handle_callback():
+        try:
+            callback_function(*args, **kwargs)
+        except Exception as e:
+            # Set the event to notify the main thread about the exception
+            event.set()
+            raise e
+
+    # Create a ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        # Submit the sleep thread to the executor
+        sleep_future = executor.submit(sleep_thread)
+
+        # If a callback function is provided, submit it to the executor
+        if callback_function:
+            callback_future = executor.submit(handle_callback)
+
+        # Wait for both futures to complete
+        callback_result = callback_future.result() if callback_function else None
+        sleep_result = sleep_future.result()
+
+    return not event.is_set()
 
 def collect_daily_reward(handler:requests_handler):
     succes = handler.post("loginbonus","collect",use_h = True)

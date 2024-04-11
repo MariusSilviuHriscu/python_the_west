@@ -3,7 +3,7 @@ from the_west_inner.game_classes import Game_classes
 
 from automation_scripts.exp_gain_script.exp_script import ExpScript
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
-from automation_scripts.sleep_func_callbacks.misc_func_callback import check_and_update_skills
+from automation_scripts.sleep_func_callbacks.misc_func_callback import check_and_update_skills,error_handling_test
 
 class ExpScriptExecutor:
     """
@@ -52,6 +52,6 @@ def make_exp_script_executor(game_classes: Game_classes):
         target_attribute_key='strength',
         target_skill_key='build'
     )
-
+    chainer.add_callback(callback_function = error_handling_test)
     # Create and return an instance of ExpScriptExecutor
     return ExpScriptExecutor(script_chainer=chainer)

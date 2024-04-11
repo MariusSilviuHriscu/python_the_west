@@ -8,6 +8,8 @@ from the_west_inner.skills import read_skill
 from automation_scripts.marketplace_scripts.marketplace_observer import MarketplaceProductObserver
 
 
+from automation_scripts.stop_events.script_events import RestartEvent,StopEvent,ScriptPauseEvent
+
 def read_report_rewards(report_manager: Reports_manager) -> None:
     """
     Reads the reports using the provided Reports_manager and prints the rewards.
@@ -76,3 +78,10 @@ def check_and_update_skills(handler:requests_handler,target_attribute_key : str 
         change_dict[target_skill_key] = free_skill_points
     
     return skills.save_additional_skills_attributes(handler=handler,changes=change_dict)
+
+
+def error_handling_test():
+    
+    event = StopEvent()
+    print('raising stop exception')
+    event.raise_exception()

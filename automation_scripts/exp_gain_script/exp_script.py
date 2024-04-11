@@ -15,6 +15,8 @@ from the_west_inner.work_job_data import (WorkDataLoader,
 
 from automation_scripts.work_cycle import Script_work_task
 
+from automation_scripts.stop_events.script_exception_handler import handle_exceptions
+
 class ExpScriptJobDataManager:
     """
     Manages work data, sorting rules, and validation rules for work tasks.
@@ -478,6 +480,7 @@ class ExpScript:
                                                              **kwargs
                                                              )
 
+    @handle_exceptions
     def cycle_exp(self, callback_function: typing.Callable, *args, **kwargs):
         """
         Executes a cycle of work actions to gain experience.

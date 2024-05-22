@@ -81,7 +81,6 @@ def check_and_update_skills(handler:requests_handler,target_attribute_key : str 
 
 
 def error_handling_test():
-    
-    event = StopEvent()
-    print('raising stop exception')
-    event.raise_exception()
+    event = RestartEvent()
+    print('raising restart exception')
+    event.raise_exception() 

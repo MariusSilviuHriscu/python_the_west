@@ -195,7 +195,7 @@ class TaskQueue():
         # Return the expiration time in seconds, or 0 if the queue is empty.
         return end_date.seconds if end_date != -1 else 0
 
-    def return_tasks_by_type(self, task_type):
+    def return_tasks_by_type(self, task_type) -> Task_list:
         """Get a list of tasks of a given type.
 
         Args:

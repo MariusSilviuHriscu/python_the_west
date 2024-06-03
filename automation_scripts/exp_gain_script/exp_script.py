@@ -348,7 +348,7 @@ class ExpScriptJobSelector:
             work_list = work_list[1::]
 
         # If no combination of actions meets the target, return the list of actions based on the last set of work job data
-        return self.get_possible_action_list(work_job_data=self.work_data_list, duration=self.duration)
+        return self.get_possible_action_list(work_job_data=work_list, duration=self.duration) #self.work_data_list
 
 
 class ExpScript:

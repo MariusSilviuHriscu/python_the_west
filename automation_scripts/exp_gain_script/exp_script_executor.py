@@ -32,7 +32,7 @@ class ExpScriptExecutor:
         exp_script.cycle_exp(callback_function=self.script_chainer.chain_function())
 
 
-def make_exp_script_executor(game_classes: Game_classes):
+def make_exp_script_executor(game_classes: Game_classes) -> ExpScriptExecutor:
     """
     Creates an instance of ExpScriptExecutor configured with appropriate callback functions.
 
@@ -52,6 +52,5 @@ def make_exp_script_executor(game_classes: Game_classes):
         target_attribute_key='strength',
         target_skill_key='build'
     )
-    chainer.add_callback(callback_function = error_handling_test)
     # Create and return an instance of ExpScriptExecutor
     return ExpScriptExecutor(script_chainer=chainer)

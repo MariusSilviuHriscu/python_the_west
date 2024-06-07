@@ -159,7 +159,7 @@ class TaskQueue():
         # Return False if no "sleep" task was found.
         return False
 
-    def get_tasks_number(self):
+    def get_tasks_number(self) -> int:
         """Get the number of tasks in the queue.
 
         Returns:

@@ -1,0 +1,166 @@
+import typing
+import time
+from requests.exceptions import ConnectionError
+
+from the_west_inner.login import Game_login
+from the_west_inner.game_classes import Game_classes
+
+from automation_scripts.exp_gain_script.exp_script import ExpScript
+from automation_scripts.exp_gain_script.exp_script_executor import ExpScriptExecutor
+
+from automation_scripts.exp_gain_script.example_exp_scripts.loader_func_v1 import load_exp_script_v1, make_exp_script_executor_v1
+from automation_scripts.exp_gain_script.example_exp_scripts.sleep_func_v1 import CycleSleeperManager
+
+class CycleScript:
+    """
+    Manages the execution of an experience script (ExpScript) and its executor (ExpScriptExecutor).
+    Handles reconnection and re-execution in case of connection errors.
+
+    Attributes:
+        exp_script (ExpScript): The experience script to be executed.
+        exp_script_executor (ExpScriptExecutor): The executor that runs the experience script.
+    """
+    
+    def __init__(self, exp_script: ExpScript, exp_script_executor: ExpScriptExecutor):
+        """
+        Initializes the CycleScript with the provided experience script and executor.
+
+        Args:
+            exp_script (ExpScript): The experience script to be executed.
+            exp_script_executor (ExpScriptExecutor): The executor that runs the experience script.
+        """
+        self.exp_script = exp_script
+        self.exp_script_executor = exp_script_executor
+    
+    def set_exp_script(self, exp_script: ExpScript):
+        """
+        Sets a new experience script.
+
+        Args:
+            exp_script (ExpScript): The new experience script to be set.
+        """
+        self.exp_script = exp_script
+
+    def set_exp_script_executor(self, exp_script_executor: ExpScriptExecutor):
+        """
+        Sets a new experience script executor.
+
+        Args:
+            exp_script_executor (ExpScriptExecutor): The new experience script executor to be set.
+        """
+        self.exp_script_executor = exp_script_executor
+
+    def execute(self) -> typing.Generator[bool, None, None]:
+        """
+        Executes the experience script using the executor. Handles reconnection on connection errors.
+
+        Yields:
+            bool: True if the cycle starts successfully or finishes without errors, False on connection error.
+        """
+        if self.cycle_sleeper_manager.start_cycle():
+            yield True
+        flag = True
+        while flag:
+            try:
+                self.exp_script_executor.execute(self.exp_script)
+                flag = False
+            except ConnectionError:
+                yield False
+            except Exception as e:
+                raise e
+        yield True
+
+class CycleScriptManager:
+    """
+    Manages the creation and execution of CycleScript instances. Handles login and reinitialization of scripts.
+
+    Attributes:
+        game_login (Game_login): The login manager for the game.
+    """
+    
+    def __init__(self, game_login: Game_login):
+        """
+        Initializes the CycleScriptManager with the provided login manager.
+
+        Args:
+            game_login (Game_login): The login manager for the game.
+        """
+        self.game_login = game_login
+        self.current_cycle_script = None
+
+    @property
+    def game_data(self) -> Game_classes:
+        """
+        Logs into the game and retrieves the game data.
+
+        Returns:
+            Game_classes: The logged-in game data.
+        """
+        return self.game_login.login()
+    
+    def create_cycle_script(self, level: int, game_data: Game_classes) -> CycleScript:
+        """
+        Creates a new CycleScript instance for the specified level using the provided game data.
+
+        Args:
+            level (int): The level for which the cycle script is created.
+            game_data (Game_classes): The game data required to create the script.
+
+        Returns:
+            CycleScript: The created CycleScript instance.
+        """
+        exp_script = load_exp_script_v1(game_classes=game_data, level=level)
+        exp_script_executor = make_exp_script_executor_v1(game_classes=game_data)
+        return CycleScript(exp_script=exp_script, exp_script_executor=exp_script_executor)
+    
+    def restore_cycle_script(self, level: int, game_data: Game_classes):
+        """
+        Restores the current CycleScript by creating a new one and updating the script and executor.
+
+        Args:
+            level (int): The level for which the cycle script is restored.
+            game_data (Game_classes): The game data required to create the script.
+        """
+        new_cycle_script = self.create_cycle_script(level=level, game_data=game_data)
+        self.current_cycle_script.set_exp_script(new_cycle_script.exp_script)
+        self.current_cycle_script.set_exp_script_executor(new_cycle_script.exp_script_executor)
+
+    def _execute_cycle_script(self, level: int):
+        """
+        Executes the cycle script, handling reconnection if necessary.
+
+        Args:
+            level (int): The level for which the cycle script is executed.
+        """
+        cycle_generator = self.create_cycle_script(level=level).execute()
+        for cycle_flag in cycle_generator:
+            if not cycle_flag:
+                self.restore_cycle_script(level=level)
+    
+    def execute_cycle_script(self, level: int):
+        """
+        Manages the execution of the cycle script and the sleeping cycle.
+
+        Args:
+            level (int): The level for which the cycle script is executed.
+        """
+        game_data = self.game_data
+        sleep_manager = CycleSleeperManager(handler=game_data.handler,
+                                            task_queue=game_data.task_queue,
+                                            work_manager=game_data.work_manager,
+                                            player_data=game_data.player_data)
+        
+        if sleep_manager.start_cycle():
+            self._execute_cycle_script(level=level)
+            sleep_manager.stop_cycle()
+            print('Cycle script finished')
+        
+    def cycle(self, level: int):
+        """
+        Executes the cycle script and sleeps for a specified duration before repeating.
+
+        Args:
+            level (int): The level for which the cycle script is executed.
+        """
+        self.execute_cycle_script(level=level)
+        time.sleep(3600 / 4)

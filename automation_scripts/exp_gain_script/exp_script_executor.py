@@ -3,7 +3,7 @@ from the_west_inner.game_classes import Game_classes
 
 from automation_scripts.exp_gain_script.exp_script import ExpScript
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
-from automation_scripts.sleep_func_callbacks.misc_func_callback import check_and_update_skills,error_handling_test
+from automation_scripts.sleep_func_callbacks.misc_func_callback import check_and_update_skills
 
 class ExpScriptExecutor:
     """

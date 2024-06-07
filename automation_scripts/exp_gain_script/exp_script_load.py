@@ -100,7 +100,11 @@ class ExpScriptLoader:
                          )
 
 
+<<<<<<< HEAD
 def load_exp_script(game_classes: Game_classes, level : int , max_allowed_damage_percent : float = 0.25 , max_allowed_damage_frequency : float = 0.15) -> ExpScript:
+=======
+def load_exp_script(game_classes: Game_classes, level : int) -> ExpScript:
+>>>>>>> 949b3c9716d34808ca5c917bea0531510f268899
     """
     Loads an instance of ExpScript using the provided Game_classes.
 
@@ -135,7 +139,7 @@ def load_exp_script(game_classes: Game_classes, level : int , max_allowed_damage
     job_script_manager_loader = ExpScriptDataManagerLoader(
         game_classes=game_classes,
         work_sort_rule_list=[exp_rule],
-        work_validation_rule_list=[damage_validation_rule, frequency_validation_rule]
+        work_validation_rule_list= []#[damage_validation_rule, frequency_validation_rule]
     )
 
     # Define ExpScriptJobSelector

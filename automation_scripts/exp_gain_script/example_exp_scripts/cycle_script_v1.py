@@ -57,8 +57,6 @@ class CycleScript:
         Yields:
             bool: True if the cycle starts successfully or finishes without errors, False on connection error.
         """
-        if self.cycle_sleeper_manager.start_cycle():
-            yield True
         flag = True
         while flag:
             try:
@@ -125,14 +123,15 @@ class CycleScriptManager:
         self.current_cycle_script.set_exp_script(new_cycle_script.exp_script)
         self.current_cycle_script.set_exp_script_executor(new_cycle_script.exp_script_executor)
 
-    def _execute_cycle_script(self, level: int):
+    def _execute_cycle_script(self, level: int , game_data: Game_classes):
         """
         Executes the cycle script, handling reconnection if necessary.
 
         Args:
             level (int): The level for which the cycle script is executed.
         """
-        cycle_generator = self.create_cycle_script(level=level).execute()
+        cycle_generator = self.create_cycle_script(level=level,
+                                                   game_data=game_data).execute()
         for cycle_flag in cycle_generator:
             if not cycle_flag:
                 self.restore_cycle_script(level=level)
@@ -151,7 +150,7 @@ class CycleScriptManager:
                                             player_data=game_data.player_data)
         
         if sleep_manager.start_cycle():
-            self._execute_cycle_script(level=level)
+            self._execute_cycle_script(level=level , game_data=game_data)
             sleep_manager.stop_cycle()
             print('Cycle script finished')
         

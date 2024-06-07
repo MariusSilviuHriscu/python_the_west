@@ -89,6 +89,7 @@ class Task_list():
         Returns:
             bool: True if all tasks were successfully cancelled, False otherwise.
         """
+        returnable = None
         for task in self.task_list:
             returnable = task.cancel()
         return returnable

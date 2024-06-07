@@ -100,7 +100,7 @@ class ExpScriptLoader:
                          )
 
 
-def load_exp_script(game_classes: Game_classes, level : int):
+def load_exp_script(game_classes: Game_classes, level : int , max_allowed_damage_percent : float = 0.25 , max_allowed_damage_frequency : float = 0.15) -> ExpScript:
     """
     Loads an instance of ExpScript using the provided Game_classes.
 

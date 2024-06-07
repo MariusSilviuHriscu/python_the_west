@@ -19,6 +19,7 @@ pysocks = "^1.7.1"
 sqlalchemy = "^2.0.25"
 matplotlib = "^3.8.2"
 bidict = "^0.22.1"
+jupyter = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

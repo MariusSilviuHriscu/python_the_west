@@ -135,7 +135,7 @@ def load_exp_script(game_classes: Game_classes, level : int , max_allowed_damage
     job_script_manager_loader = ExpScriptDataManagerLoader(
         game_classes=game_classes,
         work_sort_rule_list=[exp_rule],
-        work_validation_rule_list= []#[damage_validation_rule, frequency_validation_rule]
+        work_validation_rule_list= [damage_validation_rule, frequency_validation_rule]
     )
 
     # Define ExpScriptJobSelector

@@ -52,9 +52,6 @@ def make_exp_script_executor(game_classes: Game_classes) -> ExpScriptExecutor:
         target_attribute_key='strength',
         target_skill_key='build'
     )
-<<<<<<< HEAD
     #chainer.add_callback(callback_function = error_handling_test)
-=======
->>>>>>> 949b3c9716d34808ca5c917bea0531510f268899
     # Create and return an instance of ExpScriptExecutor
     return ExpScriptExecutor(script_chainer=chainer)

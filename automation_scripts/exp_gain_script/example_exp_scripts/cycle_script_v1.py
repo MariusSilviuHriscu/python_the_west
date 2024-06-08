@@ -111,7 +111,7 @@ class CycleScriptManager:
         exp_script_executor = make_exp_script_executor_v1(game_classes=game_data)
         return CycleScript(exp_script=exp_script, exp_script_executor=exp_script_executor)
     
-    def restore_cycle_script(self, level: int, game_data: Game_classes):
+    def restore_cycle_script(self, level: int, game_data: Game_classes , current_cycle_script: CycleScript):
         """
         Restores the current CycleScript by creating a new one and updating the script and executor.
 
@@ -120,8 +120,8 @@ class CycleScriptManager:
             game_data (Game_classes): The game data required to create the script.
         """
         new_cycle_script = self.create_cycle_script(level=level, game_data=game_data)
-        self.current_cycle_script.set_exp_script(new_cycle_script.exp_script)
-        self.current_cycle_script.set_exp_script_executor(new_cycle_script.exp_script_executor)
+        current_cycle_script.set_exp_script(new_cycle_script.exp_script)
+        current_cycle_script.set_exp_script_executor(new_cycle_script.exp_script_executor)
 
     def _execute_cycle_script(self, level: int, game_data: Game_classes):
         """
@@ -131,10 +131,11 @@ class CycleScriptManager:
             level (int): The level for which the cycle script is executed.
             game_data (Game_classes): The game data required to execute the script.
         """
-        cycle_generator = self.create_cycle_script(level=level, game_data=game_data).execute()
+        cycle = self.create_cycle_script(level=level, game_data=game_data)
+        cycle_generator = cycle.execute()
         for cycle_flag in cycle_generator:
             if not cycle_flag:
-                self.restore_cycle_script(level=level, game_data=game_data)
+                self.restore_cycle_script(level=level, game_data=game_data , current_cycle_script=cycle)
     
     def execute_cycle_script(self, level: int):
         """
@@ -151,7 +152,7 @@ class CycleScriptManager:
         
         if sleep_manager.start_cycle(exp_script=load_exp_script_v1(game_classes=game_data, level=level)):
             self._execute_cycle_script(level=level, game_data=game_data)
-            sleep_manager.stop_cycle()
+            sleep_manager.finish_cycle()
             print('Cycle script finished')
         
     def cycle(self, level: int) -> typing.Generator[None, None, None]:

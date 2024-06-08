@@ -70,9 +70,9 @@ class CycleSleeperManager:
         """
         Cancels any sleep task in the task queue.
         """
-        task_list = self.task_queue.return_tasks_by_type(task_type='sleep')
-        if len(task_list) == 0:
+        if not self.task_queue.sleep_task_in_queue():
             return
+        task_list = self.task_queue.return_tasks_by_type(task_type='sleep')
         task_list.cancel()
 
     def finish_cycle(self):

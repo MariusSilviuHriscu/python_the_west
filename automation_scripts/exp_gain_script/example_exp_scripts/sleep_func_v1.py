@@ -54,6 +54,7 @@ class CycleSleeperManager:
         Initiates the sleep process by calling the sleep_closest_town function.
         """
         sleep_closest_town(self.handler, self.player_data)
+        print('Sleeping')
 
     def check_if_can_cancel_sleep(self) -> bool:
         """
@@ -97,9 +98,11 @@ class CycleSleeperManager:
             actions = exp_script.get_script_actions()
             if actions.calc_exp() > self.player_data.exp_data.level_exp_requirement:
                 self._cancel_sleep()
+                print('The experience from the script exceeds the level experience requirement. Canceled sleep.')
                 return True
             
         if not self.task_queue.sleep_task_in_queue() or self.check_if_can_cancel_sleep():
+            print('Cancelling sleep.')
             self._cancel_sleep()
             return True
         return False

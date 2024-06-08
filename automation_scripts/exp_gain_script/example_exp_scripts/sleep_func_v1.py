@@ -6,6 +6,8 @@ from the_west_inner.requests_handler import requests_handler
 from the_west_inner.player_data import Player_data
 from the_west_inner.misc_scripts import sleep_closest_town
 
+from automation_scripts.exp_gain_script.exp_script import ExpScript
+
 class CycleSleeperManager:
     """
     Manages the sleeping cycle of a player in the game. Determines when the player can sleep, initiates sleep, 
@@ -68,6 +70,8 @@ class CycleSleeperManager:
         Cancels any sleep task in the task queue.
         """
         task_list = self.task_queue.return_tasks_by_type(task_type='sleep')
+        if len(task_list) == 0:
+            return
         task_list.cancel()
 
     def finish_cycle(self):
@@ -77,14 +81,24 @@ class CycleSleeperManager:
         if self.check_if_can_sleep():
             self._sleep()
 
-    def start_cycle(self) -> bool:
+    def start_cycle(self, exp_script: ExpScript = None) -> bool:
         """
         Starts a new cycle by checking if a sleep task can be cancelled or if there is no sleep task in the queue. 
         If either condition is met, it cancels the sleep task and returns True, indicating the cycle can start.
 
+        Args:
+            exp_script (ExpScript, optional): An optional experience script to check for experience thresholds.
+
         Returns:
             bool: True if the cycle can start, False otherwise.
         """
+        if exp_script is not None:
+            # Check if the experience from the script exceeds the level experience requirement
+            actions = exp_script.get_script_actions()
+            if actions.calc_exp() > self.player_data.exp_data.level_exp_requirement:
+                self._cancel_sleep()
+                return True
+            
         if not self.task_queue.sleep_task_in_queue() or self.check_if_can_cancel_sleep():
             self._cancel_sleep()
             return True

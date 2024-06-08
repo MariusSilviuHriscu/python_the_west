@@ -70,8 +70,6 @@ class CycleSleeperManager:
         """
         Cancels any sleep task in the task queue.
         """
-        if not self.task_queue.sleep_task_in_queue():
-            return
         task_list = self.task_queue.return_tasks_by_type(task_type='sleep')
         task_list.cancel()
 
@@ -101,8 +99,12 @@ class CycleSleeperManager:
                 print('The experience from the script exceeds the level experience requirement. Canceled sleep.')
                 return True
             
-        if not self.task_queue.sleep_task_in_queue() or self.check_if_can_cancel_sleep():
+        if not self.task_queue.sleep_task_in_queue() :
+            print('No sleep task in the queue.')
+            return True
+        if self.check_if_can_cancel_sleep() :
             print('Cancelling sleep.')
             self._cancel_sleep()
             return True
+
         return False

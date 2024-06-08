@@ -154,6 +154,8 @@ class CycleScriptManager:
             self._execute_cycle_script(level=level, game_data=game_data)
             sleep_manager.finish_cycle()
             print('Cycle script finished')
+        else:
+            print('Cycle finished but did no work!')
         
     def cycle(self, level: int) -> typing.Generator[None, None, None]:
         """

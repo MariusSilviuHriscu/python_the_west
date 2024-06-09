@@ -4,7 +4,7 @@ from the_west_inner.simulation_data_library.calc_maxim import Brute_force_simula
 from the_west_inner.simulation_data_library.simul_equip_fitnes import SimulFitnessRuleSet
 from the_west_inner.simulation_data_library.simul_equip_rules.weapon_damage_rule import WeaponDamageSimulRule
 from the_west_inner.simulation_data_library.simul_equip_rules.total_skill_points_rule import TotalSkillPointsRule
-from the_west_inner.simulation_data_library.calc_maxim import Simulation_data_loader
+from the_west_inner.simulation_data_library.simul_data_loader import Simulation_data_loader
 
 def low_level_npc_duel_loss_callback(
     game_classes : Game_classes

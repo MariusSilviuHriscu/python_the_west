@@ -1,7 +1,6 @@
 import random
-import numba
 
-
+from the_west_inner.game_classes import Game_classes
 
 from the_west_inner.simulation_data_library.simul_items import Item_model_list
 from the_west_inner.simulation_data_library.simul_equipment import Equipment_simul
@@ -68,13 +67,12 @@ class GeneticAlgorithm:
         return individual
 
     def run(self):
-        jit_fitness = numba.jit()(self.fitness)
         population = self.initialize_population()
         best_individual = None
         best_fitness = self.fitness_rule_set.generate_empty_result()
 
         for generation in range(self.generations):
-            fitnesses = [jit_fitness(individual) for individual in population]
+            fitnesses = [self.fitness(individual) for individual in population]
             population = self.select(population, fitnesses)
             next_population = []
             for i in range(0, len(population), 2):
@@ -86,7 +84,7 @@ class GeneticAlgorithm:
             population = next_population
 
             for individual in population:
-                current_fitness = jit_fitness(individual)
+                current_fitness = self.fitness(individual)
                 if current_fitness > best_fitness:
                     best_fitness = current_fitness
                     best_individual = individual
@@ -97,9 +95,14 @@ class GeneticAlgorithm:
         )
 
 # Example usage
-def run_genetic_algorithm_simulation(game_data , fitness_rule_set : SimulFitnessRuleSet):
+def run_genetic_algorithm_simulation(game_data : Game_classes , fitness_rule_set : SimulFitnessRuleSet):
     loader = Simulation_data_loader(game_data)
     item_model_list = loader.assemble_item_model_list_from_game_data()
+    item_model_list = item_model_list.filter_mapdrop_items(
+                        ).filter_out_usables(
+                        ).filter_by_player_level(
+                            player_level = game_data.player_data.level
+                            )
     set_model_list = loader.assemble_item_set_model_list_from_game_data()
     equipment_simul = loader.assemble_simul_equipment_from_game_data()
     
@@ -110,8 +113,8 @@ def run_genetic_algorithm_simulation(game_data , fitness_rule_set : SimulFitness
         set_model_list=set_model_list,
         equipment_simul=equipment_simul,
         fitness_rule_set=fitness_rule_set,
-        population_size=1000,
-        generations=1000,
+        population_size=500,
+        generations=100,
         mutation_rate=0.03
     )
 

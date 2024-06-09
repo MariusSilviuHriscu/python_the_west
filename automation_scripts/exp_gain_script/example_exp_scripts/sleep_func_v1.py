@@ -94,7 +94,7 @@ class CycleSleeperManager:
         if exp_script is not None:
             # Check if the experience from the script exceeds the level experience requirement
             actions = exp_script.get_script_actions()
-            if actions.calc_exp() > self.player_data.exp_data.level_exp_requirement:
+            if actions.calc_exp() > self.player_data.exp_data.required_exp():
                 self._cancel_sleep()
                 print('The experience from the script exceeds the level experience requirement. Canceled sleep.')
                 return True

@@ -8,4 +8,4 @@ class ExpSimulRule:
         pass
     def calculate(self, equipment_data : EquipmentPermutationData) -> int:
         
-        return equipment_data.regeneration
+        return equipment_data.exp_bonus

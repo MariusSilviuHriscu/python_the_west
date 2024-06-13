@@ -50,7 +50,17 @@ class CharacterSkillsEnum(Enum):
     def get_all_attributes(cls):
         attributes = {'STRENGTH', 'MOBILITY', 'DEXTERITY', 'CHARISMA'}
         return [attribute.name.lower() for attribute in cls if attribute.name in attributes]
-
+    @staticmethod
+    def map_str_dict_to_enum_dict(str_dict) -> typing.Dict[typing.Self, int]:
+        enum_dict = {}
+        for key, value in str_dict.items():
+            try:
+                enum_key = CharacterSkillsEnum[key.upper()]
+                enum_dict[enum_key] = value
+            except KeyError:
+                raise ValueError(f"{key} is not a valid CharacterSkillsEnum member")
+        
+        return enum_dict
 class Skill_change_verifier():
     """
     The Skill_change_verifier class verifies if it is possible to make a given set of changes to skills and attributes.

@@ -1,5 +1,6 @@
 
 from requests_handler import requests_handler
+
     
 class Work_list():
     """A class for managing a list of work items.
@@ -67,3 +68,14 @@ class Work_list():
 
         # Return a dictionary mapping each work item's ID to its motivation level.
         return {x: int(float(motivation_dict[x]['motivation']) * 100) for x in motivation_dict}
+    
+    def get_work_skill_dict(self, work_id : int ) -> dict[str,int]:
+        """Get the skill requirements for a work item.
+
+        Args:
+            work_id (int): The ID of the work item.
+
+        Returns:
+            dict: A dictionary mapping each skill to its required level.
+        """
+        return self.work_dict[work_id]["skills"]

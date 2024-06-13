@@ -13,8 +13,8 @@ class WorkSkillsSimulRule:
         equipment_skills = equipment_data.status.effective_skills
         
         for skill,skill_number in self.skill_dict.items():
-            equipment_skills = equipment_skills[str(skill)]
-            
-            total_skill_numbers  += equipment_skills * skill_number
+            respective_equipment_skills = equipment_skills[str(skill)]
+
+            total_skill_numbers  += respective_equipment_skills * skill_number
         
         return total_skill_numbers

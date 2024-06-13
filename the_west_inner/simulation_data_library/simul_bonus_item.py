@@ -76,7 +76,7 @@ class Character_exp_bonus_chain():
         if 'key' in self.bonus_dict and self.bonus_dict['key'] == 'level':
             self.item.updates.exp_bonus_updates = True
     def check_bonus(self):
-        if self.bonus_dict['type'] == 'drop':
+        if self.bonus_dict['type'] == 'experience':
             self.add_bonus_to_item(self.bonus_dict['value'])
         elif self.next_chain is not None:
             self.next_chain.item = self.item

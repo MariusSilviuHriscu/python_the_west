@@ -1,8 +1,55 @@
 import typing
 import json
 from dataclasses import dataclass
+from enum import Enum, auto
+
 from requests_handler import requests_handler
 
+class CharacterSkillsEnum(Enum):
+    # Attributes
+    STRENGTH = auto()
+    MOBILITY = auto()
+    DEXTERITY = auto()
+    CHARISMA = auto()
+
+    # Strength-based skills
+    BUILD = auto()
+    PUNCH = auto()
+    TOUGH = auto()
+    ENDURANCE = auto()
+    HEALTH = auto()
+
+    # Mobility-based skills
+    RIDE = auto()
+    REFLEX = auto()
+    DODGE = auto()
+    HIDE = auto()
+    SWIM = auto()
+
+    # Dexterity-based skills
+    AIM = auto()
+    SHOT = auto()
+    PITFALL = auto()
+    FINGER_DEXTERITY = auto()
+    REPAIR = auto()
+
+    # Charisma-based skills
+    LEADERSHIP = auto()
+    TACTIC = auto()
+    TRADE = auto()
+    ANIMAL = auto()
+    APPEARANCE = auto()
+
+    def __str__(self):
+        return self.name.lower()
+    @classmethod
+    def get_all_skills(cls):
+        attributes = {'STRENGTH', 'MOBILITY', 'DEXTERITY', 'CHARISMA'}
+        return [skill.name.lower() for skill in cls if skill.name not in attributes]
+    @classmethod
+    def get_all_attributes(cls):
+        attributes = {'STRENGTH', 'MOBILITY', 'DEXTERITY', 'CHARISMA'}
+        return [attribute.name.lower() for attribute in cls if attribute.name in attributes]
 
 class Skill_change_verifier():
     """

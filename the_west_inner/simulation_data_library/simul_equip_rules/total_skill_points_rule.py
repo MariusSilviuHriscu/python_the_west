@@ -1,4 +1,4 @@
-from the_west_inner.simulation_data_library.simul_skills import CharacterSkillsEnum
+from the_west_inner.skills import CharacterSkillsEnum
 from the_west_inner.simulation_data_library.calc_maxim import EquipmentPermutationData
 
 class TotalSkillPointsRule:

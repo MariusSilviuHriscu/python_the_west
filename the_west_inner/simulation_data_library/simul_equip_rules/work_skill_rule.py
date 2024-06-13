@@ -1,5 +1,5 @@
 
-from the_west_inner.simulation_data_library.simul_skills import CharacterSkillsEnum
+from the_west_inner.skills import CharacterSkillsEnum
 from the_west_inner.simulation_data_library.calc_maxim import EquipmentPermutationData
 
 class WorkSkillsSimulRule:
@@ -17,4 +17,4 @@ class WorkSkillsSimulRule:
 
             total_skill_numbers  += respective_equipment_skills * skill_number
         
-        return total_skill_numbers
+        return total_skill_numbers + equipment_data.workpoints

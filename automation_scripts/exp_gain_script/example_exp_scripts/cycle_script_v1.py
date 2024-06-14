@@ -157,7 +157,7 @@ class CycleScriptManager:
         else:
             print('Cycle finished but did no work!')
         
-    def cycle(self, level: int) -> typing.Generator[None, None, None]:
+    def cycle(self, level: int , delay: int = 10 , repeat: int = 1) -> typing.Generator[None, None, None]:
         """
         Executes the cycle script and sleeps for a specified duration before repeating.
 
@@ -165,6 +165,14 @@ class CycleScriptManager:
             level (int): The level for which the cycle script is executed.
         """
         while True:
-            self.execute_cycle_script(level=level)
-            time.sleep(3600 / 4)
-            yield
+            for _ in range(repeat):
+                try:
+                    self.execute_cycle_script(level=level)
+                    time.sleep(3600 / 4)
+                    yield
+                except ConnectionError:
+                    print('ConnectionError .... Retrying')
+                    time.sleep(delay)
+                    continue
+                except Exception as e:
+                    raise e

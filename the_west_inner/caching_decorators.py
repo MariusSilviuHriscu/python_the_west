@@ -2,6 +2,8 @@ import time
 from functools import wraps
 import threading
 
+import typing
+
 
 def cache_function_results(seconds):
     cache = {}
@@ -36,3 +38,33 @@ def timer(func):
         return result
 
     return wrapper
+
+
+def retry_on_exception(delay: int, repeat: int, exceptions: typing.Union[type, typing.Tuple[type, ...]]):
+    """
+    Decorator that retries the decorated function if it raises the specified exceptions.
+
+    Args:
+        delay (int): The delay in seconds between retries.
+        repeat (int): The number of retries if the exception occurs.
+        exceptions (Union[type, Tuple[type, ...]]): The exception class or tuple of exception classes to catch and retry.
+
+    Returns:
+        Callable: The decorated function with retry logic.
+    """
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts <= repeat:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    attempts += 1
+                    if attempts <= repeat:
+                        print(f"Exception encountered: {e}. Retrying in {delay} seconds... (Attempt {attempts}/{repeat})")
+                        time.sleep(delay)
+                    else:
+                        print(f"Max retries reached for function {func.__name__}.")
+                        raise
+        return wrapper
+    return decorator

@@ -15,6 +15,8 @@ Classes:
 from requests_handler import requests_handler
 import datetime
 import time
+
+from caching_decorators import retry_on_exception
 from player_data import Player_data
 
 class Task():
@@ -115,6 +117,7 @@ class TaskQueue():
         # Initialize the task queue by sending an HTTP request.
         self.update()
 
+    @retry_on_exception(delay=3, repeat = 3 , exceptions = [ConnectionError])
     def initialize(self):
         """Initialize the task queue by sending an HTTP request.
 

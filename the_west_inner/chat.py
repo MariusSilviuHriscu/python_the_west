@@ -36,13 +36,23 @@ class ChatSendRequest:
                     data= data
             )
 
-class Chat:
+
+        
+        
+
+class ChatHandler:
     
     def __init__(self, handler : requests_handler):
         
         self.handler = handler
         self.clid = self.generate_client_connection_id()
+        self._index = 1
     
+    @property
+    def index(self) -> int:
+        current_index = self._index
+        self._index += 1
+        return current_index    
     def generate_client_connection_id(self):
         # Get the current timestamp in milliseconds
         init_time = int(time.time() * 1000)
@@ -92,10 +102,14 @@ class Chat:
         
         return ChatRequestData(**data)
     
+    def send(self, recipient : str, message : str) -> ChatSendRequest:
+        
+        self.create_chat_request_data(message_id = 1, clid=self.clid)
+    
     def message_loop(self) -> typing.Generator[ChatSendRequest, None, None]:
         
         data  = self.create_chat_request_data(
-            message_id = 1,
+            message_id = self.index,
             clid=self.clid
             )
         
@@ -108,11 +122,11 @@ class Chat:
         
         
         actioned = int(time.time() * 1000) - 129
-        i = 2
+        
         while True:
             
             data = self.create_chat_request_data(
-                message_id = i,
+                message_id = self.index,
                 clid=self.clid,
                 actioned = actioned
                 )
@@ -123,4 +137,3 @@ class Chat:
                 )
             
             yield chat_request
-            i += 1

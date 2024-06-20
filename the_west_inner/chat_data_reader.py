@@ -80,7 +80,7 @@ class TellReceivedTextParser:
         
         return MessageData(
             message_content = payload['message'],
-            message_timestamp = payload['t'],
+            message_timestamp = text_dict['t'],
             message_sender = payload['cid'],
             message_room = payload['to']
         )
@@ -101,6 +101,7 @@ class JoinedLeaveClientData:
     room_id : str
     time : int
     joined : bool
+    client_data : ClientData | None = None
 class JoinedClientParser:
     
     def load(self , joined_client_dict : dict) -> JoinedLeaveClientData:
@@ -115,7 +116,8 @@ class JoinedClientParser:
                 id = payload['client']['id'],
                 room_id = payload['rid'],
                 time = payload['t'],
-                joined = True
+                joined = True ,
+                client_data = ClientData.create_from_dict(payload['client'])
             )
         elif payload['id'] == 'ClientLeft':
             return JoinedLeaveClientData(
@@ -136,28 +138,7 @@ class ChatDataParser:
         self.tell_received_text_parser = TellReceivedTextParser()
         self.joined_client_parser = JoinedClientParser()
     
-    def _get_general_chat_room_messages(self , message_list : list[dict]):
-        return [x for x in message_list if x['id'] == 'Text']
-    
-    def _get_tell_received_messages(self , message_list : list[dict]):
-        return [x for x in message_list if x['id'] == 'TellReceived' or x['id'] == 'TellConfirmed']
-    
-    def _get_status_data(self , message_list : list[dict]):
-        return [x for x in message_list if x['id'] == 'Status']
-    
-    def _get_joined_client_data(self , message_list : list[dict]):
-        return [x for x in message_list if x['id'] == 'ClientJoined']
-    
-    def _get_left_client_data(self , message_list : list[dict]):
-        return [x for x in message_list if x['id'] == 'ClientLeft']
-    
-    def _get_text_data(self , message_list : list[dict]):
-        return [x for x in message_list if x['id'] == 'Text']
-    
-    def parse_message(self, message_list):
-        return [x for x in message_list if x['id'] == 'Text'] , [x for x in message_list if x['id'] == 'TellReceived']
-    
-    def add_batch(self, batch : dict) -> Generator[dict, None, None]:
+    def add_batch(self, batch : dict) -> Generator[MessageData | StatusData | JoinedLeaveClientData, None, None]:
         
         event_function_map = {
             'Text' : self.tell_received_text_parser.load,

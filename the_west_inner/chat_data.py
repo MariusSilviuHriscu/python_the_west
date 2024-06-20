@@ -69,10 +69,25 @@ class ClientDataManager:
         
         for client in clients:
             self.add_client(client)
+    
+    def set_clients(self , clients : typing.Iterable[ClientData]):
+        self.clients = {client.id : client for client in clients}
 
     def remove_client(self , client_id : str):
         self.clients.pop(client_id)
-
+    
+    def __getitem__(self , client_id : str) -> ClientData:
+        for client in self.clients.values():
+            if client.name == client_id:
+                return client
+            if client.id == client_id:
+                return client
+    
+    def player_exists(self , player_name : str) -> bool:
+        for client in self.clients.values():
+            if client.name == player_name:
+                return True
+        return False
 @dataclass
 class MessageData:
     message_content: str
@@ -87,7 +102,7 @@ class MessageData:
 
 class ChatData:
     
-    def __init__(self , messages : dict[MessageData] , rooms : list[ChatRoomData] , clients : dict[str , ClientData]):
+    def __init__(self , messages : dict[MessageData] , rooms : list[ChatRoomData] , clients : ClientDataManager):
         self.messages = messages
         self.rooms = rooms
         self.clients = clients
@@ -101,13 +116,23 @@ class ChatData:
     def add_messages(self , messages : list[MessageData]):
         for message in messages:
             self.add_message(message)
-
     
-    def get_messages_by_room(self , room : str) -> list[MessageData]:
-        return [message for message in self.messages.values() if message.message_room == room]
     
-    def remove_client(self , client_id : str,room : str):
-        for room_data in self.rooms:
-            if room_data.name == room and room_data.has_member(client_id):
-                room_data.remove_member(client_id)
-                
+    def set_clients(self , clients : typing.Iterable[ClientData]):
+        self.clients.set_clients(clients = clients)
+    
+    def add_clients(self , clients : typing.Iterable[ClientData]| ClientData):
+        if isinstance(clients , ClientData):
+            self.clients.add_client(client = clients)
+        else:
+            self.clients.add_clients(clients = clients)
+    def remove_client(self , client_id : str):
+        self.clients.remove_client(client_id)
+    
+    def set_rooms(self , rooms : list[ChatRoomData]):
+        self.rooms = rooms
+    
+    def player_exists(self , player_name : str) -> bool:
+        return self.clients.player_exists(player_name = player_name)
+    def get_player(self , player_name : str) -> ClientData:
+        return self.clients[player_name]

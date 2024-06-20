@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Generator,Iterable
 
 from the_west_inner.chat_data import ChatRoomData
@@ -94,13 +95,46 @@ class TellReceivedTextParser:
                 return self.load_text(tell_received_text_dict)
             case _:
                 raise ValueError('Unknown tell received message type!')
+@dataclass
+class JoinedLeaveClientData:
+    id : str
+    room_id : str
+    time : int
+    joined : bool
+class JoinedClientParser:
+    
+    def load(self , joined_client_dict : dict) -> JoinedLeaveClientData:
         
+        if joined_client_dict['id'] != 'ClientJoined':
+            raise ValueError('Not a joined client message!')
         
+        payload = joined_client_dict['payload']
+        
+        if payload['id'] == 'ClientJoined':
+            return JoinedLeaveClientData(
+                id = payload['client']['id'],
+                room_id = payload['rid'],
+                time = payload['t'],
+                joined = True
+            )
+        elif payload['id'] == 'ClientLeft':
+            return JoinedLeaveClientData(
+                id = payload['client']['id'],
+                room_id = payload['rid'],
+                time = payload['t'],
+                joined = False
+            )
+        else:
+            raise ValueError('Unknown joined client message type!')
         
         
 
 class ChatDataParser:
         
+    def __init__(self ):
+        self.status_data_parser = StatusDataParser()
+        self.tell_received_text_parser = TellReceivedTextParser()
+        self.joined_client_parser = JoinedClientParser()
     
     def _get_general_chat_room_messages(self , message_list : list[dict]):
         return [x for x in message_list if x['id'] == 'Text']
@@ -123,16 +157,16 @@ class ChatDataParser:
     def parse_message(self, message_list):
         return [x for x in message_list if x['id'] == 'Text'] , [x for x in message_list if x['id'] == 'TellReceived']
     
-    def add_batch(self, batch) -> Generator[dict, None, None]:
+    def add_batch(self, batch : dict) -> Generator[dict, None, None]:
         
-        saloon_messages , tell_messages = self.parse_message(batch)
+        event_function_map = {
+            'Text' : self.tell_received_text_parser.load,
+            'TellReceived' : self.tell_received_text_parser.load,
+            'Status' : self.status_data_parser.load,
+            'ClientJoined' : self.joined_client_parser.load,
+            'ClientLeft' : self.joined_client_parser.load
+        }
         
-        for message in saloon_messages:
-            if (message['t'] , message['payload']['cid'], message['payload']['message']) not in self.messages:
-                
-                self.messages[(message['t'] , message['payload']['cid'], message['payload']['message'])] = message
-                yield message
-        for message in tell_messages:
-            if (message['t'] , message['payload']['from']['id'], message['payload']['message']) not in self.messages:
-                self.messages[(message['t'] , message['payload']['from']['id'], message['payload']['message'])] = message
-                yield message
+        for message in batch:
+            if message['id'] == 'Text':
+                yield event_function_map[message['id']](message)

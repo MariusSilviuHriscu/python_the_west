@@ -9,8 +9,8 @@ import typing
 
 from requests_handler import requests_handler
 
-from chat_data_reader import ChatDataParser, StatusData, JoinedLeaveClientData
-from chat_data import ChatData, MessageData
+from chat_data_reader import ChatDataParser, StatusData, JoinedLeaveClientData , MessageData
+from chat_data import ChatData
 
 @dataclass
 class ChatRequestData:
@@ -246,6 +246,7 @@ class Chat:
             typing.Union[MessageData, StatusData, JoinedLeaveClientData]: Parsed message data.
         """
         for message in self.chat_data_parser.add_batch(batch):
+            print(type(message))
             if isinstance(message, MessageData):
                 self.chat_data.add_message(message)
             elif isinstance(message, StatusData):
@@ -253,9 +254,12 @@ class Chat:
                 self.chat_data.set_clients(clients=message.clients)
             elif isinstance(message, JoinedLeaveClientData):
                 if message.joined:
+                    print('added')
                     self.chat_data.add_clients(clients=message.client_data)
+                    self.chat_data.add_clients_to_room(clients=[message.client_data], room_name=message.room_name)
                 else:
                     self.chat_data.remove_client(client_id=message.id)
+                    self.chat_data.remove_clients_from_room(clients=[message.client_data], room_name=message.room_name)
             
             yield message
     
@@ -268,7 +272,6 @@ class Chat:
             typing.Union[MessageData, StatusData, JoinedLeaveClientData]: Parsed message data.
         """
         chat_request_response = chat_request.send()
-        
         chat_request_data = json.loads(chat_request_response.text)
         batch = chat_request_data['batch']
         
@@ -282,6 +285,7 @@ class Chat:
         """
         for chat_request in self.chat_handler.message_loop():
             while len(self.message_queue) != 0:
+                print('got here')
                 queue_chat_request = self.message_queue.pop(0)
                 yield from self.handle_request(chat_request=queue_chat_request)
             

@@ -11,8 +11,15 @@ class ChatRoomData:
     def add_member(self , member : str):
         self.members.append(member)
     
+    def add_members(self , members : typing.Iterable[str]):
+        self.members.extend(members)
+    
     def remove_member(self , member : str):
         self.members.remove(member)
+    
+    def remove_members(self , members : typing.Iterable[str]):
+        for member in members:
+            self.remove_member(member)
     
     def has_member(self , member : str) -> bool:
         return member in self.members
@@ -121,6 +128,25 @@ class ChatData:
     def set_clients(self , clients : typing.Iterable[ClientData]):
         self.clients.set_clients(clients = clients)
     
+    def add_clients_to_room(self ,clients : typing.Iterable[ClientData], room_name : str):
+        print('adding clients to room: ', clients, room_name)
+        is_private = 'room' not in room_name
+        if room_name not in [x.name for x in self.rooms]:
+            self.rooms.append(ChatRoomData(name = room_name , members = [] , is_private = is_private))
+        for room in self.rooms:
+            if room.name == room_name:
+                room.add_members(clients = clients)
+                return
+    
+    def remove_clients_from_room(self , clients : typing.Iterable[ClientData] , room_name : str):
+        
+        if room_name not in [x.name for x in self.rooms]:
+            return
+        for room in self.rooms:
+            if room.name == room_name :
+                room.remove_members(clients = clients)
+                return
+                
     def add_clients(self , clients : typing.Iterable[ClientData]| ClientData):
         if isinstance(clients , ClientData):
             self.clients.add_client(client = clients)
@@ -131,6 +157,13 @@ class ChatData:
     
     def set_rooms(self , rooms : list[ChatRoomData]):
         self.rooms = rooms
+    
+    def get_general_chat_room(self) -> ChatRoomData:
+        print(self.rooms)
+        for room in self.rooms:
+            print(room.__dict__)
+            if room.is_private == False:
+                return room
     
     def player_exists(self , player_name : str) -> bool:
         return self.clients.player_exists(player_name = player_name)

@@ -80,7 +80,7 @@ class TellReceivedTextParser:
         
         return MessageData(
             message_content = payload['message'],
-            message_timestamp = text_dict['t'],
+            message_timestamp = payload['t'],
             message_sender = payload['cid'],
             message_room = payload['to']
         )
@@ -106,26 +106,27 @@ class JoinedClientParser:
     
     def load(self , joined_client_dict : dict) -> JoinedLeaveClientData:
         
-        if joined_client_dict['id'] != 'ClientJoined':
-            raise ValueError('Not a joined client message!')
+        if joined_client_dict['id'] != 'ClientJoined' and joined_client_dict['id'] != 'ClientLeft':
+            raise ValueError('Not a joined or left client message!')
         
         payload = joined_client_dict['payload']
         
-        if payload['id'] == 'ClientJoined':
+        if joined_client_dict['id'] == 'ClientJoined':
             return JoinedLeaveClientData(
                 id = payload['client']['id'],
                 room_id = payload['rid'],
-                time = payload['t'],
+                time = joined_client_dict['t'],
                 joined = True ,
                 client_data = ClientData.create_from_dict(payload['client'])
             )
-        elif payload['id'] == 'ClientLeft':
+        elif joined_client_dict['id'] == 'ClientLeft':
             return JoinedLeaveClientData(
-                id = payload['client']['id'],
+                id = payload['cid'],
                 room_id = payload['rid'],
-                time = payload['t'],
+                time = joined_client_dict['t'],
                 joined = False
             )
+
         else:
             raise ValueError('Unknown joined client message type!')
         
@@ -149,5 +150,6 @@ class ChatDataParser:
         }
         
         for message in batch:
-            if message['id'] == 'Text':
-                yield event_function_map[message['id']](message)
+            if message['id'] not in event_function_map:
+                continue
+            yield event_function_map[message['id']](message)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+import typing
 
 class ChatRoomData:
     
@@ -35,7 +35,43 @@ class ClientData:
     town_y: str
     v: int
     actioned: int
+    
+    @staticmethod
+    def create_from_dict(data : dict):
+        return ClientData(
+            name = data['name'],
+            cclass= data['cclass'],
+            subclass= data['subclass'],
+            westid= data['westid'],
+            level= data['level'],
+            duelLevel= data['duelLevel'],
+            townId= data['townId'],
+            town_rights= data['town_rights'],
+            allianceId= data['allianceId'],
+            gm= data['gm'],
+            professionId= data['professionId'],
+            id= data['id'],
+            town_x= data['town_x'],
+            town_y= data['town_y'],
+            v= data['v'],
+            actioned= data['actioned']
+        )
 
+class ClientDataManager:
+    
+    def __init__(self , clients : dict[str , ClientData]):
+        self.clients = clients
+    
+    def add_client(self , client : ClientData):
+        self.clients[client.id] = client
+    
+    def add_clients(self , clients : typing.Iterable[ClientData]):
+        
+        for client in clients:
+            self.add_client(client)
+
+    def remove_client(self , client_id : str):
+        self.clients.pop(client_id)
 
 @dataclass
 class MessageData:

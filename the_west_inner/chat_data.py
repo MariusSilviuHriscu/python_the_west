@@ -15,8 +15,12 @@ class ChatRoomData:
         self.members.extend(members)
     
     def remove_member(self , member : str):
-        self.members.remove(member)
-    
+        try:
+            self.members.remove(member)
+        except ValueError:
+            pass
+        except Exception as e:
+            raise e
     def remove_members(self , members : typing.Iterable[str]):
         for member in members:
             self.remove_member(member)
@@ -80,10 +84,14 @@ class ClientDataManager:
     def set_clients(self , clients : typing.Iterable[ClientData]):
         self.clients = {client.id : client for client in clients}
 
-    def remove_client(self , client_id : str):
-        self.clients.pop(client_id)
-    
-    def __getitem__(self , client_id : str) -> ClientData:
+    def remove_client(self , client : ClientData):
+        try :
+            self.clients.pop(client)
+        except KeyError :
+            pass
+        except Exception as e:
+            raise e
+    def __getitem__(self , client_id : int) -> ClientData:
         for client in self.clients.values():
             if client.name == client_id:
                 return client
@@ -128,14 +136,13 @@ class ChatData:
     def set_clients(self , clients : typing.Iterable[ClientData]):
         self.clients.set_clients(clients = clients)
     
-    def add_clients_to_room(self ,clients : typing.Iterable[ClientData], room_name : str):
-        print('adding clients to room: ', clients, room_name)
+    def add_clients_to_room(self ,clients : typing.Iterable[str], room_name : str):
         is_private = 'room' not in room_name
         if room_name not in [x.name for x in self.rooms]:
             self.rooms.append(ChatRoomData(name = room_name , members = [] , is_private = is_private))
         for room in self.rooms:
             if room.name == room_name:
-                room.add_members(clients = clients)
+                room.add_members(members= clients)
                 return
     
     def remove_clients_from_room(self , clients : typing.Iterable[ClientData] , room_name : str):
@@ -144,7 +151,7 @@ class ChatData:
             return
         for room in self.rooms:
             if room.name == room_name :
-                room.remove_members(clients = clients)
+                room.remove_members(members = clients)
                 return
                 
     def add_clients(self , clients : typing.Iterable[ClientData]| ClientData):
@@ -159,9 +166,7 @@ class ChatData:
         self.rooms = rooms
     
     def get_general_chat_room(self) -> ChatRoomData:
-        print(self.rooms)
         for room in self.rooms:
-            print(room.__dict__)
             if room.is_private == False:
                 return room
     

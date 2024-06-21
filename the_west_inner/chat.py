@@ -9,8 +9,8 @@ import typing
 
 from requests_handler import requests_handler
 
-from chat_data_reader import ChatDataParser, StatusData, JoinedLeaveClientData , MessageData
-from chat_data import ChatData
+from the_west_inner.chat_data_reader import ChatDataParser, StatusData, JoinedLeaveClientData , MessageData
+from the_west_inner.chat_data import ChatData
 
 @dataclass
 class ChatRequestData:
@@ -231,11 +231,17 @@ class Chat:
         Returns:
             typing.Union[ChatSendRequest, bool]: ChatSendRequest object if recipient exists, otherwise False.
         """
-        if not self.chat_data.player_exists(player_name=recipient_name):
-            return False
-        player_data = self.chat_data.get_player_data(player_name=recipient_name)
         
-        return self.chat_handler.send(recipient=player_data.id, message=message)
+        if not self.chat_data.player_exists(player_name=recipient_name) and recipient_name not in [x.name for x in self.chat_data.rooms]:
+            return False
+        player_data = self.chat_data.get_player(player_name=recipient_name)
+        
+        if player_data is None:
+            send_room_name = recipient_name
+        else:
+            send_room_name = player_data.id
+        
+        return self.chat_handler.send(recipient=send_room_name, message=message)
     
     def parse_batch(self, batch: list[dict]) -> typing.Generator[typing.Union[MessageData, StatusData, JoinedLeaveClientData], None, None]:
         """
@@ -246,7 +252,6 @@ class Chat:
             typing.Union[MessageData, StatusData, JoinedLeaveClientData]: Parsed message data.
         """
         for message in self.chat_data_parser.add_batch(batch):
-            print(type(message))
             if isinstance(message, MessageData):
                 self.chat_data.add_message(message)
             elif isinstance(message, StatusData):
@@ -254,12 +259,11 @@ class Chat:
                 self.chat_data.set_clients(clients=message.clients)
             elif isinstance(message, JoinedLeaveClientData):
                 if message.joined:
-                    print('added')
                     self.chat_data.add_clients(clients=message.client_data)
-                    self.chat_data.add_clients_to_room(clients=[message.client_data], room_name=message.room_name)
+                    self.chat_data.add_clients_to_room(clients=[message.id], room_name=message.room_id)
                 else:
                     self.chat_data.remove_client(client_id=message.id)
-                    self.chat_data.remove_clients_from_room(clients=[message.client_data], room_name=message.room_name)
+                    self.chat_data.remove_clients_from_room(clients=[message.id], room_name=message.room_id)
             
             yield message
     
@@ -285,7 +289,6 @@ class Chat:
         """
         for chat_request in self.chat_handler.message_loop():
             while len(self.message_queue) != 0:
-                print('got here')
                 queue_chat_request = self.message_queue.pop(0)
                 yield from self.handle_request(chat_request=queue_chat_request)
             

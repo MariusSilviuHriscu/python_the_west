@@ -275,6 +275,8 @@ class Chat:
         Yields:
             typing.Union[MessageData, StatusData, JoinedLeaveClientData]: Parsed message data.
         """
+        if chat_request == False:
+            return
         chat_request_response = chat_request.send()
         chat_request_data = json.loads(chat_request_response.text)
         batch = chat_request_data['batch']

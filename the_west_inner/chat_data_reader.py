@@ -18,16 +18,19 @@ class StatusDataParser:
         
         for room_dict in room_data:
             
-            yield ChatRoomData(room_dict['id'],
-                                room_dict['members'],
-                                not room_dict['roomdescription']['public']
+            yield ChatRoomData( name = room_dict['id'],
+                                members = room_dict['members'],
+                                is_private = not room_dict['roomdescription']['public']
                                 )
     
-    def load_clients(self , client_data : list[dict]) -> Generator[ClientData, None, None]:
+    def load_clients(self , client_data : list[dict] , self_data : dict) -> Generator[ClientData, None, None]:
         
         for client_dict in client_data:
             
-            yield ClientData.create_from_dict(client_dict)
+            yield ClientData.create_from_dict(data = client_dict)
+        
+        if self_data is not None:
+            yield ClientData.create_from_dict(data = self_data)
             
             
     
@@ -35,8 +38,8 @@ class StatusDataParser:
         
         payload = status_dict['payload']
         
-        clients = self.load_clients(payload['clients'])
-        rooms = self.load_rooms(payload['rooms'])
+        clients = self.load_clients(client_data = payload['clients'] , self_data = payload['self'])
+        rooms = self.load_rooms(room_data = payload['rooms'])
         
         return StatusData(rooms = list(rooms),
                           clients = clients)

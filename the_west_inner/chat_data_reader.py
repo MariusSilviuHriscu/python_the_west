@@ -56,7 +56,7 @@ class TellReceivedTextParser:
         
         return MessageData(
             message_content = payload['message'],
-            message_timestamp = payload['t'],
+            message_timestamp = tell_received_text_dict['t'],
             message_sender = payload['from']['id'],
             message_room = payload['from']['id']
         )

@@ -3,6 +3,7 @@ import requests
 from urllib.parse import urlparse
 import datetime
 
+from tor_handler import TorRequestsSession
 from requests_rate_limiter import rate_limited
 
 def requests_url_decorator(funct):
@@ -30,7 +31,7 @@ def request_url(base_url, window, action, h=None, action_name="action"):
         base_url)._replace(query=f'window={window}&action={action}&h={h}')
     return url.geturl()
 
-def request_game(session, base_url, window, action, payload=None, h=None, action_name="action"):
+def request_game(session : requests.Session | TorRequestsSession, base_url, window, action, payload=None, h=None, action_name="action"):
     """
     Make a game request to the specified server.
 
@@ -47,9 +48,9 @@ def request_game(session, base_url, window, action, payload=None, h=None, action
         dict: JSON response from the game server.
     """
     if payload is not None:
-        r = session.post(request_url(base_url, window, action, h, action_name=action_name), data=payload)
+        r = session.post(request_url(base_url, window, action, h, action_name=action_name), data=payload,timeout=50)
     else:
-        r = session.post(request_url(base_url, window, action, h, action_name=action_name))
+        r = session.post(request_url(base_url, window, action, h, action_name=action_name) ,timeout=50)
     return r.json()
 
 @dataclass
@@ -62,7 +63,7 @@ class requests_handler:
         base_url (str): The base URL of the game server.
         h (str): The hash parameter for authentication.
     """
-    session: requests.Session
+    session: requests.Session | TorRequestsSession
     base_url: str
     h: str
 

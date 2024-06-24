@@ -60,10 +60,12 @@ class ChatSendRequest:
             Response: Response object from the HTTP request.
         """
         data = self.chat_request_data.to_json()
-        return self.handler.session.post(
+        response = self.handler.session.post(
                     urlparse(self.handler.base_url)._replace(path="gameservice/chat/").geturl(), allow_redirects=False,
                     data=data
             )
+        self.is_sent = True
+        return response
 
 class ChatHandler:
     """
@@ -117,7 +119,7 @@ class ChatHandler:
         
         return client_connection_id
     
-    def create_chat_request_data(self, message_id: int, clid: int, actioned=None, recipient='null', message=None) -> ChatRequestData:
+    def create_chat_request_data(self, message_id: int, clid: int, actioned=None, recipient='null', message=None , tell_message = False) -> ChatRequestData:
         """
         Creates a ChatRequestData object based on provided parameters.
         Args:
@@ -142,6 +144,11 @@ class ChatHandler:
             {"op": "nop", "to": recipient, "stamp": current_timestamp - 1}
         ]
         
+        if tell_message:
+            batch = [
+                {"op": "send", "to": recipient, "stamp": current_timestamp - 1, "message": message , 'tell' : True}
+            ]
+        
         # Create the data dictionary
         data = {
             "messageid": messageid,
@@ -153,7 +160,7 @@ class ChatHandler:
         
         return ChatRequestData(**data)
     
-    def send(self, recipient: str, message: str) -> ChatSendRequest:
+    def send(self, recipient: str, message: str , tell_message : bool = False) -> ChatSendRequest:
         """
         Sends a chat message.
         Args:
@@ -167,7 +174,9 @@ class ChatHandler:
                                              clid=self.clid,
                                              actioned=actioned,
                                              recipient=recipient,
-                                             message=message)
+                                             message=message,
+                                             tell_message=tell_message
+                                             )
         return ChatSendRequest(handler=self.handler, chat_request_data=data)
     
     def message_loop(self) -> typing.Generator[ChatSendRequest, None, None]:
@@ -222,7 +231,7 @@ class Chat:
         self.chat_data_parser = chat_data_parser
         self.message_queue: list[ChatSendRequest] = []
 
-    def send_message(self, recipient_name: str, message: str) -> typing.Union[ChatSendRequest, bool]:
+    def send_message(self, recipient_name: str, message: str , tell_message : bool = False) -> typing.Union[ChatSendRequest, bool]:
         """
         Sends a message to a recipient if the recipient exists.
         Args:
@@ -232,16 +241,17 @@ class Chat:
             typing.Union[ChatSendRequest, bool]: ChatSendRequest object if recipient exists, otherwise False.
         """
         
-        if not self.chat_data.player_exists(player_name=recipient_name) and recipient_name not in [x.name for x in self.chat_data.rooms]:
+        if not self.chat_data.player_exists(player_name=recipient_name) and recipient_name not in [x.name for x in self.chat_data.rooms] and not tell_message:
+            print('Returning')
             return False
         player_data = self.chat_data.get_player(player_name=recipient_name)
         
         if player_data is None:
             send_room_name = recipient_name
         else:
-            send_room_name = player_data.id
+            send_room_name = player_data.name
         
-        return self.chat_handler.send(recipient=send_room_name, message=message)
+        return self.chat_handler.send(recipient=send_room_name, message=message , tell_message = tell_message)
     
     def parse_batch(self, batch: list[dict]) -> typing.Generator[typing.Union[MessageData, StatusData, JoinedLeaveClientData], None, None]:
         """
@@ -283,7 +293,7 @@ class Chat:
         
         yield from self.parse_batch(batch=batch)
     
-    def message_loop(self) -> typing.Generator[MessageData|StatusData|JoinedLeaveClientData, None, None]:
+    def message_loop(self , sleep_time: int = 0) -> typing.Generator[MessageData|StatusData|JoinedLeaveClientData, None, None]:
         """
         Processes messages in a loop, handling queued requests and sending new requests.
         Yields:
@@ -295,3 +305,6 @@ class Chat:
                 yield from self.handle_request(chat_request=queue_chat_request)
             
             yield from self.handle_request(chat_request=chat_request)
+            
+            time.sleep(sleep_time)
+            

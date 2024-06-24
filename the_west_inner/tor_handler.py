@@ -3,6 +3,10 @@ from stem import Signal
 from stem.control import Controller
 import time
 
+
+
+
+
 class TorSessionHandler:
     def __init__(self):
         self.session = requests.Session()
@@ -62,7 +66,95 @@ class TorSessionHandler:
         except Exception as e:
             print(f"Error checking connection speed: {e}")
             return False
-def create_tor_session():
+
+class TorRequestsSession():
+    def __init__(self,
+                 tor_handler : TorSessionHandler , 
+                 session : requests.Session ,
+                 base_website : str = 'https://www.the-west.ro'):
+        self.tor_handler = tor_handler
+        self.session = session
+        self.base_website  = base_website
+    def test_connection(self) -> bool:
+        
+        try :
+            response = self.session.get(self.base_website)
+            return response.status_code == 200
+        
+        except requests.ConnectTimeout as e:
+            
+            return False
+        
+        
+    def new_connection(self):
+        
+        while not self.test_connection() :
+            
+            self.tor_handler.renew_connection()
+    
+    def _post(self,
+              url : str ,
+              data : dict | None = None ,
+              timeout : int = 50 ,
+              allow_redirects : bool | None = None) -> requests.Response:
+        if allow_redirects is None:
+            return self.session.post(url=url , data= data , timeout= timeout)
+        return self.session.post(url=url , data= data , timeout= timeout , allow_redirects= allow_redirects)
+    def _get(self,
+              url : str ,
+              data : dict | None = None ,
+              timeout : int = 50 ,
+              allow_redirects : bool | None = None) -> requests.Response:
+        if allow_redirects is None:
+            return self.session.post(url=url , data= data , timeout= timeout)
+        return self.session.post(url=url , data= data , timeout= timeout , allow_redirects= allow_redirects)
+    
+    def post(self,
+             url : str , 
+             data : dict | None = None ,
+             timeout : int = 50 ,
+             retry_per_connection : int = 3 ,
+             allow_redirects : bool | None = None):
+        for _ in range(retry_per_connection):
+            
+            try :
+                return self._post(url = url , 
+                                  data = data ,
+                                  timeout= timeout ,
+                                  allow_redirects = allow_redirects)
+            except:
+                print(f'Tried to get url try number {_}')
+        return self.post(url=url , 
+                         data=data ,
+                         timeout=timeout ,
+                         retry_per_connection = retry_per_connection,
+                         allow_redirects = allow_redirects
+                         )
+    def get(self,
+             url : str , 
+             data : dict | None = None ,
+             timeout : int = 50 ,
+             retry_per_connection : int = 3 ,
+             allow_redirects : bool | None = None):
+        for _ in range(retry_per_connection):
+            
+            try :
+                return self._get(url = url , 
+                                  data = data ,
+                                  timeout= timeout ,
+                                  allow_redirects = allow_redirects)
+            except:
+                print(f'Tried to get url try number {_}')
+        return self.get(url=url , 
+                         data=data ,
+                         timeout=timeout ,
+                         retry_per_connection = retry_per_connection,
+                         allow_redirects = allow_redirects
+                         )
+            
+
+
+def create_tor_session() -> TorRequestsSession:
     tor_handler = TorSessionHandler()
 
     while not tor_handler.is_tor_connected():
@@ -72,6 +164,11 @@ def create_tor_session():
     # Set the proxy for the requests session
     tor_proxy = {'http': 'socks5://127.0.0.1:9150', 'https': 'socks5://127.0.0.1:9150'}
     tor_handler.session.proxies.update(tor_proxy)
-
-    return tor_handler.session
+    tor_handler.session.headers = {"User-Agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'}
+    
+    
+    return TorRequestsSession(
+        tor_handler = tor_handler,
+        session = tor_handler.session
+    )
 

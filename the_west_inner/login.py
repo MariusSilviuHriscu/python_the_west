@@ -5,6 +5,7 @@ import typing
 
 from game_classes import Game_classes
 from requests_handler import requests_handler
+from tor_handler import create_tor_session
 from movement import Game_data
 from player_data import Player_data,ExpData
 from init_data import (return_h,
@@ -169,7 +170,7 @@ class Game_login():
         self.player_name = player_name 
         self.player_password = player_password
         self.world_id = world_id
-        self.session = self._create_session()
+        self.session = self._create_session(use_tor_flag=use_tor_flag)
         self.url = ""
         self.game_html = None
     def _set_url(self,url:str)->None:
@@ -177,7 +178,10 @@ class Game_login():
     def _create_session (self , use_tor_flag : bool = False) -> requests.Session :
         if use_tor_flag:
             
-            pass
+            session = create_tor_session()
+            session.headers = {"User-Agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'}
+
+            return session
             
         with requests.Session() as session:
             # Set the User-Agent header

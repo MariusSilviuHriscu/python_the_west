@@ -5,7 +5,7 @@ import typing
 
 from game_classes import Game_classes
 from requests_handler import requests_handler
-from tor_handler import create_tor_session
+from tor_handler import create_tor_session , TorRequestsSession
 from movement import Game_data
 from player_data import Player_data,ExpData
 from init_data import (return_h,
@@ -175,11 +175,10 @@ class Game_login():
         self.game_html = None
     def _set_url(self,url:str)->None:
         self.url = url
-    def _create_session (self , use_tor_flag : bool = False) -> requests.Session :
+    def _create_session (self , use_tor_flag : bool = False) -> requests.Session | TorRequestsSession :
         if use_tor_flag:
             
             session = create_tor_session()
-            session.headers = {"User-Agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'}
 
             return session
             
@@ -212,8 +211,13 @@ class Game_login():
         # Send a GET request to the URL specified in the Location header of the previous response
         game_state_response = self.session.get(f"{game_page_response.headers['Location']}",allow_redirects=False)
 
+        
         # Set the X-Requested-With header to "XMLHttpRequest"
-        self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
+        if isinstance(self.session , requests.Session):
+            self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
+        elif isinstance(self.session , TorRequestsSession):
+            self.session.session.headers['X-Requested-With'] = 'XMLHttpRequest'
+        
 
         # Extract the active game URL from the previous response
         active_game_url = game_state_response.url

@@ -75,6 +75,7 @@ class TorRequestsSession():
         self.tor_handler = tor_handler
         self.session = session
         self.base_website  = base_website
+                
     def test_connection(self) -> bool:
         
         try :
@@ -151,6 +152,7 @@ class TorRequestsSession():
                          retry_per_connection = retry_per_connection,
                          allow_redirects = allow_redirects
                          )
+
             
 
 

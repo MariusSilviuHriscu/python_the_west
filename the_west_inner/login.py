@@ -54,7 +54,9 @@ def game_classes_builder(active_world_url : str, game_requests_session: requests
                     energy_max=0,
                     level=0,
                     experience=0,
-                    exp_data = ExpData(0,0,0)
+                    exp_data = ExpData(0,0,0),
+                    class_name= '',
+                    class_key= ''
                     )
 
         # Update the character_movement attribute of the Player_data object using the "handler" object

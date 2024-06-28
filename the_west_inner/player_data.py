@@ -46,6 +46,8 @@ class Player_data:
     level: int
     experience: int
     exp_data : ExpData
+    class_name : str
+    class_key : str
     profession_id: int = -1
     profession: str = "None"
     town_id : int|None = None
@@ -61,6 +63,10 @@ class Player_data:
         profile_search_response = handler.post("profile", "init", payload={"playerId": f"{self.id}", "name": f"{self.name}"}, use_h=False, action_name="mode")
         self.x = profile_search_response["x"]
         self.y = profile_search_response["y"]
+        
+        self.class_name = profile_search_response['className']
+        self.class_key = profile_search_response['classKey']
+        
         if profile_search_response["profession"] is not None:
             self.profession_id = profile_search_response["profession"]["id"]
             self.profession = profile_search_response["profession"]["name"]
@@ -165,3 +171,9 @@ class Player_data:
     def required_exp(self) -> int:
         
         return self.exp_data.required_exp()
+    
+    def select_class(self, handler: requests_handler):
+        
+        if self.level < 15 :
+            raise ValueError(f'Cannot select class before level 15 now you have : {self.level}')
+        

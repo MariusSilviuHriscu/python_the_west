@@ -32,26 +32,15 @@ class ExpScriptExecutor:
         exp_script.cycle_exp(callback_function=self.script_chainer.chain_function())
 
 
-def make_exp_script_executor(game_classes: Game_classes) -> ExpScriptExecutor:
+def make_exp_script_executor(callback_chainer : CallbackChainer | None = None ) -> ExpScriptExecutor:
     """
     Creates an instance of ExpScriptExecutor configured with appropriate callback functions.
 
     Args:
-        game_classes (Game_classes): An instance of Game_classes containing game-related data.
+        callback_chainer (CallbackChainer): An instance of CallbackChainer containing the callback functions the executor uses.
 
     Returns:
         ExpScriptExecutor: An instance of ExpScriptExecutor configured with callback functions.
     """
-    # Initialize a CallbackChainer
-    chainer = CallbackChainer()
-
-    # Add callback function to update skills
-    chainer.add_callback(
-        callback_function=check_and_update_skills,
-        handler=game_classes.handler,
-        target_attribute_key='strength',
-        target_skill_key='build'
-    )
-    #chainer.add_callback(callback_function = error_handling_test)
     # Create and return an instance of ExpScriptExecutor
-    return ExpScriptExecutor(script_chainer=chainer)
+    return ExpScriptExecutor(script_chainer=callback_chainer)

@@ -142,3 +142,31 @@ class CombinedRule():
     def should_run(self) -> bool:
         # Combine the results of individual rules using logical AND
         return all(rule.should_run() for rule in self.rules)
+
+
+class RunOnceThenStopRule():
+    
+    """
+    A rule that allows execution once and then stops.
+
+    Methods:
+    - __init__: Initializes an instance of the rule with a callable condition.
+    - should_run: Checks if the rule allows execution based on the callable condition.
+    """
+    def __init__(self , condition_callable: typing.Callable[[], bool]):
+        self.condition_callable = condition_callable
+        self.has_run = False
+    
+    def should_run(self) -> bool:
+        
+        if self.has_run:
+            return False
+        
+        checked_value = self.condition_callable()
+        
+        if checked_value:
+            
+            self.has_run = True
+            return True
+        
+        return False

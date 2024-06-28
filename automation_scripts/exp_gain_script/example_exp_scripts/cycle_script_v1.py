@@ -157,7 +157,7 @@ class CycleScriptManager:
         else:
             print('Cycle finished but did no work!')
         
-    def cycle(self, level: int , callback_script) -> typing.Generator[None, None, None]:
+    def cycle(self, level: int , callback_script : typing.Callable | None = None) -> typing.Generator[None, None, None]:
         """
         Executes the cycle script and sleeps for a specified duration before repeating.
 

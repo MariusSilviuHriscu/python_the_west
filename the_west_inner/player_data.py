@@ -15,10 +15,20 @@ Methods:
 """
 
 from dataclasses import dataclass
+import typing
 import time
+from enum import Enum, auto
+
 from requests_handler import requests_handler
 from movement import character_movement,Game_data
-import typing
+
+
+class ClassTypeEnum(Enum):
+    GREENHORN = auto()
+    ADVENTURER = auto()
+    DUELIST = auto()
+    SOLDIER = auto()
+    WORKER = auto()
 
 @dataclass
 class ExpData:
@@ -172,8 +182,24 @@ class Player_data:
         
         return self.exp_data.required_exp()
     
-    def select_class(self, handler: requests_handler):
+    def select_class(self, handler: requests_handler , class_type_enum : ClassTypeEnum):
         
         if self.level < 15 :
             raise ValueError(f'Cannot select class before level 15 now you have : {self.level}')
+        if self.class_key != 'greenhorn':
+            raise Exception(f'You already  have a class selected !')
         
+        payload = {'charclass' : str(class_type_enum)}
+        
+        response = handler.post(
+            window = 'class_choose',
+            action = 'choose',
+            payload = payload ,
+            use_h = True
+        )
+        
+        if response.get('error' , False):
+            raise Exception('Something went wrong with choosing class')
+        
+        self.update_all(handler = handler)
+    

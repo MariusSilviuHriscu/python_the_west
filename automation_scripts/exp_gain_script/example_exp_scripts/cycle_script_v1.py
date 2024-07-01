@@ -4,12 +4,37 @@ from requests.exceptions import ConnectionError
 
 from the_west_inner.login import Game_login
 from the_west_inner.game_classes import Game_classes
+from the_west_inner.equipment import Equipment, Equipment_manager
+from the_west_inner.requests_handler import requests_handler
 
 from automation_scripts.exp_gain_script.exp_script import ExpScript
 from automation_scripts.exp_gain_script.exp_script_executor import ExpScriptExecutor
 
 from automation_scripts.exp_gain_script.example_exp_scripts.loader_func_v1 import load_exp_script_v1, make_exp_script_executor_v1
 from automation_scripts.exp_gain_script.example_exp_scripts.sleep_func_v1 import CycleSleeperManager
+
+class CycleScriptEquipmentChanger:
+    
+    def __init__(self , 
+                 regen_equip : Equipment ,
+                 work_equip : Equipment 
+                 ):
+        self.regen_equip = regen_equip
+        self.work_equip = work_equip
+    
+    def equip_regen_equipment(self , 
+                              equipment_manager : Equipment_manager ,
+                              handler : requests_handler) -> None:
+        
+        equipment_manager.equip_equipment(equipment = self.regen_equip,
+                                          handler = handler
+                                          )
+    def equip_work_equipment(self , 
+                              equipment_manager : Equipment_manager ,
+                              handler : requests_handler) -> None:
+        
+        equipment_manager.equip_equipment(equipment = self.work_equip,
+                                          handler = handler)
 
 class CycleScript:
     """
@@ -76,7 +101,7 @@ class CycleScriptManager:
         game_login (Game_login): The login manager for the game.
     """
     
-    def __init__(self, game_login: Game_login):
+    def __init__(self, game_login: Game_login , equipment_changer : typing.Optional[CycleScriptEquipmentChanger]):
         """
         Initializes the CycleScriptManager with the provided login manager.
 
@@ -84,8 +109,8 @@ class CycleScriptManager:
             game_login (Game_login): The login manager for the game.
         """
         self.game_login = game_login
+        self.equipment_changer = equipment_changer
         self.current_cycle_script = None
-
     @property
     def game_data(self) -> Game_classes:
         """
@@ -150,14 +175,26 @@ class CycleScriptManager:
                                             work_manager=game_data.work_manager,
                                             player_data=game_data.player_data)
         
+        if self.equipment_changer is not None:
+            self.equipment_changer.equip_work_equipment(
+                    equipment_manager = game_data.equipment_manager,
+                    handler = game_data.handler
+                )
+
         if sleep_manager.start_cycle(exp_script=load_exp_script_v1(game_classes=game_data, level=level)):
+                                
             self._execute_cycle_script(level=level, game_data=game_data)
             sleep_manager.finish_cycle()
             print('Cycle script finished')
         else:
             print('Cycle finished but did no work!')
         
-    def cycle(self, level: int , callback_script) -> typing.Generator[None, None, None]:
+        if self.equipment_changer is not None:
+            self.equipment_changer.equip_regen_equipment(
+                    equipment_manager = game_data.equipment_manager,
+                    handler = game_data.handler
+                )
+    def cycle(self, level: int ) -> typing.Generator[None, None, None]:
         """
         Executes the cycle script and sleeps for a specified duration before repeating.
 

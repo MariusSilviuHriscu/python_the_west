@@ -101,7 +101,7 @@ class CycleScriptManager:
         game_login (Game_login): The login manager for the game.
     """
     
-    def __init__(self, game_login: Game_login , equipment_changer : typing.Optional[CycleScriptEquipmentChanger]):
+    def __init__(self, game_login: Game_login , equipment_changer : typing.Optional[CycleScriptEquipmentChanger] = None):
         """
         Initializes the CycleScriptManager with the provided login manager.
 

@@ -13,6 +13,7 @@ Functions:
 """
 import typing
 from the_west_inner.game_classes import Game_classes
+from the_west_inner.player_data import ClassTypeEnum
 
 def make_check_health_funct(health_percentage: float, game_classes: Game_classes) -> typing.Callable[[], bool]:
     """
@@ -59,3 +60,12 @@ def make_check_inventory_item_func(item_id: int, item_number: int, game_classes:
         return game_classes.bag[item_id] >= item_number
 
     return check_inventory_item
+
+def make_check_if_can_change_class(game_classes : Game_classes) -> typing.Callable[[],bool]:
+    
+    
+    def check_if_can_change() -> bool:
+        
+        return game_classes.player_data.level >= 15 and str(ClassTypeEnum.GREENHORN) == game_classes.player_data.class_name
+    
+    return check_if_can_change

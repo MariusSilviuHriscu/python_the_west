@@ -17,6 +17,11 @@ return_premium_data: Extracts premium bonus data from the initialization HTML.
 return_wear_data : Extracts equipment data from the initialization HTML
 """
 
+CORRESPONDING_EVENT_WOF = {
+    'Independence' : 'independencewof'
+}
+
+
 def return_h(login_data):
     soup = BeautifulSoup(login_data.text, 'html.parser')
     return soup.find("body").find("script").contents[0].split("""Player.init({"h":""")[1].split(",")[0].replace("\"","")
@@ -85,3 +90,22 @@ def return_currency_data(initialization_html:str)->dict[str,int]:
         if "cash" in string_found:
             json_player_data = json.loads(string_found)
             return {key : json_player_data.get(key) for key in search_dict}
+
+def return_current_event_data(initialization_html : str) -> dict[str,str|int]:
+    
+    jsonStr_list = re.findall(r'\{.*\}', str(initialization_html))
+    json_item = json.loads(jsonStr_list[2])
+    return json_item["sesData"]
+
+
+def get_wof_id_by_event_name(initialization_html : str , event_name : str) -> dict[str,str|int]:
+    
+    jsonStr_list = re.findall(r'\{.*\}', str(initialization_html))
+    wof_type = CORRESPONDING_EVENT_WOF.get(event_name, None)
+    for json_item in jsonStr_list:
+        try :
+            dict_data = json.loads(json_item)
+            if wof_type and dict_data.get('type', None) == wof_type:
+                return dict_data.get('id')
+        except Exception as e:
+            pass

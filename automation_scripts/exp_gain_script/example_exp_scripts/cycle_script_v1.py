@@ -13,6 +13,8 @@ from automation_scripts.exp_gain_script.exp_script_executor import ExpScriptExec
 from automation_scripts.exp_gain_script.example_exp_scripts.loader_func_v1 import load_exp_script_v1, make_exp_script_executor_v1
 from automation_scripts.exp_gain_script.example_exp_scripts.sleep_func_v1 import CycleSleeperManager
 
+from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
+
 class CycleScriptEquipmentChanger:
     
     def __init__(self , 
@@ -101,7 +103,11 @@ class CycleScriptManager:
         game_login (Game_login): The login manager for the game.
     """
     
-    def __init__(self, game_login: Game_login , equipment_changer : typing.Optional[CycleScriptEquipmentChanger] = None):
+    def __init__(self,
+                 game_login: Game_login ,
+                 equipment_changer : typing.Optional[CycleScriptEquipmentChanger] = None ,
+                 setup_executable : CallbackChainer = None
+                 ):
         """
         Initializes the CycleScriptManager with the provided login manager.
 
@@ -110,6 +116,7 @@ class CycleScriptManager:
         """
         self.game_login = game_login
         self.equipment_changer = equipment_changer
+        self.setup_executable = setup_executable
         self.current_cycle_script = None
     @property
     def game_data(self) -> Game_classes:
@@ -170,6 +177,17 @@ class CycleScriptManager:
             level (int): The level for which the cycle script is executed.
         """
         game_data = self.game_data
+        
+        if self.setup_executable is not None:
+            executable = self.setup_executable.chain_function(
+                                                            handler = game_data.handler ,
+                                                            global_currency = game_data.currency,
+                                                            game_html = self.game_login.game_html)
+            try:
+                executable()
+            except Exception as e:
+                print(e)
+        
         sleep_manager = CycleSleeperManager(handler=game_data.handler,
                                             task_queue=game_data.task_queue,
                                             work_manager=game_data.work_manager,

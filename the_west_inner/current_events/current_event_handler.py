@@ -22,8 +22,7 @@ class EventHandler():
             payload= payload,
             use_h= True
         )
-        
-        if response.get('error' , 'False'):
+        if 'error' in response and response.get('error'):
             raise Exception(f"You couldn't gamble ! Error message is  : {response.get('msg', '')} ")
         
         return response
@@ -41,7 +40,6 @@ class EventHandler():
             payload= payload,
             use_h= True
         )
-        
         return response
     
     def init_event(self , wof_id : int):

@@ -50,12 +50,13 @@ class CostData:
 class CurrencyData:
     def __init__(self ,
                  cost_data : CostData,
-                 bribe_dict : list[int],
-                 reset_dict : list[int]
+                 bribe_list : list[int],
+                 reset_list : list[int],
+                 main_list : list[int]
                  ):
         self.cost_data = cost_data
-        self.bribe_dict = bribe_dict
-        self.reset_dict = reset_dict
+        self.bribe_list = bribe_list
+        self.reset_list = reset_list
     
     def get_reset_cost(self, currency : EventCurrencyEnum) -> int :
         
@@ -86,7 +87,7 @@ class EventStageData():
             raise ValueError(f'The position {position} is not available !')
         return self.gamble_stages.get(position ) * UNIVERSAL_EVENT_MULTIPLIER_DICT.get(event_currency.value)
     def get_bet_cost_by_stage(self, stage: typing.Literal[0,25,150,800] , event_currency : EventCurrencyEnum) -> int:
-        if stage not in [0,1,2,3]:
+        if stage not in [0,25,150,800]:
             raise ValueError(f'The stage {stage} is not available !')
         return stage* UNIVERSAL_EVENT_MULTIPLIER_DICT.get(event_currency.value)
 
@@ -107,7 +108,6 @@ class CurrentEventData():
         self.event_name = event_name
         self.event_currency_ammount = event_currency_ammount
         self.event_wof = event_wof
-        self.event_stages
         self.enhancements = enhancements
         self.can_halve_time = can_halve_time
         self.currency_data = currency_data

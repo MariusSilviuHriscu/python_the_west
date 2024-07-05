@@ -280,3 +280,9 @@ def sleep_closest_town(handler:requests_handler, player_data):
     
     # Add a sleep task for the town to the end of the queue.
     queue_sleep(handler, town[0])
+
+def turn_game_time_to_datetime(game_time : float) -> datetime.datetime:
+    
+    return datetime.datetime.strptime(
+            time.ctime(float(game_time)), "%c"
+        )

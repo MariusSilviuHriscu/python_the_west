@@ -36,7 +36,8 @@ class Equipment:
         # Update equipment
         for item_type, item_id in change_equipment_dict.items():
             if item_id is not None:
-                setattr(self, f"{item_type}_item_id", item_id)
+                attribute_string_item = f'{item_type}' if f'{item_type}'.endswith('_item_id') else f"{item_type}_item_id"
+                setattr(self, attribute_string_item, item_id)
     def __iter__(self):
         yield from vars(self).items()
     def __eq__(self, other: typing.Any) -> bool:

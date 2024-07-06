@@ -10,7 +10,7 @@ from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChain
 from automation_scripts.sleep_func_callbacks.callback_frequency import CallableRunRule
 
 from automation_scripts.sleep_func_callbacks.misc_func_callback import check_and_update_skills
-from automation_scripts.sleep_func_callbacks.class_select import can_select_new_class, set_class_to_adventurer
+from automation_scripts.sleep_func_callbacks.class_select import  set_class_to_adventurer
 
 from automation_scripts.sleep_func_callbacks.lambda_frequency_create import make_check_if_can_change_class
 

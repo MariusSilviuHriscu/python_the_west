@@ -337,12 +337,10 @@ def world_script_by_login(login : Game_login,
     
     script.choose_path().execute()
     
-    print(type(game.handler.session))
-    print(type(TorRequestsSession))
+
     if isinstance(game.handler.session, TorRequestsSession):
-        
-        print(" changing ip to forbid overlap")
-        game.handler.session.new_connection()
+        print('Changing ip adress')
+        game.handler.session.force_change_connection()
 
 def world_script_instance(script_settings: Script_settings):
     """

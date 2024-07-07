@@ -86,12 +86,15 @@ class TorRequestsSession():
             
             return False
         
+    def force_change_connection(self):
+        
+        self.tor_handler.renew_connection()
         
     def new_connection(self):
         
         while not self.test_connection() :
             
-            self.tor_handler.renew_connection()
+            self.force_change_connection()    
     
     def _post(self,
               url : str ,
@@ -125,6 +128,7 @@ class TorRequestsSession():
                                   allow_redirects = allow_redirects)
             except:
                 print(f'Tried to get url try number {_}')
+        self.new_connection()
         return self.post(url=url , 
                          data=data ,
                          timeout=timeout ,
@@ -146,6 +150,7 @@ class TorRequestsSession():
                                   allow_redirects = allow_redirects)
             except:
                 print(f'Tried to get url try number {_}')
+        self.new_connection()
         return self.get(url=url , 
                          data=data ,
                          timeout=timeout ,

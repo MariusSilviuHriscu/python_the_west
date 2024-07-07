@@ -85,6 +85,10 @@ class TorRequestsSession():
         except requests.ConnectTimeout as e:
             
             return False
+        except requests.ConnectionError as e:
+            return False
+        except requests.HTTPError as e:
+            return False
         
     def force_change_connection(self):
         

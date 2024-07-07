@@ -5,7 +5,7 @@ import typing
 
 from game_classes import Game_classes
 from requests_handler import requests_handler
-from tor_handler import create_tor_session , TorRequestsSession
+from the_west_inner.tor_handler import create_tor_session , TorRequestsSession
 from movement import Game_data
 from player_data import Player_data,ExpData
 from init_data import (return_h,

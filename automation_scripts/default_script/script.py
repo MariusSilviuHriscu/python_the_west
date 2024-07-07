@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import datetime
 
-from script_data import Script_settings
+from automation_scripts.default_script.script_data import Script_settings
 
 from ..work_cycle import Cycle_jobs
 
@@ -12,7 +12,10 @@ from the_west_inner.crafting import acquire_product
 from the_west_inner.misc_scripts import collect_daily_reward
 from the_west_inner.work import Work
 from the_west_inner.bag import Bag
+from the_west_inner.tor_handler import TorRequestsSession
 from the_west_inner.login import Game_login
+
+from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 
 
 class Work_cycle_judge:
@@ -302,8 +305,44 @@ class Script_comert_produs_clona:
         """
         chosen_script = self.choose_path()
         chosen_script.execute()
+        
 
-
+def world_script_by_login(login : Game_login,
+                          target_product_id : int,
+                          event_bet_offset : list[int] = None,
+                          preview_ex_chainer :CallbackChainer = None
+                        ):
+    
+    game = login.login()
+    
+    if preview_ex_chainer is not None:
+        executable_func = preview_ex_chainer.chain_function(
+        game_html = login.game_html,
+        global_currency = game.currency,
+        offset_list = event_bet_offset or [0 , 1],
+        handler = game.handler
+        )
+        executable_func()
+    
+    collect_daily_reward(handler = game.handler)
+    
+    script = Script_comert_produs_clona(
+        game_classes=game,
+        energy_consummable_id=0,
+        motivation_consummable_id=0,
+        luck_bonus_consumable_id=0,
+        target_mass_product_id=target_product_id,
+        target_seconds_work_id=0
+    )
+    
+    script.choose_path().execute()
+    
+    print(type(game.handler.session))
+    print(type(TorRequestsSession))
+    if isinstance(game.handler.session, TorRequestsSession):
+        
+        print(" changing ip to forbid overlap")
+        game.handler.session.new_connection()
 
 def world_script_instance(script_settings: Script_settings):
     """

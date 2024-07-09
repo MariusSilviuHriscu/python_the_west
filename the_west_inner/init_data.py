@@ -103,9 +103,24 @@ def get_wof_id_by_event_name(initialization_html : str , event_name : str) -> di
     jsonStr_list = re.findall(r'\{.*\}', str(initialization_html))
     wof_type = CORRESPONDING_EVENT_WOF.get(event_name, None)
     for json_item in jsonStr_list:
+
         try :
+            
+                
             dict_data = json.loads(json_item)
+
             if wof_type and dict_data.get('type', None) == wof_type:
                 return dict_data.get('id')
         except Exception as e:
             pass
+        
+        if json_item.startswith('{') and json_item.endswith('}'):
+            try :
+            
+                    
+                dict_data = json.loads(f'[{json_item}]')
+                for event in dict_data:
+                    if wof_type and event.get('type', None) == wof_type:
+                        return event.get('id')
+            except Exception as e:
+                pass

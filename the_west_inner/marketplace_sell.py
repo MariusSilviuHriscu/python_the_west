@@ -182,7 +182,14 @@ class Auction_sell_manager:
         return auction_fee_calculator.calculate_fee() < self.currency.total_money
         
         
-    def _create_auction(self, item_id: int, number_of_items: int, unitary_price: int, town_id: int, description: str="") -> Sell_offer_data:
+    def _create_auction(self, 
+                        item_id: int,
+                        number_of_items: int,
+                        unitary_price: int,
+                        town_id: int,
+                        min_price : None | int = None,
+                        description: str=""
+                        ) -> Sell_offer_data:
         """
         This function creates an auction for the given product.
 
@@ -204,7 +211,7 @@ class Auction_sell_manager:
             sellrights="2",
             auctionlength="7",
             description=description,
-            auctionprice="",
+            auctionprice="" if min_price is None else number_of_items * min_price,
             maxprice=number_of_items * unitary_price
         )
     def commit_auction(self,
@@ -212,6 +219,7 @@ class Auction_sell_manager:
                      item_id : int,
                      number_of_items : int,
                      unitary_price : int,
+                     min_price : None | int = None,
                      description : str = ''
                      ):
         
@@ -222,6 +230,7 @@ class Auction_sell_manager:
             number_of_items=number_of_items,
             unitary_price=unitary_price,
             town_id=town_id,
+            min_price = min_price,
             description = description
         )
         if not self.validate_item_quantity(offer_data=auction):
@@ -238,7 +247,14 @@ class Auction_sell_manager:
         
         return result
         
-    def sell_in_nearest_town(self, item_id: int, number_of_items: int, unitary_price: int, description: str="") -> typing.Optional[dict]:
+    def sell_in_nearest_town(self,
+                             item_id: int,
+                             number_of_items: int,
+                             unitary_price: int,
+                             min_price : None | int = None,
+                             description: str="",
+                             minimise_tax_flag : bool = False
+                             ) -> typing.Optional[dict]:
         """
         This function auctions and sells the given product in the nearest town.
 
@@ -252,11 +268,20 @@ class Auction_sell_manager:
         Optional[dict]: The result of the auction if it was successful, None otherwise.
         """
         
+        if min_price is not None and minimise_tax_flag:
+            raise ValueError('You both provided a minimum value and you selected the minimise tax flag ! ')
+        
+        if minimise_tax_flag:
+            min_price : int = int (
+                                    self.items.find_item(item_id=item_id).get('sell_price') 
+                                )
+        
         town_id = self.movement_manager.move_to_closest_town()
         
         return self.commit_auction(town_id=town_id,
                                  item_id = item_id,
                                  number_of_items= number_of_items,
                                  unitary_price = unitary_price,
+                                 min_price = min_price ,
                                  description = description
                                  )

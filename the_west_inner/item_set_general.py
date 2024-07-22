@@ -57,6 +57,15 @@ class Item_sets():
         Returns a string representation of the set_list dictionary
         """
         return self.__str__()
+    
+    def get_set_by_example_item(self , item_id : int) -> Item_set | None:
+        
+        for _ , set in self.set_list.items():
+            
+            if item_id in set.list_items:
+                return set
+        
+            
 
 def get_item_sets(requests_handler: requests_handler) -> Item_sets:
     """

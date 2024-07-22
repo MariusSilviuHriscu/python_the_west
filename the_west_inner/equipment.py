@@ -38,6 +38,11 @@ class Equipment:
             if item_id is not None:
                 attribute_string_item = f'{item_type}' if f'{item_type}'.endswith('_item_id') else f"{item_type}_item_id"
                 setattr(self, attribute_string_item, item_id)
+    def unequip_item(self , item_type : str) :
+        valid_item_types = ["head_item_id", "neck_item_id", "left_arm_item_id", "body_item_id", "right_arm_item_id", "foot_item_id", "animal_item_id", "belt_item_id", "pants_item_id","yield_item_id"]
+        if item_type not in valid_item_types:
+            raise ValueError(f'Invalid unequip type : {item_type}')
+        setattr(self , item_type  , None)
     def __iter__(self):
         yield from vars(self).items()
     def __eq__(self, other: typing.Any) -> bool:
@@ -46,6 +51,12 @@ class Equipment:
         return vars(self) == vars(other)
     def __contains__(self,item_id:int) -> bool:
         return item_id in self.__dict__.values()
+    def get_item_type_by_id(self, item_id : int) -> str:
+        if item_id not in self:
+            raise ValueError('The required item is not part of the equipment !')
+        for item_type , equipment_item_id in self.__dict__.items():
+            if equipment_item_id == item_id:
+                return item_type
 
 class Equipment_manager():
     def __init__(self,current_equipment:Equipment,bag:Bag,items:Items,skills:Skills):
@@ -72,6 +83,45 @@ class Equipment_manager():
             raise Exception(f"Error when trying to equip id_{item_id} : {response['error']}")
         
         return response
+    def _unequip_item(self , 
+                     item_id : int ,
+                     handler : requests_handler
+                     ) -> dict:
+        
+        
+        response = handler.post(
+            window = 'inventory',
+            action = 'uncarry',
+            payload={
+                'last_inv_id' : self.bag.last_inv_id ,
+                'type' : self.items.find_item(item_id = item_id).get('type')
+            },
+            use_h= True
+        )
+        
+        if 'error' in response and response['error'] :
+            raise Exception(f"Error when trying to unequip id_{item_id} : {response['error']}")
+        
+        return response
+    
+    def unequip_item(self , item_id : int , handler : requests_handler) -> bool:
+        if item_id not in self.items:
+            raise Exception(f"You tried to unequip item that does not exist! : {item_id} ")
+        if item_id not in self.current_equipment:
+            raise Exception(f"You tried to unequip something you do not have equipped: {item_id}")
+        
+        equipment_type = self.current_equipment.get_item_type_by_id(item_id = item_id)
+        
+        response = self._unequip_item(item_id = item_id , handler= handler)
+        
+        self.bag.add_item(item_id = item_id ,amount= 1)
+        self.current_equipment.unequip_item(item_type = equipment_type)
+        self.equipment_change_skill_update(
+            skill_change= response['bonus']['allBonuspoints']
+        )
+        
+        return True
+    
     def equipment_change_skill_update(self,skill_change:dict)->None:
         self.skills.set_skills_and_attributes_bonus(change_dict=skill_change)
     def equip_equipment(self,equipment:Equipment,handler:requests_handler):

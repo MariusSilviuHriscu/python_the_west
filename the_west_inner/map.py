@@ -300,7 +300,9 @@ class MapLoader:
             map_job_location_data.complete_silver_jobs(handler=self.handler)
         
         return map_job_location_data
-    
+    def get_town_list(self) -> Town_list:
+        minimap_data = self._init_map()
+        return self._build_towns(minimap = minimap_data)
     def build(self, load_silver_jobs : bool = False) -> Map:
         
         minimap_data = self._init_map()

@@ -1,6 +1,7 @@
 import typing
 
-from towns import Town
+from map import MapLoader
+from towns import Town,Town_list
 from task_queue import TaskQueue
 from work_manager import Work_manager
 from misc_scripts import wait_until_date
@@ -35,7 +36,21 @@ class MovementManager:
         self.task_queue = task_queue
         self.work_manager = work_manager
         self.player_data = player_data
-
+        self._town_list : None|Town_list = None
+    @property
+    def town_list(self) -> Town_list:
+        if self._town_list:
+            return self._town_list
+        
+        loader = MapLoader(
+            handler = self.handler,
+            player_data = self.player_data,
+            work_list = None
+        )
+        
+        self._town_list = loader.get_town_list()
+        
+        return self._town_list
     def check_location(self, target_x: int, target_y: int) -> bool:
         """
         Checks if the player is at the specified location.
@@ -89,8 +104,8 @@ class MovementManager:
         Returns:
             int: The ID of the town the player moved to.
         """
-        town_list = self.map.towns
-        closest_town = town_list.get_closest_town(player_data=self.player_data)
+        
+        closest_town = self.town_list.get_closest_town(player_data=self.player_data)
         return self.move_to_town(town=closest_town)
 
     def get_distance_to_town(self, town: int | Town) -> int | float:

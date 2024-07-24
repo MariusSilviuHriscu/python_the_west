@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
+from the_west_inner.tor_handler import TorRequestsSession
 
-# Assuming these are imports from your game modules
 from the_west_inner.login import Game_login, Game_classes
 from the_west_inner.marketplace import Marketplace_managers, build_marketplace_managers
 
@@ -133,6 +133,13 @@ class ItemMoverAgent:
         Returns:
             bool: True if the sale was successful, False otherwise.
         """
+        if self.game_classes.bag[item_id] + 1 == number and item_id in self.game_classes.equipment_manager.current_equipment:
+            
+            self.move_to_town()
+            self.game_classes.equipment_manager.unequip_item(
+                item_id = item_id,
+                handler=self.game_classes.handler
+            )
         return self.marketplace_managers.marketplace_sell_manager.sell_in_nearest_town(
             item_id=item_id,
             number_of_items=number,
@@ -151,6 +158,12 @@ class ItemMoverAgent:
         Collects all bought items from the marketplace.
         """
         self.marketplace_managers.marketplace_pickup_manager.fetch_all_bought()
+    
+    def refresh_connection(self):
+        
+        if isinstance(self.game_classes.handler , TorRequestsSession):
+            
+            self.game_classes.handler.force_change_connection()
 
 
 class ItemMover:
@@ -238,7 +251,9 @@ class ItemMover:
                 continue
             
             self.exchange_item(item_id=item_id, item_number=number)
-
+        
+        self.target_item_mover.refresh_connection()
+        self.item_mover_donator.refresh_connection()
     def collect_exchanged_items(self):
         """
         Collects all items bought by the target mover.
@@ -279,10 +294,18 @@ class MoneyMover:
             number=1
         )
         
-        return self.item_mover_donor.buy_from_marketplace(
+        buy_bool = self.item_mover_donor.buy_from_marketplace(
             item_id=self.exchange_token_item,
             player_id=self.target_item_mover.player_id
         )
+        
+        self.target_item_mover.collect_sold()
+        
+        self.target_item_mover.refresh_connection()
+        self.item_mover_donor.refresh_connection()
+
+        return buy_bool
+        
 
 
 class ItemMoverBuilder:
@@ -309,7 +332,7 @@ class ItemMoverBuilder:
         self.exchange_token_item = exchange_token_item
         self.exchange_value = exchange_value
 
-    def transaction_number(self, required_item_list: ExchangeDictType) -> int:
+    def transaction_number(self, required_item_list: ExchangeDictType|None = None) -> int:
         """
         Calculates the total number of transactions required.
 
@@ -319,7 +342,7 @@ class ItemMoverBuilder:
         Returns:
             int: Total number of transactions.
         """
-        return len(required_item_list)
+        return len(required_item_list) if required_item_list else 1
     
     def _make_agent(self, game_login: Game_login) -> ItemMoverAgent:
         """
@@ -369,7 +392,7 @@ class ItemMoverBuilder:
             raise ValueError('Target agent does not have enough money to do the transactions!')
         
         if agent.get_item_number(item_id=self.exchange_token_item) < self.transaction_number(
-                required_item_list=requirement_item_list):
+                required_item_list=requirement_item_list ):
             raise ValueError('Target agent does not have enough token items for transaction!')
         
         return agent

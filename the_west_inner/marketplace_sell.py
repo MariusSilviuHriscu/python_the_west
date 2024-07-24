@@ -171,7 +171,7 @@ class Auction_sell_manager:
         
         return True
     def validate_money_fee_value(self,town_id : int,sell_offer : Sell_offer_data) -> bool:
-        town = self.movement_manager.map.towns[town_id]
+        town = self.movement_manager.town_list[town_id]
         auction_fee_calculator_builder = AuctionFeeBuilder(
             handler = self.handler,
             player_data = self.player_data,

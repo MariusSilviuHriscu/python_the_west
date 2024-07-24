@@ -59,6 +59,9 @@ def make_event_loader(game_html : str) -> CurrentEventLoader|None:
     
     current_event_list  = return_current_event_data(initialization_html = game_html)
     
+    if current_event_list == []:
+        return None
+    
     for event_name, event_dict in current_event_list.items():
         
         if event_name in EVENT_DICT:

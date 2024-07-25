@@ -114,7 +114,8 @@ class MarketplacePickupManager:
         if is_buy:
             self.bag.add_item(item_id=offer.item_id, amount=offer.item_count)
         else:
-            self.currency.modify_cash(new_cash=result)
+            
+            self.currency.modify_cash(new_cash=result.get('money'))
 
     def fetch_all_sold(self):
         """

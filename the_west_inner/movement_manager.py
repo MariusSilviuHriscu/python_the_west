@@ -97,7 +97,7 @@ class MovementManager:
         self.player_data.update_visible_variables(handler=self.handler)
         return town.town_id
 
-    def move_to_closest_town(self):
+    def move_to_closest_town(self , key : typing.Callable[[Town], bool] | None = None) :
         """
         Moves the player to the closest town.
 
@@ -105,7 +105,9 @@ class MovementManager:
             int: The ID of the town the player moved to.
         """
         
-        closest_town = self.town_list.get_closest_town(player_data=self.player_data)
+        closest_town = self.town_list.get_closest_town(player_data=self.player_data , key= key)
+        if closest_town is None:
+            raise Exception('No town matching your requirement has been found !')
         return self.move_to_town(town=closest_town)
 
     def get_distance_to_town(self, town: int | Town) -> int | float:

@@ -60,7 +60,19 @@ class Town_list():
         return Town_list(
                         town_list = {town_id:town for town_id,town in self.town_list.items() if town.member_count > 0}
                         )
-    def get_closest_town(self, player_data : Player_data) -> Town:
+    def get_towns_generator(self, player_data : Player_data) -> typing.Generator[Town,None,None]:
+        populated_towns = [town for town in self.town_list.values() if town.member_count > 0]
+
+        if not populated_towns:
+            # No populated towns available
+            return None
+        distance_key = lambda x : player_data.absolute_distance_to(x.x, x.y)
+        populated_towns.sort(key= distance_key)
+
+        return (x for x in populated_towns) 
+        
+        
+    def get_closest_town_simple(self, player_data : Player_data ) -> Town:
         """
         Get the closest populated town to the player.
 
@@ -85,3 +97,36 @@ class Town_list():
         closest_town = min(distances, key=distances.get)
 
         return closest_town
+
+    def get_closest_town(self, player_data: Player_data, key: typing.Optional[typing.Callable[[Town], bool]] = None) -> typing.Optional[Town]:
+        """
+        Get the closest town to the player that satisfies the given key condition.
+
+        Args:
+            player_data (Player_data): Player data instance.
+            key (Callable[[Town], bool], optional): A callable that takes a Town instance and returns a bool.
+                                                    The closest town must satisfy this condition.
+
+        Returns:
+            Town: The closest town to the player that satisfies the key condition, or None if no such town exists.
+        """
+        town_generator = self.get_towns_generator(player_data=player_data)
+        if town_generator is None:
+            return None
+
+        for town in town_generator:
+            if key is None or key(town):
+                return town
+        return None
+
+
+class TownSortKey:
+    def __init__(self , handler : requests_handler):
+        self.handler = handler
+    def marketplace_available_sorting_key(self , town: Town) -> bool:
+    
+        inner_data =town.town_level_map_data(handler=self.handler,
+                                 city_building_name = 'market'
+                                 )
+        
+        return inner_data.level > 0

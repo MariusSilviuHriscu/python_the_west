@@ -148,7 +148,7 @@ class Player_data:
         self.update_visible_variables(handler)
         self.update_crafting(handler)
     
-    def absolute_distance_to(self, final_position: typing.Tuple[int, int]):
+    def absolute_distance_to(self, final_position: typing.Tuple[int, int]) -> int:
         """
         Calculates the absolute distance between the player's current position and a final position.
         

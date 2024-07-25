@@ -12,7 +12,7 @@ class Currency:
     @property
     def total_money(self) -> int :
         return self.cash + self.deposit
-    
+
     def add_cash(self , ammount : int) :
         self.cash  += ammount
     
@@ -46,7 +46,7 @@ class Currency:
         self.nuggets = new_nuggets
 
 def build_currency(input_dict:dict) -> Currency:
-    return Currency(cash = input_dict['cash'],
+    return Currency(cash = input_dict['cash'] if not isinstance(input_dict['cash'] , dict) else input_dict['cash'].get('money'),
                     deposit = input_dict['deposit'],
                     oup = input_dict['upb'],
                     nuggets = input_dict['nuggets'],

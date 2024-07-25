@@ -46,6 +46,7 @@ class ItemMoverAgent:
         Returns:
             int: Total money.
         """
+        print(self.game_classes.currency.total_money)
         return self.game_classes.currency.total_money
 
     @property
@@ -56,6 +57,7 @@ class ItemMoverAgent:
         Returns:
             bool: True if the player has enough money, False otherwise.
         """
+
         return self.money >= self.exchange_price
     
     def get_item_number(self, item_id: int) -> int:
@@ -222,6 +224,7 @@ class ItemMover:
         if not self.target_item_mover.has_money:
             raise ValueError("Target mover doesn't have enough money")
 
+        print('buying item')
         self._exchange_simple(
             seller_agent=self.item_mover_donator,
             buyer_agent=self.target_item_mover,
@@ -231,7 +234,7 @@ class ItemMover:
         
         if not self.item_mover_donator.has_money:
             raise ValueError("Donator doesn't have enough money")
-        
+        print('moving money back')
         self._exchange_simple(
             seller_agent=self.target_item_mover,
             buyer_agent=self.item_mover_donator,
@@ -373,7 +376,10 @@ class ItemMoverBuilder:
         
         return agent
 
-    def _make_target_agent(self, requirement_item_list: Optional[ExchangeDictType] = None) -> ItemMoverAgent:
+    def _make_target_agent(self, 
+                           requirement_item_list: Optional[ExchangeDictType] = None ,
+                           cash_flag : bool = False
+                           ) -> ItemMoverAgent:
         """
         Creates the target ItemMoverAgent.
 
@@ -388,7 +394,7 @@ class ItemMoverBuilder:
         """
         agent = self._make_agent(game_login=self.login_target)
         
-        if requirement_item_list is not None and not agent.has_money:
+        if not cash_flag and not agent.has_money:
             raise ValueError('Target agent does not have enough money to do the transactions!')
         
         if agent.get_item_number(item_id=self.exchange_token_item) < self.transaction_number(
@@ -397,7 +403,9 @@ class ItemMoverBuilder:
         
         return agent
 
-    def _make_donator_agent(self, requirement_item_list: Optional[ExchangeDictType] = None) -> ItemMoverAgent:
+    def _make_donator_agent(self, 
+                            requirement_item_list: Optional[ExchangeDictType] = None ,
+                           cash_flag : bool = False) -> ItemMoverAgent:
         """
         Creates the donator ItemMoverAgent.
 
@@ -417,7 +425,7 @@ class ItemMoverBuilder:
         items_not_found = [item_id for item_id, item_number in requirement_item_list.items()
                            if item_number is not None and agent.get_item_number(item_id=item_id) < item_number]
         
-        if not requirement_item_list and agent.money < self.exchange_value:
+        if cash_flag and agent.money < self.exchange_value:
             raise ValueError('You do not have enough money to make the monetary exchange!')
         
         if items_not_found:
@@ -450,8 +458,8 @@ class ItemMoverBuilder:
             MoneyMover: The created MoneyMover instance.
         """
         return MoneyMover(
-            target_item_mover=self._make_target_agent(),
-            item_mover_donator=self._make_donator_agent(),
+            target_item_mover=self._make_target_agent(cash_flag=True),
+            item_mover_donator=self._make_donator_agent(cash_flag=True),
             exchange_token_item=self.exchange_token_item
         )
     

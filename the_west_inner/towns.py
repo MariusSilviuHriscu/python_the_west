@@ -66,7 +66,7 @@ class Town_list():
         if not populated_towns:
             # No populated towns available
             return None
-        distance_key = lambda x : player_data.absolute_distance_to(x.x, x.y)
+        distance_key = lambda town : player_data.absolute_distance_to((town.x, town.y))
         populated_towns.sort(key= distance_key)
 
         return (x for x in populated_towns) 

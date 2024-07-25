@@ -77,7 +77,7 @@ class MovementManager:
         if isinstance(town, Town):
             return self._move_to_town(town=town)
         elif isinstance(town, int) or isinstance(town, str):
-            town = self.map.towns[town]
+            town = self.town_list[town]
             return self._move_to_town(town=town)
 
     def _move_to_town(self, town: Town) -> int:

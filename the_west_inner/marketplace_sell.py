@@ -20,7 +20,7 @@ from currency import Currency
 from bag import Bag
 from movement_manager import MovementManager
 from player_data import Player_data
-from towns import Town,TownBuildingLevelMap
+from towns import Town,TownBuildingLevelMap , TownSortKey
 
 @dataclass
 class Sell_offer_data:
@@ -275,8 +275,9 @@ class Auction_sell_manager:
             min_price : int = int (
                                     self.items.find_item(item_id=item_id).get('sell_price') 
                                 )
+        validation_market = TownSortKey(handler=self.handler)
         
-        town_id = self.movement_manager.move_to_closest_town()
+        town_id = self.movement_manager.move_to_closest_town(key=validation_market.marketplace_available_sorting_key)
         
         return self.commit_auction(town_id=town_id,
                                  item_id = item_id,

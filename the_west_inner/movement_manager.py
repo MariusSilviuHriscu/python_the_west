@@ -121,7 +121,7 @@ class MovementManager:
         if isinstance(town, Town):
             coordinates = (town.x, town.y)
         elif isinstance(town, int) or isinstance(town, str):
-            map_town = self.map.towns[town]
+            map_town = self.town_list[town]
             coordinates = (map_town.x, map_town.y)
         else:
             raise Exception('Invalid type of input')

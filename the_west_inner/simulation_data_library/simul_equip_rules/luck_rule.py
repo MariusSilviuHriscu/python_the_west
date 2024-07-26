@@ -8,3 +8,12 @@ class LuckSimulRule:
     def calculate(self, equipment_data : EquipmentPermutationData) -> int:
         
         return equipment_data.item_drop
+
+class ProductDropSimulRule :
+    
+    def __init__(self) -> None:
+        pass
+    
+    def calculate(self , equipment_data : EquipmentPermutationData) -> int:
+        
+        return equipment_data.product_drop

@@ -182,7 +182,9 @@ class CycleScriptManager:
             executable = self.setup_executable.chain_function(
                                                             handler = game_data.handler ,
                                                             global_currency = game_data.currency,
-                                                            game_html = self.game_login.game_html)
+                                                            game_html = self.game_login.game_html,
+                                                            game_classes = game_data
+                                                            )
             try:
                 executable()
             except Exception as e:

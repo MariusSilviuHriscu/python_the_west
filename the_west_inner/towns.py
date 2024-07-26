@@ -130,3 +130,10 @@ class TownSortKey:
                                  )
         
         return inner_data.level > 0
+    def bank_available_sorting_key(self , town: Town) -> bool:
+    
+        inner_data =town.town_level_map_data(handler=self.handler,
+                                 city_building_name = 'bank'
+                                 )
+        
+        return inner_data.level > 0

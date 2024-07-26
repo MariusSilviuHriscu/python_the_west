@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.towns import Town_list,TownSortKey
+from the_west_inner.player_data import Player_data
+
 @dataclass
 class Currency:
     
@@ -44,6 +48,30 @@ class Currency:
         self.veteran_points = new_veteran_points
     def set_nuggets(self,new_nuggets:int):
         self.nuggets = new_nuggets
+    def _update_raw(self , handler : requests_handler , town_id : int):
+        
+        response = handler.post(window='building_bank',
+                                action = 'get_data',
+                                action_name= 'mode',
+                                payload = {'town_id': f'{town_id}'}
+                                )
+        
+        if 'error' in response and response.get('error') :
+            raise Exception(f'Could not properly request bank data town id :{town_id}')
+        
+        return response
+        
+    def update_raw(self , town_list : Town_list, requests_handler : requests_handler , player_data : Player_data):
+        
+        sort_key = TownSortKey(handler=requests_handler)
+        
+        town = town_list.get_closest_town(player_data = player_data , key = sort_key.bank_available_sorting_key)
+        
+        response = self._update_raw(handler = requests_handler , town_id= town.town_id)
+        
+        self.modify_money(new_cash = response.get('own_money') ,
+                          new_deposit = response.get('deposit')
+                          )
 
 def build_currency(input_dict:dict) -> Currency:
     return Currency(cash = input_dict['cash'],

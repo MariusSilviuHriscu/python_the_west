@@ -3,6 +3,7 @@ from typing import Dict, Optional
 from the_west_inner.tor_handler import TorRequestsSession
 
 from the_west_inner.login import Game_login, Game_classes
+from the_west_inner.map import MapLoader
 from the_west_inner.marketplace import Marketplace_managers, build_marketplace_managers
 
 ItemIDType = int
@@ -46,7 +47,6 @@ class ItemMoverAgent:
         Returns:
             int: Total money.
         """
-        print(self.game_classes.currency.total_money)
         return self.game_classes.currency.total_money
 
     @property
@@ -70,7 +70,8 @@ class ItemMoverAgent:
         Returns:
             int: The number of items.
         """
-        return self.game_classes.bag[item_id]
+        item_num = self.game_classes.bag[item_id]
+        return item_num + 1 if item_id in self.game_classes.equipment_manager.current_equipment else item_num
     
     def _free_task_queue(self) -> bool:
         """
@@ -224,7 +225,6 @@ class ItemMover:
         if not self.target_item_mover.has_money:
             raise ValueError("Target mover doesn't have enough money")
 
-        print('buying item')
         self._exchange_simple(
             seller_agent=self.item_mover_donator,
             buyer_agent=self.target_item_mover,
@@ -234,7 +234,6 @@ class ItemMover:
         
         if not self.item_mover_donator.has_money:
             raise ValueError("Donator doesn't have enough money")
-        print('moving money back')
         self._exchange_simple(
             seller_agent=self.target_item_mover,
             buyer_agent=self.item_mover_donator,
@@ -358,6 +357,16 @@ class ItemMoverBuilder:
             ItemMoverAgent: The created agent.
         """
         game_classes = game_login.login()
+        if game_classes.currency.cash is None:
+            town_list = MapLoader(
+                handler= game_classes.handler,
+                player_data = game_classes.player_data,
+                work_list = game_classes.work_list
+            ).get_town_list()
+            game_classes.currency.update_raw(town_list= town_list,
+                                             requests_handler= game_classes.handler,
+                                             player_data= game_classes.player_data
+                                             )
         marketplace_managers = build_marketplace_managers(
             handler=game_classes.handler,
             items=game_classes.items,

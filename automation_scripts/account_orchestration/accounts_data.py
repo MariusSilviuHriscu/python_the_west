@@ -9,6 +9,7 @@ from the_west_inner.bag import Bag
 from the_west_inner.currency import Currency
 from the_west_inner.equipment import Equipment
 from the_west_inner.tor_handler import TorRequestsSession
+from the_west_inner.map import MapLoader
 
 ItemIDType = int
 ExchangeDictType = dict[ItemIDType, typing.Optional[int]]
@@ -50,7 +51,15 @@ class AccountData:
         self.bag = game_classes.bag
         self.currency = game_classes.currency
         if game_classes.currency.cash is None:
-            raise Exception('none cash')
+            town_list = MapLoader(
+                handler= game_classes.handler,
+                player_data = game_classes.player_data,
+                work_list = game_classes.work_list
+            ).get_town_list()
+            game_classes.currency.update_raw(town_list= town_list,
+                                             requests_handler= game_classes.handler,
+                                             player_data= game_classes.player_data
+                                             )
         
         self.current_equipment = game_classes.equipment_manager.current_equipment
         if isinstance(game_classes.handler.session, TorRequestsSession):

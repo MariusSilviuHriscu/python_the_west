@@ -320,7 +320,8 @@ def world_script_by_login(login : Game_login,
         game_html = login.game_html,
         global_currency = game.currency,
         offset_list = event_bet_offset or [0 , 1],
-        handler = game.handler
+        handler = game.handler,
+        game_classes = game
         )
         executable_func()
     

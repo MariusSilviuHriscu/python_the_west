@@ -73,7 +73,9 @@ def load_exp_script_v1(game_classes: Game_classes, level: int, max_allowed_damag
     # Return the loaded ExpScript
     return exp_script_loader.load(level=level)
 
-def make_exp_script_executor_v1(game_classes: Game_classes) -> ExpScriptExecutor:
+def make_exp_script_executor_v1(game_classes: Game_classes ,
+                                additional_chainer :CallbackChainer|None= None
+                                ) -> ExpScriptExecutor:
     """
     Creates an instance of ExpScriptExecutor configured with appropriate callback functions.
 
@@ -108,6 +110,10 @@ def make_exp_script_executor_v1(game_classes: Game_classes) -> ExpScriptExecutor
 
     # Set the frequency rule for the chainer
     chainer.set_frequency(rule=rule)
+    
+    if additional_chainer is not None:
+        
+        chainer = chainer + additional_chainer
 
     # Create and return an instance of ExpScriptExecutor with the configured chainer
     return ExpScriptExecutor(script_chainer=chainer)

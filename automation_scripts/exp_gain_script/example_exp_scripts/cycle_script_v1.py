@@ -128,7 +128,11 @@ class CycleScriptManager:
         """
         return self.game_login.login()
     
-    def create_cycle_script(self, level: int, game_data: Game_classes) -> CycleScript:
+    def create_cycle_script(self,
+                            level: int,
+                            game_data: Game_classes,
+                            additional_chainer : CallbackChainer|None = None
+                            ) -> CycleScript:
         """
         Creates a new CycleScript instance for the specified level using the provided game data.
 
@@ -140,10 +144,17 @@ class CycleScriptManager:
             CycleScript: The created CycleScript instance.
         """
         exp_script = load_exp_script_v1(game_classes=game_data, level=level)
-        exp_script_executor = make_exp_script_executor_v1(game_classes=game_data)
+        exp_script_executor = make_exp_script_executor_v1(game_classes=game_data,
+                                                          additional_chainer= additional_chainer
+                                                          )
         return CycleScript(exp_script=exp_script, exp_script_executor=exp_script_executor)
     
-    def restore_cycle_script(self, level: int, game_data: Game_classes , current_cycle_script: CycleScript):
+    def restore_cycle_script(self, 
+                             level: int,
+                             game_data: Game_classes ,
+                             current_cycle_script: CycleScript,
+                             additional_chainer : CallbackChainer|None = None
+                             ):
         """
         Restores the current CycleScript by creating a new one and updating the script and executor.
 
@@ -151,11 +162,18 @@ class CycleScriptManager:
             level (int): The level for which the cycle script is restored.
             game_data (Game_classes): The game data required to create the script.
         """
-        new_cycle_script = self.create_cycle_script(level=level, game_data=game_data)
+        new_cycle_script = self.create_cycle_script(level=level, 
+                                                    game_data=game_data ,
+                                                    additional_chainer= additional_chainer
+                                                    )
         current_cycle_script.set_exp_script(new_cycle_script.exp_script)
         current_cycle_script.set_exp_script_executor(new_cycle_script.exp_script_executor)
 
-    def _execute_cycle_script(self, level: int, game_data: Game_classes):
+    def _execute_cycle_script(self, 
+                              level: int,
+                              game_data: Game_classes,
+                              additional_chainer : CallbackChainer|None = None
+                              ):
         """
         Executes the cycle script, handling reconnection if necessary.
 
@@ -163,13 +181,23 @@ class CycleScriptManager:
             level (int): The level for which the cycle script is executed.
             game_data (Game_classes): The game data required to execute the script.
         """
-        cycle = self.create_cycle_script(level=level, game_data=game_data)
+        cycle = self.create_cycle_script(level=level,
+                                         game_data=game_data ,
+                                         additional_chainer= additional_chainer
+                                         )
         cycle_generator = cycle.execute()
         for cycle_flag in cycle_generator:
             if not cycle_flag:
-                self.restore_cycle_script(level=level, game_data=game_data , current_cycle_script=cycle)
+                self.restore_cycle_script(level=level,
+                                          game_data=game_data ,
+                                          current_cycle_script=cycle,
+                                          additional_chainer= additional_chainer
+                                          )
     
-    def execute_cycle_script(self, level: int):
+    def execute_cycle_script(self,
+                             level: int ,
+                             additional_chainer : CallbackChainer|None = None
+                             ):
         """
         Manages the execution of the cycle script and the sleeping cycle.
 
@@ -203,7 +231,10 @@ class CycleScriptManager:
 
         if sleep_manager.start_cycle(exp_script=load_exp_script_v1(game_classes=game_data, level=level)):
                                 
-            self._execute_cycle_script(level=level, game_data=game_data)
+            self._execute_cycle_script(level=level,
+                                       game_data=game_data,
+                                       additional_chainer=additional_chainer
+                                       )
             sleep_manager.finish_cycle()
             print('Cycle script finished')
         else:
@@ -214,7 +245,9 @@ class CycleScriptManager:
                     equipment_manager = game_data.equipment_manager,
                     handler = game_data.handler
                 )
-    def cycle(self, level: int ) -> typing.Generator[None, None, None]:
+    def cycle(self, level: int ,
+              additional_chainer : CallbackChainer|None = None
+              ) -> typing.Generator[None, None, None]:
         """
         Executes the cycle script and sleeps for a specified duration before repeating.
 
@@ -222,7 +255,7 @@ class CycleScriptManager:
             level (int): The level for which the cycle script is executed.
         """
         while True:
-            self.execute_cycle_script(level=level)
+            self.execute_cycle_script(level=level,additional_chainer=additional_chainer)
             time.sleep(3600 / 4)
             yield
 

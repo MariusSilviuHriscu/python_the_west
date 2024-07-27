@@ -41,7 +41,7 @@ class CallbackChainer:
         Returns:
         None
         """
-        self.callback_chain : list[typing.Callable] = []
+        self.callback_chain: list[tuple[typing.Callable, tuple, dict]] = []
         self.frequency_chain : list[FrequencyRule] = []
 
     def add_callback(self, callback_function: typing.Callable, *args, **kwargs):

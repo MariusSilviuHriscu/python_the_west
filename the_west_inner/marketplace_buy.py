@@ -388,7 +388,7 @@ class Marketplace_buy_manager():
         self.items = items
         self.currency = currency
     
-    def _is_on_market(self , item_id : int) -> bool:
+    def is_on_market(self , item_id : int) -> bool:
         if item_id not in self.items:
             raise ItemNotValidException(f"The required item : {item_id} is not a valid item.")
         item_type = self.items.get_item(item_id = item_id)

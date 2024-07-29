@@ -402,8 +402,11 @@ class Marketplace_buy_manager():
                                              items=self.items
                                              )
     
-    def buy_cheapest_marketplace_item(self , item_id : int):
+    def buy_cheapest_marketplace_item(self , item_id : int , max_price : int | None = None):
         offer_list = self._search_item(item_id = item_id)
+        
+        if max_price is not None :
+            offer_list = offer_list.filter(condition_func= lambda x : x.item_price/x.item_count <= max_price)
         
         if len(offer_list) != 0 :
             offer_list.buy_first_in_list(player_currency = self.currency)

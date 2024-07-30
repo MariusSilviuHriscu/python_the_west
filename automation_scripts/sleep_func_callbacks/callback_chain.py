@@ -104,3 +104,5 @@ class CallbackChainer:
         
         new_chainer.callback_chain = self.callback_chain + other_chain.callback_chain
         new_chainer.frequency_chain = self.frequency_chain + other_chain.frequency_chain
+        
+        return new_chainer

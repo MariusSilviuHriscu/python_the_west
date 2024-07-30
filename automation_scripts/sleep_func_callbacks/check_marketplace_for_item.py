@@ -7,8 +7,11 @@ from the_west_inner.marketplace import Marketplace_managers,build_marketplace_ma
 
 class Flag():
     def __init__(self, flag : bool = False):
-        flag = flag
-
+        self.flag = flag
+    def __bool__(self ):
+        return self.flag
+    def set_true(self):
+        self.flag = True
 
 def check_marketplace(game_classes : Game_classes ,
                       item_id : int ,
@@ -33,7 +36,7 @@ def check_marketplace(game_classes : Game_classes ,
     
     marketplace_buy_manager = marketplace_managers.marketplace_buy_manager
     
-    if flag.flag or not marketplace_buy_manager.is_on_market(item_id = item_id):
+    if flag or not marketplace_buy_manager.is_on_market(item_id = item_id):
         print(flag.flag)
         print(marketplace_buy_manager.is_on_market(item_id = item_id))
         return
@@ -46,4 +49,4 @@ def check_marketplace(game_classes : Game_classes ,
                                                           max_price= max_price
                                                           )
         
-        flag.flag = True
+        flag.set_true()

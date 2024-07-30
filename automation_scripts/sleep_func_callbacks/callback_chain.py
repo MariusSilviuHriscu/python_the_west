@@ -62,6 +62,15 @@ class CallbackChainer:
     def set_frequency(self,rule:FrequencyRule):
         
         self.frequency_chain[-1] = rule
+    
+    def add_args(self , *args , **kwargs):
+        
+        last_callback , last_args , last_kwarg = self.callback_chain[-1]
+        
+        new_args = (*args , *last_args)
+        new_kwargs = {**kwargs ,**last_kwarg}
+        
+        self.callback_chain[-1] = (last_callback, new_args ,new_kwargs)
 
     def chain_function(self, *args, **kwargs) -> typing.Callable:
         """

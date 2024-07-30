@@ -113,6 +113,8 @@ def make_exp_script_executor_v1(game_classes: Game_classes ,
     
     if additional_chainer is not None:
         
+        additional_chainer.add_args(game_classes = game_classes)
+        
         chainer = chainer + additional_chainer
 
     # Create and return an instance of ExpScriptExecutor with the configured chainer

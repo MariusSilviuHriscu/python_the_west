@@ -3,10 +3,17 @@ import typing
 from the_west_inner.chat_data_reader import StatusData, JoinedLeaveClientData , MessageData
 from the_west_inner.chat import Chat
 
+from automation_scripts.sleep_func_callbacks.check_marketplace_for_item import Flag
+
 ChatGeneratorType = typing.Generator[MessageData|StatusData|JoinedLeaveClientData, None, None]
 
 
-def send_message_to_chat(message : str , chat_generator : ChatGeneratorType , chat : Chat):
+def send_message_to_chat(message : str , chat_generator : ChatGeneratorType , chat : Chat , flag : Flag | None = None):
+    
+    if flag :
+        return
+    
+    
     sent = False
     for chat_entity in chat_generator:
     

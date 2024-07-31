@@ -34,7 +34,7 @@ class Marketplace_categories(Enum):
     ANIMAL = "animal"
     FOOT = "foot"
 
-def search_marketplace_category(category:Marketplace_categories,handler:requests_handler) ->list[int]:
+def search_marketplace_category(category:Marketplace_categories | dict ,handler:requests_handler) ->list[int]:
     """
     This function searches the given category of items in the marketplace using the given request handler.
 
@@ -45,7 +45,11 @@ def search_marketplace_category(category:Marketplace_categories,handler:requests
     Returns:
     Optional[List[str]]: The list of items in the category, if found. Otherwise, None.
     """
-    result = handler.post(window="building_market",action="search_accordion",payload={"pattern":"","type": f"{category.value}"},use_h=True)
+    if isinstance(category,dict):
+        category_data = category.get('type')
+    else:
+        category_data = str(category)
+    result = handler.post(window="building_market",action="search_accordion",payload={"pattern":"","type": f"{category_data}"},use_h=True)
     if result["error"] == True:
         raise Exception("Could not search category of items")
     return result["items"]

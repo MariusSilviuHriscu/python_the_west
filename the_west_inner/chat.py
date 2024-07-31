@@ -242,7 +242,6 @@ class Chat:
         """
         
         if not self.chat_data.player_exists(player_name=recipient_name) and recipient_name not in [x.name for x in self.chat_data.rooms] and not tell_message:
-            print('Returning')
             return False
         player_data = self.chat_data.get_player(player_name=recipient_name)
         

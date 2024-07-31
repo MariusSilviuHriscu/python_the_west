@@ -165,7 +165,7 @@ class ChatData:
     def set_rooms(self , rooms : list[ChatRoomData]):
         self.rooms = rooms
     
-    def get_general_chat_room(self) -> ChatRoomData:
+    def get_general_chat_room(self) -> ChatRoomData | None:
         for room in self.rooms:
             if room.is_private == False:
                 return room

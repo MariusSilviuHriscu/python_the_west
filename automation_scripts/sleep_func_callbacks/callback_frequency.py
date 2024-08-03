@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta ,time
 from typing import Protocol
 import typing
 
@@ -170,3 +170,25 @@ class RunOnceThenStopRule():
             return True
         
         return False
+
+class DatetimeIntervalRule():
+    """
+    A rule that allows execution only within a specified time interval in a 24-hour period.
+
+    Methods:
+    - __init__: Initializes an instance of the rule with start and end times.
+    - should_run: Checks if the rule allows execution based on the current time.
+    """
+    def __init__(self, start_hour: int, start_minute: int, end_hour: int, end_minute: int):
+        self.start_time = time(start_hour, start_minute)
+        self.end_time = time(end_hour, end_minute)
+
+    def should_run(self) -> bool:
+        current_time = datetime.now().time()
+        
+        if self.start_time <= self.end_time:
+            # Interval does not span midnight
+            return self.start_time <= current_time <= self.end_time
+        else:
+            # Interval spans midnight
+            return current_time >= self.start_time or current_time <= self.end_time

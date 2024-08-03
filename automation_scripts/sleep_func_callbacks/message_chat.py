@@ -21,6 +21,7 @@ def send_message_to_chat(message : str , chat_generator : ChatGeneratorType , ch
     
     
     sent = False
+    index = 0
     for chat_entity in chat_generator:
     
         if not sent and chat.chat_data.get_general_chat_room() is not None:
@@ -32,7 +33,10 @@ def send_message_to_chat(message : str , chat_generator : ChatGeneratorType , ch
             chat.message_queue.append(pending_message)
             
             sent = True
-        
+        if sent:
+            index +=1
+        if index >= 100 :
+            return
         if sent and isinstance(chat_entity , MessageData):
             
             if chat_entity.message_content == message:

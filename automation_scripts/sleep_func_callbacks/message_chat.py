@@ -21,7 +21,6 @@ def send_message_to_chat(message : str , chat_generator : ChatGeneratorType , ch
     
     
     sent = False
-    index = 0
     for chat_entity in chat_generator:
     
         if not sent and chat.chat_data.get_general_chat_room() is not None:
@@ -33,17 +32,17 @@ def send_message_to_chat(message : str , chat_generator : ChatGeneratorType , ch
             chat.message_queue.append(pending_message)
             
             sent = True
-        if sent:
-            index +=1
-        if index >= 100 :
-            return
+
         if sent and isinstance(chat_entity , MessageData):
-            
             if chat_entity.message_content == message:
                 return
 
 def message_chat(message : str ,handler : requests_handler, flag : Flag | None = None):
-    
+    def clean_message(message : str):
+        if message.endswith(' '):
+            return clean_message(message = message.removesuffix(' '))
+        return message
+        
     chat_handler = ChatHandler(
     handler = handler
     )
@@ -62,7 +61,7 @@ def message_chat(message : str ,handler : requests_handler, flag : Flag | None =
     chat_generator = chat.message_loop()
     
     send_message_to_chat(
-        message=message,
+        message= clean_message(message=message),
         chat_generator = chat_generator,
         chat = chat,
         flag = flag

@@ -414,8 +414,7 @@ class Marketplace_buy_manager():
         
         if len(offer_list) != 0 :
             offer_list.buy_first_in_list(player_currency = self.currency)
-        else:
-            raise ItemNotFoundException(f"No item found :{item_id}")
+
 
     def buy_cheapest_n_items(self, item_id: int, item_number: int, buy_anyway: bool = False):
         offer_list = self._search_item(item_id=item_id)

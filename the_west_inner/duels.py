@@ -3,9 +3,9 @@ from enum import Enum
 from dataclasses import dataclass, fields
 import datetime
 
-from requests_handler import requests_handler
-from equipment import Equipment_manager,Equipment
-from player_data import Player_data
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.equipment import Equipment_manager,Equipment
+from the_west_inner.player_data import Player_data
 
 STANCE_NUM : int = 4
 class DuelTargetStanceEnum(Enum):

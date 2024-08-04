@@ -1,9 +1,10 @@
-from requests_handler import requests_handler
-from task_queue import TaskQueue
-from premium import Premium
-from player_data import Player_data
 import math
-from misc_scripts import wait_until_date,wait_until_date_callback
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.task_queue import TaskQueue
+from the_west_inner.premium import Premium
+from the_west_inner.player_data import Player_data
+from the_west_inner.misc_scripts import wait_until_date,wait_until_date_callback
 
 class Work_manager():
     """A class for managing work tasks in a task queue.

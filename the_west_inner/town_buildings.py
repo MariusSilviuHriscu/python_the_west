@@ -4,11 +4,11 @@ import typing
 from abc import ABC,abstractmethod
 import dateparser
 
-from requests_handler import requests_handler
-from bag import Bag
-from player_data import Player_data
-from items import Items
-from work_manager import Work_manager
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.bag import Bag
+from the_west_inner.player_data import Player_data
+from the_west_inner.items import Items
+from the_west_inner.work_manager import Work_manager
 
 
 class IncorrectBuyMapPosition(Exception):

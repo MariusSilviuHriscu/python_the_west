@@ -3,12 +3,12 @@ from urllib.parse import urlparse
 import json
 import typing
 
-from game_classes import Game_classes
-from requests_handler import requests_handler
+from the_west_inner.game_classes import Game_classes
+from the_west_inner.requests_handler import requests_handler
 from the_west_inner.tor_handler import create_tor_session , TorRequestsSession
-from movement import Game_data
-from player_data import Player_data,ExpData
-from init_data import (return_h,
+from the_west_inner.movement import Game_data
+from the_west_inner.player_data import Player_data,ExpData
+from the_west_inner.init_data import (return_h,
                        return_premium_data,
                        return_bag,
                        return_work_list,
@@ -17,20 +17,20 @@ from init_data import (return_h,
                        return_buff_data ,
                        return_currency_data
                        )
-from task_queue import TaskQueue
-from premium import Premium
-from misc_scripts import server_time
-from work_list import Work_list
-from items import Items,return_items
-from crafting import Crafting_table,Crafting
-from work_manager import Work_manager
-from consumable import Consumable_handler,Cooldown
-from bag import Bag
-from movement_manager import MovementManager
-from skills import read_skill
-from equipment import create_initial_equipment , Equipment_manager
-from buffs import build_buff_list
-from currency import build_currency
+from the_west_inner.task_queue import TaskQueue
+from the_west_inner.premium import Premium
+from the_west_inner.misc_scripts import server_time
+from the_west_inner.work_list import Work_list
+from the_west_inner.items import Items,return_items
+from the_west_inner.crafting import Crafting_table,Crafting
+from the_west_inner.work_manager import Work_manager
+from the_west_inner.consumable import Consumable_handler,Cooldown
+from the_west_inner.bag import Bag
+from the_west_inner.movement_manager import MovementManager
+from the_west_inner.skills import read_skill
+from the_west_inner.equipment import create_initial_equipment , Equipment_manager
+from the_west_inner.buffs import build_buff_list
+from the_west_inner.currency import build_currency
 
 
 

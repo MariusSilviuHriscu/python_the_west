@@ -15,10 +15,10 @@ import typing
 import time
 import datetime
 
-from requests_handler import requests_handler
-from items import Items
-from currency import Currency
-from misc_scripts import server_time
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.items import Items
+from the_west_inner.currency import Currency
+from the_west_inner.misc_scripts import server_time
 
 
 class Marketplace_categories(Enum):

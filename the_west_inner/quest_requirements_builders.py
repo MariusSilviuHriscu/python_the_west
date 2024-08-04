@@ -1,11 +1,11 @@
-from requests_handler import requests_handler
-from game_classes import Game_classes
-from gold_finder import parse_map_for_quest_employers
-from items import Items
-from crafting import Crafting_table
-from player_data import Player_data
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.game_classes import Game_classes
+from the_west_inner.gold_finder import parse_map_for_quest_employers
+from the_west_inner.items import Items
+from the_west_inner.crafting import Crafting_table
+from the_west_inner.player_data import Player_data
 
-from quest_requirements import (Quest_requirement_travel,
+from the_west_inner.quest_requirements import (Quest_requirement_travel,
                                 Quest_requirement_item_to_hand_work_product_hourly,
                                 Quest_requirement_item_to_hand_work_product_seconds,
                                 Quest_requirement_item_to_hand_buy_from_marketplace,

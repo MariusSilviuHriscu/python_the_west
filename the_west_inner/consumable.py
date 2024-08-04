@@ -1,9 +1,10 @@
 import time
 import typing
 import datetime
-from requests_handler import requests_handler
-from misc_scripts import server_time,wait_until_date,wait_until_date_callback
-from bag import Bag
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.misc_scripts import server_time,wait_until_date,wait_until_date_callback
+from the_west_inner.bag import Bag
 
 """
 This module contains classes for handling consumable items in a game. The `Cooldown` class represents a cooldown period, and the `ConsumableHandler` class is used to use consumable items, update the bag and cooldown, and wait until the cooldown period has passed.

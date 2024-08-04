@@ -12,12 +12,12 @@ Classes:
     The Task_type : This class is a simple enum-like class for storing constants representing the different types of tasks that can be added to the task queue.
 """
 
-from requests_handler import requests_handler
 import datetime
 import time
 
-from caching_decorators import retry_on_exception
-from player_data import Player_data
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.caching_decorators import retry_on_exception
+from the_west_inner.player_data import Player_data
 
 class Task():
     """

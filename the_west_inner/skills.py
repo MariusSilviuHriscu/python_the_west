@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from requests_handler import requests_handler
+from the_west_inner.requests_handler import requests_handler
 
 class CharacterSkillsEnum(Enum):
     # Attributes

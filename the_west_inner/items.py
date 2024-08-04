@@ -1,11 +1,12 @@
 import math
 
 import typing
-from requests_handler import requests_handler
-from premium import Premium
-from work_list import Work_list
-from bag import Bag
-from caching_decorators import cache_function_results
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.premium import Premium
+from the_west_inner.work_list import Work_list
+from the_west_inner.bag import Bag
+from the_west_inner.caching_decorators import cache_function_results
 
 """
 This module contains utility functions and classes for handling items in a game. The return_items function returns a dictionary containing the items data from the server. The Items class represents a list of items and provides methods for finding an item by ID, checking if an item is craftable, and getting the name and price of an item. The isCraftable function returns True if an item is craftable, and nr_item returns the number of items in the bag. The has_automation function returns True if the player has automation premium, and get_corresponding_work_id returns the ID of the work corresponding to a given item ID.

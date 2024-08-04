@@ -1,5 +1,5 @@
 
-from requests_handler import requests_handler
+from the_west_inner.requests_handler import requests_handler
 
     
 class Work_list():

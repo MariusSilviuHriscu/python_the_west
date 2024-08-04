@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from requests_handler import requests_handler
-from misc_scripts import number_of_tasks, distance_to
-from player_data import Player_data
-from work_list import Work_list
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.misc_scripts import number_of_tasks, distance_to
+from the_west_inner.player_data import Player_data
+from the_west_inner.work_list import Work_list
 
 
 @dataclass

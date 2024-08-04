@@ -8,7 +8,7 @@ This module contains a class that represents a bag that can hold items. The bag 
 """
 import typing
 
-from requests_handler import requests_handler
+from the_west_inner.requests_handler import requests_handler
 
 class Bag():
     def __init__(self,item_dict:typing.Dict):

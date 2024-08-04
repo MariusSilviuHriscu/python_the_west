@@ -9,7 +9,6 @@ Functions:
 - number_of_tasks(handler:requests_handler) -> int: Returns the number of tasks in the task queue.
 - distance_to(target_coords, player_data) -> float: Calculates the distance between the player and a given set of coordinates.
 """
-from requests_handler import requests_handler
 import time
 import typing
 import datetime
@@ -18,6 +17,7 @@ from urllib.parse import urlparse
 import threading
 from concurrent.futures import ThreadPoolExecutor, Future
 
+from the_west_inner.requests_handler import requests_handler
 def server_time(handler:requests_handler) -> datetime:
     """
     This function returns the server time.

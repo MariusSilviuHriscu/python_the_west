@@ -19,8 +19,8 @@ import typing
 import time
 from enum import Enum, auto
 
-from requests_handler import requests_handler
-from movement import character_movement,Game_data
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.movement import character_movement,Game_data
 
 
 class ClassTypeEnum(Enum):

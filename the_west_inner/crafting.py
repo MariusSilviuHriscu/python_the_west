@@ -1,12 +1,13 @@
-from requests_handler import requests_handler
-from task_queue import TaskQueue
-from premium import Premium
-from player_data import Player_data
-from work_list import Work_list
-from work import get_closest_workplace_data, munceste_coord
-from misc_scripts import sleep_closest_town
-from items import Items,get_corresponding_work_id
 from dataclasses import dataclass
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.task_queue import TaskQueue
+from the_west_inner.premium import Premium
+from the_west_inner.player_data import Player_data
+from the_west_inner.work_list import Work_list
+from the_west_inner.work import get_closest_workplace_data, munceste_coord
+from the_west_inner.misc_scripts import sleep_closest_town
+from the_west_inner.items import Items,get_corresponding_work_id
 
 """
 This module contains classes and functions for handling crafting in a game. The `Crafting` class is used to craft items, while the `craft_item` function is used to craft the specified item using the `Crafting` class.

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import typing
-from requests_handler import requests_handler
+
+from the_west_inner.requests_handler import requests_handler
 
 @dataclass
 class Telegram_message_post():

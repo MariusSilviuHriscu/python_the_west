@@ -1,5 +1,5 @@
 import typing
-from requests_handler import requests_handler
+from the_west_inner.requests_handler import requests_handler
 
 class IntString(str):
     def __new__(cls, value: str):

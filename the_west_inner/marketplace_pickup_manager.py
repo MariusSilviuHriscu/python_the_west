@@ -1,10 +1,11 @@
 import typing
-from requests_handler import requests_handler
-from movement_manager import MovementManager
-from marketplace_buy import Marketplace_offer,Marketplace_offer_list
-from items import Items
-from currency import Currency
-from bag import Bag
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.movement_manager import MovementManager
+from the_west_inner.marketplace_buy import Marketplace_offer,Marketplace_offer_list
+from the_west_inner.items import Items
+from the_west_inner.currency import Currency
+from the_west_inner.bag import Bag
 
 
 class MarketplacePickupManager:

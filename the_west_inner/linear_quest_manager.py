@@ -1,6 +1,6 @@
 import typing
 from dataclasses import dataclass
-from saloon import QuestNotAcceptable,QuestAcceptError,QuestNotFinishable,QuestFinishError
+from the_west_inner.saloon import QuestNotAcceptable,QuestAcceptError,QuestNotFinishable,QuestFinishError
 from the_west_inner.quest_requirements import (
                     Quest_requirement,
                     Quest_requirement_duel_quest_npc,

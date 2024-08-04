@@ -2,9 +2,9 @@ import typing
 from typing import Protocol
 from dataclasses import dataclass
 
-from requests_handler import requests_handler
-from player_data import Player_data
-from map import Map
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.player_data import Player_data
+from the_west_inner.map import Map
 
 @dataclass
 class WorkData:

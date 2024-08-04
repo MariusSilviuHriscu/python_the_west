@@ -5,10 +5,10 @@ from enum import Enum
 
 from bidict import bidict
 
-from currency import Currency
-from bag import Bag
-from requests_handler import requests_handler
-from items import Items
+from the_west_inner.currency import Currency
+from the_west_inner.bag import Bag
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.items import Items
 
 
 # Dictionary to map currency type IDs to their names

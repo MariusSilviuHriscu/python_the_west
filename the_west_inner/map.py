@@ -14,11 +14,12 @@ Functions:
 """
 import random
 import typing
-from requests_handler import requests_handler
-from work_list import Work_list
-from towns import Town_list,Town
-from player_data import Player_data
-from gold_finder import parse_map_tw_gold
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.work_list import Work_list
+from the_west_inner.towns import Town_list,Town
+from the_west_inner.player_data import Player_data
+from the_west_inner.gold_finder import parse_map_tw_gold
 
 class Map_job_location():
     def __init__(self,job_group_id:int,job_id:int,job_x:int,job_y:int,is_silver:bool) -> None:

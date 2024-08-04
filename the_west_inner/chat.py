@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from requests import Response
 import typing
 
-from requests_handler import requests_handler
+from the_west_inner.requests_handler import requests_handler
 
 from the_west_inner.chat_data_reader import ChatDataParser, StatusData, JoinedLeaveClientData , MessageData
 from the_west_inner.chat_data import ChatData

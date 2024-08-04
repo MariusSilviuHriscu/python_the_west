@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import warnings
 from time import ctime
 
-from misc_scripts import server_time
-from requests_handler import requests_handler
+from the_west_inner.misc_scripts import server_time
+from the_west_inner.requests_handler import requests_handler
 
 @dataclass
 class Buff_data:

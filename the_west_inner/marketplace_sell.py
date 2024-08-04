@@ -11,16 +11,16 @@ Sell_offer_data: Represents the data required to put a product on the marketplac
 Auction_sell_manager: A manager for auctioning and selling products on the marketplace, with methods for going to the closest town, finding the best offer for a product, buying a product, and auctioning or selling a product.
 """
 import math
-
-from requests_handler import requests_handler
-from items import Items
-from dataclasses import dataclass
 import typing
-from currency import Currency
-from bag import Bag
-from movement_manager import MovementManager
-from player_data import Player_data
-from towns import Town,TownBuildingLevelMap , TownSortKey
+from dataclasses import dataclass
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.items import Items
+from the_west_inner.currency import Currency
+from the_west_inner.bag import Bag
+from the_west_inner.movement_manager import MovementManager
+from the_west_inner.player_data import Player_data
+from the_west_inner.towns import Town,TownBuildingLevelMap , TownSortKey
 
 @dataclass
 class Sell_offer_data:

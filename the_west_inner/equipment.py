@@ -1,9 +1,10 @@
 import typing
 from dataclasses import dataclass
-from requests_handler import requests_handler
-from bag import Bag
-from skills import Skills
-from items import Items
+
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.bag import Bag
+from the_west_inner.skills import Skills
+from the_west_inner.items import Items
 
 Equipment_change_dict = typing.Dict[typing.Literal["head","neck","left_arm","body","right_arm","foot","animal","belt","pants"],int]
 

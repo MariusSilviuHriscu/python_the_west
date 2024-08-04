@@ -3,8 +3,8 @@ import requests
 from urllib.parse import urlparse
 import datetime
 
-from tor_handler import TorRequestsSession
-from requests_rate_limiter import rate_limited
+from the_west_inner.tor_handler import TorRequestsSession
+from the_west_inner.requests_rate_limiter import rate_limited
 
 def requests_url_decorator(funct):
     def inner(*args,**kwargs):

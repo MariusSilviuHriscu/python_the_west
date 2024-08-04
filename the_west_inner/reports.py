@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from dataclasses import dataclass
 import os
 
-from requests_handler import requests_handler
+from the_west_inner.requests_handler import requests_handler
 
 
 def extract_items(input_js_string:str) -> typing.Dict[int,int]:

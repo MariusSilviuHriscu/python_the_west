@@ -2,9 +2,9 @@ import typing
 import time
 from dataclasses import dataclass
 
-from requests_handler import requests_handler
-from quest_requirements import Quest_requirement
-from gold_finder import parse_map_for_quest_employers
+from the_west_inner.requests_handler import requests_handler
+from the_west_inner.quest_requirements import Quest_requirement
+from the_west_inner.gold_finder import parse_map_for_quest_employers
 
 class QuestNotAcceptable(Exception):
     pass

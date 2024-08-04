@@ -9,9 +9,11 @@ parse_map_tw_gold: Parses data from the complete map and returns a list of dicti
 import math
 import typing
 import concurrent.futures
-from requests_handler import requests_handler
-import numpy as np
 import itertools
+
+import numpy as np
+
+from the_west_inner.requests_handler import requests_handler
 
 
 # Do not disturb , this function was written by someone else and I don't know how it works

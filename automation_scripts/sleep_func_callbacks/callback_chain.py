@@ -148,7 +148,7 @@ class CallbackChainer:
                     
                     all_combined_kwargs = {**kwargs , **stored_kwargs}
                     
-                    missing_kwargs = self.get_missing_kwargs(func=callback_function , kwargs= combined_kwargs)
+                    missing_kwargs = self.get_missing_kwargs(func=callback_function , kwargs= all_combined_kwargs)
                     
                     result_kwargs = self.create_missing_kwargs(
                         missing_kwargs = missing_kwargs,

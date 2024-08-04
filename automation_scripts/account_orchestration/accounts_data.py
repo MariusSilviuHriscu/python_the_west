@@ -114,6 +114,12 @@ class CompleteAccountData:
     def get_money(self) -> int:
         return sum([x.get_money() for x in self.accounts])
     
+    def get_account_money(self) -> typing.Generator[tuple[AccountData,int] , None ,None]:
+        
+        for account in self.accounts:
+            
+            yield account , account.get_money()
+    
     def get_number_of_items(self, item_id : int) -> int:
         
         return sum([x.get_item_number(item_id = item_id) for x in self.accounts])

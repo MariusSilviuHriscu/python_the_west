@@ -395,7 +395,7 @@ class Marketplace_buy_manager():
     def is_on_market(self , item_id : int) -> bool:
         if item_id not in self.items:
             raise ItemNotValidException(f"The required item : {item_id} is not a valid item.")
-        item_type = self.items.get_item(item_id = item_id)
+        item_type = self.items.get_item(item_id = item_id).get('type')
         return item_id in search_marketplace_category(category = item_type , handler = self.handler)
     
     def _search_item(self,item_id:int) ->Marketplace_offer_list:

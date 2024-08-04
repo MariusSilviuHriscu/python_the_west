@@ -1,6 +1,10 @@
 import typing
-from automation_scripts.sleep_func_callbacks.callback_frequency import FrequencyRule,AlwaysRunRule
+import inspect
 
+from automation_scripts.sleep_func_callbacks.callback_frequency import FrequencyRule,AlwaysRunRule
+from automation_scripts.sleep_func_callbacks.map_callback_types import TypeMappingList
+
+T = typing.TypeVar('T')
 
 class CallbackChainer:
     """
@@ -34,13 +38,14 @@ class CallbackChainer:
     - add_callback(callback_function: Callable, *args, **kwargs): Adds a callback function to the chain.
     - chain_function(*args, **kwargs) -> Callable: Returns a combined function for executing the callback chain.
     """
-    def __init__(self):
+    def __init__(self , type_map_list : None | TypeMappingList = None):
         """
         Initializes an instance of CallbackChainer with an empty callback chain.
 
         Returns:
         None
         """
+        self.type_map_list = type_map_list
         self.callback_chain: list[tuple[typing.Callable, tuple, dict]] = []
         self.frequency_chain : list[FrequencyRule] = []
 
@@ -72,6 +77,45 @@ class CallbackChainer:
         
         self.callback_chain[-1] = (last_callback, new_args ,new_kwargs)
 
+    def get_missing_kwargs(self , func : typing.Callable , kwargs) -> dict[str , typing.Type]:
+        
+        sig = inspect.signature(func)
+        
+        missing_kword_args = {name : param.annotation for name,param in sig.parameters.items() if name not in kwargs}
+        
+        return missing_kword_args
+    def create_missing_kwargs(self, missing_kwargs : dict[str , typing.Type[T]] , all_kwargs_available : dict) -> dict[str,T]:
+        
+        if self.type_map_list is None:
+            return {}
+        
+        if missing_kwargs == {}:
+            return {}
+        
+        new_dict = {}
+        for arg_name, arg_value_type in missing_kwargs.items():
+            
+            for _ , arg_value_all in all_kwargs_available.items():
+                
+                if self.type_map_list.can_convert(original_type = type(arg_value_all) , 
+                                                  target_type = arg_value_type
+                                                  ):
+                    
+                    new_dict[arg_name] = self.type_map_list.convert(
+                        arg_value_all ,
+                        target_type = arg_value_type
+                    )
+        
+        if len(missing_kwargs.keys()) != len(new_dict.keys()):
+            missing_kwargs_keys = [x for x in missing_kwargs if x not in new_dict]
+            print(new_dict)
+            raise ValueError(f'Could not complete all missing args ! {missing_kwargs_keys}')
+        
+        return new_dict
+        
+        
+        
+        
     def chain_function(self, *args, **kwargs) -> typing.Callable:
         """
         Returns a chained function that executes each callback in the chain with combined arguments.
@@ -101,9 +145,18 @@ class CallbackChainer:
                     # Combine stored args/kwargs with provided args/filtered kwargs
                     combined_args = args + stored_args
                     combined_kwargs = {**valid_kwargs, **stored_kwargs}
-    
+                    
+                    all_combined_kwargs = {**kwargs , **stored_kwargs}
+                    
+                    missing_kwargs = self.get_missing_kwargs(func=callback_function , kwargs= combined_kwargs)
+                    
+                    result_kwargs = self.create_missing_kwargs(
+                        missing_kwargs = missing_kwargs,
+                        all_kwargs_available= all_combined_kwargs
+                    )
+                    
                     # Call the callback function with combined args/kwargs
-                    callback_function(*combined_args, **combined_kwargs)
+                    callback_function(*combined_args, **combined_kwargs , **result_kwargs)
 
         return chained_function
     

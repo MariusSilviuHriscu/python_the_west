@@ -155,14 +155,19 @@ class CallbackChainer:
                         all_kwargs_available= all_combined_kwargs
                     )
                     
+                    final_kwargs = {**combined_kwargs , **result_kwargs}
+                    final_filtered_kwargs = {
+                        key: value for key, value in final_kwargs.items() if key in callback_function.__code__.co_varnames
+                    }
+                    
                     # Call the callback function with combined args/kwargs
-                    callback_function(*combined_args, **combined_kwargs , **result_kwargs)
+                    callback_function(*combined_args, **final_filtered_kwargs)
 
         return chained_function
     
     def __add__(self , other_chain : typing.Self) -> typing.Self:
         
-        new_chainer = CallbackChainer()
+        new_chainer = CallbackChainer(type_map_list = self.type_map_list)
         
         new_chainer.callback_chain = self.callback_chain + other_chain.callback_chain
         new_chainer.frequency_chain = self.frequency_chain + other_chain.frequency_chain

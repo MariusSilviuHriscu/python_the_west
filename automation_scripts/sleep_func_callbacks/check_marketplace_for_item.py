@@ -37,8 +37,7 @@ def check_marketplace(game_classes : Game_classes ,
     marketplace_buy_manager = marketplace_managers.marketplace_buy_manager
     
     if flag or not marketplace_buy_manager.is_on_market(item_id = item_id):
-        print(flag.flag)
-        print(marketplace_buy_manager.is_on_market(item_id = item_id))
+
         return
     
     print(f'Found item {item_id} on marketplace !')

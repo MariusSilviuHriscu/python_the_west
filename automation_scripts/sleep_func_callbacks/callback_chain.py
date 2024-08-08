@@ -48,7 +48,12 @@ class CallbackChainer:
         self.type_map_list = type_map_list
         self.callback_chain: list[tuple[typing.Callable, tuple, dict]] = []
         self.frequency_chain : list[FrequencyRule] = []
-
+        self.default_chainer_kwargs : dict = {}
+    
+    def add_default_kwargs(self , **kwargs) :
+        
+        self.default_chainer_kwargs = {**self.default_chainer_kwargs , **kwargs}
+    
     def add_callback(self, callback_function: typing.Callable, *args, **kwargs):
         """
         Adds a callback function along with its arguments and keyword arguments to the callback chain.
@@ -146,7 +151,7 @@ class CallbackChainer:
                     combined_args = args + stored_args
                     combined_kwargs = {**valid_kwargs, **stored_kwargs}
                     
-                    all_combined_kwargs = {**kwargs , **stored_kwargs}
+                    all_combined_kwargs = {**kwargs , **stored_kwargs , **self.default_chainer_kwargs}
                     
                     missing_kwargs = self.get_missing_kwargs(func=callback_function , kwargs= all_combined_kwargs)
                     
@@ -171,5 +176,8 @@ class CallbackChainer:
         
         new_chainer.callback_chain = self.callback_chain + other_chain.callback_chain
         new_chainer.frequency_chain = self.frequency_chain + other_chain.frequency_chain
+        new_chainer.default_chainer_kwargs = {**self.default_chainer_kwargs,
+                                              **other_chain.default_chainer_kwargs                                     
+        }
         
         return new_chainer

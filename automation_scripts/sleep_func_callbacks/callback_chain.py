@@ -87,7 +87,6 @@ class CallbackChainer:
         sig = inspect.signature(func)
         
         missing_kword_args = {name : param.annotation for name,param in sig.parameters.items() if name not in kwargs}
-        
         return missing_kword_args
     def create_missing_kwargs(self, missing_kwargs : dict[str , typing.Type[T]] , all_kwargs_available : dict) -> dict[str,T]:
         
@@ -96,6 +95,8 @@ class CallbackChainer:
         
         if missing_kwargs == {}:
             return {}
+        
+        
         
         new_dict = {}
         for arg_name, arg_value_type in missing_kwargs.items():
@@ -113,7 +114,6 @@ class CallbackChainer:
         
         if len(missing_kwargs.keys()) != len(new_dict.keys()):
             missing_kwargs_keys = [x for x in missing_kwargs if x not in new_dict]
-            print(new_dict)
             raise ValueError(f'Could not complete all missing args ! {missing_kwargs_keys}')
         
         return new_dict
@@ -172,7 +172,7 @@ class CallbackChainer:
     
     def __add__(self , other_chain : typing.Self) -> typing.Self:
         
-        new_chainer = CallbackChainer(type_map_list = self.type_map_list)
+        new_chainer = CallbackChainer(type_map_list = self.type_map_list if self.type_map_list is not None else other_chain.type_map_list)
         
         new_chainer.callback_chain = self.callback_chain + other_chain.callback_chain
         new_chainer.frequency_chain = self.frequency_chain + other_chain.frequency_chain

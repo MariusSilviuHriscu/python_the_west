@@ -5,6 +5,7 @@ from the_west_inner.bag import Bag
 from the_west_inner.consumable import Consumable_handler
 from the_west_inner.items import Items
 from the_west_inner.player_data import Player_data
+from the_west_inner.requests_handler import requests_handler
 
 def select_usable(usable_list : list[int],bag : Bag ) -> int:
     
@@ -23,7 +24,10 @@ def recharge_health_script(player_data : Player_data ,
                     usable_list : list[int],
                     min_percent_hp : int ,
                     bag : Bag ,
+                    handler : requests_handler ,
                     consumable_manager : Consumable_handler):
+    
+    player_data.update_all(handler= handler)
     
     if player_data.hp / player_data.hp_max * 100 > min_percent_hp:
         

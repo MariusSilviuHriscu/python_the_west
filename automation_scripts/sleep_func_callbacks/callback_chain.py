@@ -172,7 +172,9 @@ class CallbackChainer:
     
     def __add__(self , other_chain : typing.Self) -> typing.Self:
         
-        new_chainer = CallbackChainer(type_map_list = self.type_map_list if self.type_map_list is not None else other_chain.type_map_list)
+        new_type_map = self.type_map_list + other_chain.type_map_list
+        
+        new_chainer = CallbackChainer(type_map_list = new_type_map)
         
         new_chainer.callback_chain = self.callback_chain + other_chain.callback_chain
         new_chainer.frequency_chain = self.frequency_chain + other_chain.frequency_chain

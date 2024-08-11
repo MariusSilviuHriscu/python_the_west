@@ -147,3 +147,42 @@ class TypeMappingList:
             return None
 
         return self.type_map_dict[obj_type].convert(obj, target_type)
+    
+    def extend(self, other_mapping_list: typing.Self) -> None:
+        """
+        Extends the current TypeMappingList with another TypeMappingList.
+
+        Args:
+        - other_mapping_list: Another TypeMappingList whose mappings will be added to the current instance.
+
+        Returns:
+        None
+        """
+        for origin_type, other_mapping in other_mapping_list.type_map_dict.items():
+            if origin_type in self.type_map_dict:
+                # Update the existing type dictionary with new mappings from other_mapping
+                self.type_map_dict[origin_type].type_dict.update(other_mapping.type_dict)
+            else:
+                # Add the new TypeMapping to the current dictionary
+                self.type_map_dict[origin_type] = other_mapping
+    def __add__(self, other: typing.Self | None) -> typing.Self:
+        """
+        Combines the current TypeMappingList with another TypeMappingList.
+    
+        Args:
+        - other: Another TypeMappingList to combine with the current instance.
+    
+        Returns:
+        A new TypeMappingList instance containing the combined type mappings.
+        """
+        
+        if other is None:
+            return self.type_map_dict
+        
+        # Create a new list of TypeMappings starting with a copy of the current mappings
+        new_mapping_list = TypeMappingList(list(self.type_map_dict.values()))
+    
+        # Extend the new list with the other TypeMappingList
+        new_mapping_list.extend(other)
+        
+        return new_mapping_list

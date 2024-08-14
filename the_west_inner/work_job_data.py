@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.player_data import Player_data
-from the_west_inner.map import Map
+from the_west_inner.map import Map, Map_job_location
 
 @dataclass
 class WorkData:
@@ -91,6 +91,44 @@ class WorkJobData:
         self._job_data_damage = job_damage
         
         return job_damage
+    
+    def _load_work_data(self , work_data : dict) -> WorkData:
+        return WorkData(
+            cost = work_data.get('cost'),
+            money = work_data.get('money'),
+            xp = work_data.get('xp'),
+            luck = work_data.get('luck'),
+            duration = work_data.get('duration'),
+            product_id_list = [x.get('itemid',None) for x in work_data.get('items') if x.get('itemid',None) is not None]
+        )
+    
+    def get_map_job_data(self , map_job_location : Map_job_location , handler : requests_handler) -> typing.Self:
+        
+        if not map_job_location.is_silver:
+            return self
+        
+        map_job_data = self._load_job_data(
+            handler= handler,
+            x = map_job_location.job_x,
+            y = map_job_location.job_y
+        )
+        
+        work_time_info = map_job_data.get('durations')
+        
+        return WorkJobData(
+            work_id= self.work_id,
+            skill_points_required= self.skill_points_required,
+            work_points= self.work_points,
+            motivation= self.motivation,
+            item_drop_interval = self.item_drop_interval,
+            stage= self.stage,
+            malus= self.malus,
+            timed_work_data= {x.get('duration') : self._load_work_data(work_data = x) 
+                                                    for x in work_time_info}
+        )
+
+        
+        
 
 class WorkSortRule(Protocol):
     def __init__(self) -> None:

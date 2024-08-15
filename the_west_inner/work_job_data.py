@@ -1,4 +1,5 @@
 import typing
+import math
 from typing import Protocol
 from dataclasses import dataclass
 
@@ -15,6 +16,16 @@ class WorkData:
     duration : int
     product_id_list : list[int]
     
+    def get_silver(self) -> typing.Self:
+        
+        return WorkData(
+            cost= self.cost,
+            money = math.ceil(self.money *1.5),
+            xp = math.ceil(self.xp * 1.5),
+            luck= math.ceil(self.luck * 1.5),
+            duration= self.duration,
+            product_id_list= self.product_id_list
+        )
     
 @dataclass
 class JobDataDamage:
@@ -100,34 +111,7 @@ class WorkJobData:
             luck = work_data.get('luck'),
             duration = work_data.get('duration'),
             product_id_list = [x.get('itemid',None) for x in work_data.get('items') if x.get('itemid',None) is not None]
-        )
-    
-    def get_map_job_data(self , map_job_location : Map_job_location , handler : requests_handler) -> typing.Self:
-        
-        if not map_job_location.is_silver:
-            return self
-        
-        map_job_data = self._load_job_data(
-            handler= handler,
-            x = map_job_location.job_x,
-            y = map_job_location.job_y
-        )
-        
-        work_time_info = map_job_data.get('durations')
-        
-        return WorkJobData(
-            work_id= self.work_id,
-            skill_points_required= self.skill_points_required,
-            work_points= self.work_points,
-            motivation= self.motivation,
-            item_drop_interval = self.item_drop_interval,
-            stage= self.stage,
-            malus= self.malus,
-            timed_work_data= {x.get('duration') : self._load_work_data(work_data = x) 
-                                                    for x in work_time_info}
-        )
-
-        
+        )        
         
 
 class WorkSortRule(Protocol):

@@ -3,6 +3,7 @@ from the_west_inner.movement import character_movement
 from the_west_inner.movement_manager import MovementManager
 from the_west_inner.player_data import Player_data
 from the_west_inner.simulation_data_library.simul_work_cycles.work_cycle_simul_data import WorkCycleSimul,WorkCycleJobSimul
+from the_west_inner.work_job_data import WorkData
 
 SIMUL_COOLDOWN_DURATION = 600
 
@@ -44,11 +45,18 @@ class SimulationLocationData:
         self.motivation = motivation
 
     @staticmethod
-    def load_from_work_cycle_job_simul(work_cycle_job_simul : WorkCycleJobSimul) -> typing.Self:
+    def load_from_work_cycle_job_simul(work_cycle_job_simul : WorkCycleJobSimul, work_time : int) -> typing.Self:
+        
+        work_data : WorkData = work_cycle_job_simul.job_data.timed_work_data.get(work_time , None)
+        if work_data is None :
+            raise Exception('Could not find exp')
+        
+        
         
         return SimulationLocationData(
             x = work_cycle_job_simul.map_job_location.job_x,
-            y = work_cycle_job_simul.map_job_location.job_y
+            y = work_cycle_job_simul.map_job_location.job_y,
+            exp= work_data.xp if not work_cycle_job_simul.map_job_location.is_silver else work_data.get_silver().xp
         )
     
     def modify_motivation(self, ammount : int):
@@ -70,6 +78,7 @@ class WorkCycleSimulation:
     def __init__(self,
                  player_data : Player_data ,
                  energy : int ,
+                 work_time : int ,
                  work_cycle_simul : WorkCycleSimul ,
                  energy_usable : SimulUsableItem | None = None ,
                  motivation_usable : SimulUsableItem | None = None 
@@ -84,9 +93,12 @@ class WorkCycleSimulation:
         if not work_cycle_simul.is_valid_cycle():
             raise ValueError('Invalid work cycle!')
         
+        
+        
         self.simul_location_data : list[SimulationLocationData] = [SimulationLocationData.load_from_work_cycle_job_simul(
-                                                                       work_cycle_job_simul= x
-                                                                   ) for x in work_cycle_simul.work_data_list]
+                                                                       work_cycle_job_simul= x , 
+                                                                       work_time= work_time 
+                                                                       ) for x in work_cycle_simul.work_data_list]
         self.energy_usable = energy_usable
         self.motivation_usable = motivation_usable
         
@@ -140,8 +152,8 @@ class WorkCycleSimulation:
 
         move_x , move_y = (location.x,
                             location.y)
-        if self.position.x ==0 and self.position.y == 0:
-            self.position.x , self.position.y = (move_x,
+        if self.position.character_position == (0,0):
+            self.position.character_position = (move_x,
                                                  move_y)
             return
         
@@ -163,9 +175,9 @@ class WorkCycleSimulation:
     
     def work(self , location : SimulationLocationData , work_number : int) -> int:
         
-        work = location
         for _ in range(work_number):
-            self.exp_gained +=work.work_one_job()
+            self.exp_gained += location.work_one_job()
+            self.energy -= 1
     
             
         
@@ -181,6 +193,7 @@ class SimulatorWorkCycle():
     ):
         self.player_data = player_data
         self.time_limit = time_limit
+        self.energy_max = self.player_data.energy_max
         self.work_duration = work_duration
         self.energy_usable = energy_usable
         self.motivation_usable = motivation_usable
@@ -188,27 +201,36 @@ class SimulatorWorkCycle():
     def _calculate_actions(self , simulation : WorkCycleSimulation) -> list[tuple[int,SimulationLocationData]]:
         
         actions = []
-        actions_possible = simulation.energy_usable
+        actions_possible = simulation.energy
         
         for job in simulation.simul_location_data:
+
             
             work_action = min(job.motivation - 75 , actions_possible)
             
-            actions.append((work_action,job))
-            
-            actions_possible -= work_action
+            if work_action != 0:
+                actions.append((work_action,job))
+                
+                actions_possible -= work_action
             
             if actions_possible == 0:
                 return actions
+        
+        return actions
     
     def _work_actions(self,
               simulation : WorkCycleSimulation,
-              event_list: list[tuple[int,SimulationLocationData]]):
+              event_list: list[tuple[int,SimulationLocationData]]) -> bool:
         
         for num_work,job_data in event_list:
             
             simulation.go_to_location(location = job_data)
             simulation.work(location = job_data , work_number = num_work)
+            
+            if simulation.elapsed_time > self.time_limit:
+                return False
+            
+        return True
     
     def _work_cycle(self,
                     simulation : WorkCycleSimulation
@@ -220,17 +242,20 @@ class SimulatorWorkCycle():
             
             return True
         
-        self._work_actions(simulation = simulation ,
+        result = self._work_actions(simulation = simulation ,
                            event_list= actions
                            )
         
-        return self._work_cycle(simulation=simulation)
+        return result
         
             
     
     def simulate(self , work_cycle_simul : WorkCycleSimul) -> WorkCycleSimulation:
         
         simulation = WorkCycleSimulation(
+            player_data= self.player_data,
+            energy= self.energy_max,
+            work_time= self.work_duration,
             work_cycle_simul = work_cycle_simul,
             energy_usable= self.energy_usable,
             motivation_usable = self.motivation_usable
@@ -244,7 +269,13 @@ class SimulatorWorkCycle():
                 if not used:
                     break
             
-            self._work_cycle(simulation=simulation)
+            result = self._work_cycle(simulation=simulation)
+            
+            if not result:
+                return simulation
+            
+            if simulation.elapsed_time > self.time_limit:
+                return simulation
 
             if simulation.energy > 0 and not simulation.can_afford_motivation_wise():
                 

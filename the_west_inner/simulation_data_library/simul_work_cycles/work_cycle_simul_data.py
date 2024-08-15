@@ -54,7 +54,8 @@ class Work_cycle_simul_data:
             max_number = max_number
         )
         
-        universal_job_data_dict = {x.work_id : x for x in universal_job_data}
+        
+        universal_job_data_dict = {x.work_id : x for x in universal_job_data}        
         
         for job_location_data in self.complete_job_location.values():
             
@@ -63,15 +64,10 @@ class Work_cycle_simul_data:
                 
                 job_data = universal_job_data_dict.get(job_location_data.job_id)
                 
-                optional_silver_job_data =job_data.get_map_job_data(
-                    map_job_location= job_location_data,
-                    handler= self.handler
-                    
-                )
                 
                 yield WorkCycleJobSimul(
                     map_job_location = job_location_data,
-                    job_data = optional_silver_job_data
+                    job_data = job_data
                 )
         
     def get_list_of_work(self,

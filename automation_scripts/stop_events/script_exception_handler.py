@@ -1,7 +1,11 @@
 import inspect
 from functools import wraps
 
-from automation_scripts.stop_events.script_events import RestartEventException,StopEventException,NestedStopEvent
+from automation_scripts.stop_events.script_events import (RestartEventException,
+                                                          StopEventException,
+                                                          NestedStopEvent,
+                                                          CompleteStopEventException
+                                                          )
 
 def handle_exceptions(func):
     def wrapper(*args, **kwargs):
@@ -32,7 +36,19 @@ def handle_exceptions(func):
                 pass
             except NestedStopEvent:
                 raise StopEventException()
-            
+            except CompleteStopEventException as e:
+                
+                stack = inspect.stack()
+                function_name = stack[0].function
+                
+                # Get a list of all functions in the current stack
+                function_stack = [frame.function for frame in stack]
+                
+                first_occurrence = function_stack.index(function_name)
+                if first_occurrence == 0:
+                    pass
+                else:
+                    raise e
         else:
             try:
                 return func(*args, **kwargs)
@@ -44,5 +60,18 @@ def handle_exceptions(func):
                 pass
             except NestedStopEvent:
                 raise StopEventException()
+            except CompleteStopEventException as e:
+                
+                stack = inspect.stack()
+                function_name = stack[0].function
+                
+                # Get a list of all functions in the current stack
+                function_stack = [frame.function for frame in stack]
+                
+                first_occurrence = function_stack.index(function_name)
+                if first_occurrence == 0 :
+                    pass
+                else:
+                    raise e
             
     return wrapper

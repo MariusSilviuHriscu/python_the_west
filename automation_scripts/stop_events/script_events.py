@@ -25,6 +25,9 @@ class StopEventException(Exception):
 class NestedStopEventException(Exception):
     pass
 
+class  CompleteStopEventException(Exception):
+    pass
+
 
 class ScriptPauseEvent:
     
@@ -103,3 +106,20 @@ class NestedStopEvent(Exception):
         
         self.call_callback_func()
         raise NestedStopEventException()
+
+class CompleteStopEvent:
+    
+    def __init__(self,
+                 callback_func : typing.Callable[...,None] = None,
+                 *args ,
+                 **kwargs):
+        self.callback_func = lambda : callback_func(*args, **kwargs) if callback_func else None
+    
+    def call_callback_func(self):
+        if self.callback_func :
+            self.callback_func()
+    
+    def raise_exception(self) :
+        
+        self.call_callback_func()
+        raise CompleteStopEventException()

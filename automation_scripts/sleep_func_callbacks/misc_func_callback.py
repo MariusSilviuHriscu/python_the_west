@@ -1,3 +1,4 @@
+from the_west_inner.equipment import Equipment, Equipment_manager
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.reports import Reports_manager
 from the_west_inner.player_data import Player_data
@@ -28,7 +29,8 @@ def recharge_health(handler: requests_handler,
                     player_data: Player_data,
                     work_manager: Work_manager,
                     consumable_handler: Consumable_handler,
-                    recharge_hp_consumable_id: int) -> None:
+                    recharge_hp_consumable_id: int,
+                    ) -> None:
     """
     Recharges the player's health if it is below a certain threshold.
 
@@ -50,6 +52,34 @@ def recharge_health(handler: requests_handler,
         consumable_handler.use_consumable(consumable_id=recharge_hp_consumable_id)
         player_data.update_character_variables(handler=handler)
 
+def recharge_health_equipment(handler: requests_handler,
+                    player_data: Player_data,
+                    work_manager: Work_manager,
+                    consumable_handler: Consumable_handler,
+                    recharge_hp_consumable_id: int,
+                    equipment_manager : Equipment_manager,
+                    hp_equipment : Equipment,
+                    ) -> None:
+    
+    player_data.update_character_variables(handler=handler)
+    
+    print('Checked HP')
+    if player_data.hp / player_data.hp_max < 0.25:
+        work_manager.cancel_all_tasks()
+        current_equipment = equipment_manager.current_equipment
+        equipment_manager.equip_equipment(equipment = hp_equipment , 
+                                          handler= handler
+                                          )
+        
+        consumable_handler.use_consumable(consumable_id=recharge_hp_consumable_id)
+        
+        equipment_manager.equip_equipment(equipment = current_equipment,
+                                          handler= handler
+                                          )
+        
+        player_data.update_character_variables(handler=handler)
+        
+    
 
 def check_marketplace_items(marketplace_observer: MarketplaceProductObserver) -> None:
     """

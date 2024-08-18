@@ -1,7 +1,7 @@
 import inspect
 from functools import wraps
 
-from automation_scripts.stop_events.script_events import RestartEventException,StopEventException
+from automation_scripts.stop_events.script_events import RestartEventException,StopEventException,NestedStopEvent
 
 def handle_exceptions(func):
     def wrapper(*args, **kwargs):
@@ -30,6 +30,9 @@ def handle_exceptions(func):
             except StopEventException:
                 # Stop execution
                 pass
+            except NestedStopEvent:
+                raise StopEventException()
+            
         else:
             try:
                 return func(*args, **kwargs)
@@ -39,4 +42,7 @@ def handle_exceptions(func):
             except StopEventException:
                 # Stop execution
                 pass
+            except NestedStopEvent:
+                raise StopEventException()
+            
     return wrapper

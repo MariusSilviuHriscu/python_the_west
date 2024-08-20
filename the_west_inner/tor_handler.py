@@ -1,11 +1,13 @@
+import typing
+import time
+
 import requests
 from stem import Signal
 from stem.control import Controller
-import time
 
 
 
-
+HeadersType = typing.MutableMapping[str,str | bytes]
 
 class TorSessionHandler:
     def __init__(self):
@@ -161,6 +163,11 @@ class TorRequestsSession():
                          retry_per_connection = retry_per_connection,
                          allow_redirects = allow_redirects
                          )
+    
+    @property
+    def headers(self) -> HeadersType:
+        
+        return self.session.headers
 
             
 

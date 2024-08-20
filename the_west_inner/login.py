@@ -212,13 +212,8 @@ class Game_login():
 
         # Send a GET request to the URL specified in the Location header of the previous response
         game_state_response = self.session.get(f"{game_page_response.headers['Location']}",allow_redirects=False)
-
         
-        # Set the X-Requested-With header to "XMLHttpRequest"
-        if isinstance(self.session , requests.Session):
-            self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
-        elif isinstance(self.session , TorRequestsSession):
-            self.session.session.headers['X-Requested-With'] = 'XMLHttpRequest'
+        self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
         
 
         # Extract the active game URL from the previous response

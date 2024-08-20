@@ -12,7 +12,7 @@ from the_west_inner.crafting import acquire_product
 from the_west_inner.misc_scripts import collect_daily_reward
 from the_west_inner.work import Work
 from the_west_inner.bag import Bag
-from the_west_inner.tor_handler import TorRequestsSession
+from connection_sessions.standard_request_session import StandardRequestsSession
 from the_west_inner.login import Game_login
 
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
@@ -339,7 +339,7 @@ def world_script_by_login(login : Game_login,
     script.choose_path().execute()
     
 
-    if isinstance(game.handler.session, TorRequestsSession):
+    if isinstance(game.handler.session, StandardRequestsSession):
         print('Changing ip adress')
         game.handler.session.force_change_connection()
 

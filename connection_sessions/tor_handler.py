@@ -6,8 +6,8 @@ from stem import Signal
 from stem.control import Controller
 
 
+from connection_sessions.standard_request_session import HeadersType
 
-HeadersType = typing.MutableMapping[str,str | bytes]
 
 class TorSessionHandler:
     def __init__(self):

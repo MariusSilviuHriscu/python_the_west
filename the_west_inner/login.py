@@ -3,9 +3,13 @@ from urllib.parse import urlparse
 import json
 import typing
 
+from connection_sessions.tor_handler import create_tor_session 
+from connection_sessions.standard_request_session import StandardRequestsSession
+
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.requests_handler import requests_handler
-from the_west_inner.tor_handler import create_tor_session , TorRequestsSession
+
+
 from the_west_inner.movement import Game_data
 from the_west_inner.player_data import Player_data,ExpData
 from the_west_inner.init_data import (return_h,
@@ -177,7 +181,7 @@ class Game_login():
         self.game_html = None
     def _set_url(self,url:str)->None:
         self.url = url
-    def _create_session (self , use_tor_flag : bool = False) -> requests.Session | TorRequestsSession :
+    def _create_session (self , use_tor_flag : bool = False) -> requests.Session | StandardRequestsSession :
         if use_tor_flag:
             
             session = create_tor_session()

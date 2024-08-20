@@ -3,7 +3,8 @@ import requests
 from urllib.parse import urlparse
 import datetime
 
-from the_west_inner.tor_handler import TorRequestsSession
+from connection_sessions.standard_request_session import StandardRequestsSession
+
 from the_west_inner.requests_rate_limiter import rate_limited
 
 def requests_url_decorator(funct):
@@ -31,7 +32,7 @@ def request_url(base_url, window, action, h=None, action_name="action"):
         base_url)._replace(query=f'window={window}&action={action}&h={h}')
     return url.geturl()
 
-def request_game(session : requests.Session | TorRequestsSession, base_url, window, action, payload=None, h=None, action_name="action"):
+def request_game(session : requests.Session | StandardRequestsSession, base_url, window, action, payload=None, h=None, action_name="action"):
     """
     Make a game request to the specified server.
 
@@ -63,7 +64,7 @@ class requests_handler:
         base_url (str): The base URL of the game server.
         h (str): The hash parameter for authentication.
     """
-    session: requests.Session | TorRequestsSession
+    session: requests.Session | StandardRequestsSession
     base_url: str
     h: str
 

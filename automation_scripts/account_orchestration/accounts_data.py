@@ -8,7 +8,7 @@ from the_west_inner.item_set_general import Item_sets,get_item_sets
 from the_west_inner.bag import Bag
 from the_west_inner.currency import Currency
 from the_west_inner.equipment import Equipment
-from the_west_inner.tor_handler import TorRequestsSession
+from connection_sessions.standard_request_session import StandardRequestsSession
 from the_west_inner.map import MapLoader
 
 ItemIDType = int
@@ -62,7 +62,7 @@ class AccountData:
                                              )
         
         self.current_equipment = game_classes.equipment_manager.current_equipment
-        if isinstance(game_classes.handler.session, TorRequestsSession):
+        if isinstance(game_classes.handler.session, StandardRequestsSession):
             game_classes.handler.session.force_change_connection()
     
     def get_item_number(self, item_id : int) -> int:

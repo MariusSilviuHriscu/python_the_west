@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from the_west_inner.tor_handler import TorRequestsSession
+from connection_sessions.standard_request_session import StandardRequestsSession
 
 from the_west_inner.login import Game_login, Game_classes
 from the_west_inner.map import MapLoader
@@ -164,9 +164,9 @@ class ItemMoverAgent:
     
     def refresh_connection(self):
         
-        if isinstance(self.game_classes.handler , TorRequestsSession):
+        if isinstance(self.game_classes.handler.session , StandardRequestsSession):
             
-            self.game_classes.handler.force_change_connection()
+            self.game_classes.handler.session.force_change_connection()
 
 
 class ItemMover:

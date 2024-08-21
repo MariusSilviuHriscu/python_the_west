@@ -24,11 +24,11 @@ from the_west_inner.movement import character_movement,Game_data
 
 
 class ClassTypeEnum(Enum):
-    GREENHORN = auto()
-    ADVENTURER = auto()
-    DUELIST = auto()
-    SOLDIER = auto()
-    WORKER = auto()
+    GREENHORN = 'greenhorn'
+    ADVENTURER = 'adventurer'
+    DUELIST = 'duelist'
+    SOLDIER = 'soldier'
+    WORKER = 'worker'
 
 @dataclass
 class ExpData:
@@ -189,7 +189,7 @@ class Player_data:
         if self.class_key != 'greenhorn':
             raise Exception(f'You already  have a class selected !')
         
-        payload = {'charclass' : str(class_type_enum)}
+        payload = {'charclass' : class_type_enum.value}
         
         response = handler.post(
             window = 'class_choose',

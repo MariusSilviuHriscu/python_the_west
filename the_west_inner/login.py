@@ -172,16 +172,30 @@ def game_classes_builder(active_world_url : str, game_requests_session: requests
 
 
 class Game_login():
-    def __init__(self,player_name:str , player_password:str, world_id : typing.Union[str,int] , use_tor_flag : bool = False):
+    def __init__(self,
+                 player_name:str ,
+                 player_password:str,
+                 world_id : typing.Union[str,int] ,
+                 use_tor_flag : bool = False ,
+                 session_builder_func : typing.Callable[[typing.Self],StandardRequestsSession] | None = None
+                 ):
         self.player_name = player_name 
         self.player_password = player_password
         self.world_id = world_id
+        self.session_builder_func = session_builder_func
         self.session = self._create_session(use_tor_flag=use_tor_flag)
         self.url = ""
         self.game_html = None
     def _set_url(self,url:str)->None:
         self.url = url
     def _create_session (self , use_tor_flag : bool = False) -> requests.Session | StandardRequestsSession :
+        
+        if self.session_builder_func is not None :
+            
+            session = self.session_builder_func(self)
+            
+            return session
+        
         if use_tor_flag:
             
             session = create_tor_session()

@@ -49,6 +49,8 @@ class FreeProxySession:
             return False
         except requests.HTTPError as e:
             return False
+        except requests.ReadTimeout as e:
+            return False
     
     def force_change_connection(self):
         

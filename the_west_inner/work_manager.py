@@ -28,10 +28,13 @@ class Work_manager():
         Args:
             data (list): A list of task data.
         """
-        if type(data) != list:
-            data = data.values()
-        self.task_queue.update(list([x["task"] for x in data]))
-
+        try :
+            if type(data) != list:
+                data = data.values()
+            self.task_queue.update(list([x["task"] for x in data if 'task' in x]))
+        except Exception as e :
+            print(data)
+            raise e
     def update_player_data(self, data):
         """Update the player data.
 

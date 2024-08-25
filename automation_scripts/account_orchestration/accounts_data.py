@@ -65,14 +65,15 @@ class AccountData:
         if isinstance(game_classes.handler.session, StandardRequestsSession):
             game_classes.handler.session.force_change_connection()
     
-    def get_item_number(self, item_id : int) -> int:
+    def get_item_number(self, item_id : int , count_equipped : bool = True) -> int:
         additional = 0
-        if item_id in self.current_equipment:
+        if item_id in self.current_equipment and count_equipped:
             additional = 1
         return self.bag[item_id] + additional
-    def get_items_by_item_list(self, item_id_list : list[int]) -> ExchangeDictType :
+    def get_items_by_item_list(self, item_id_list : list[int], count_equipped : bool = True) -> ExchangeDictType :
         
-        return {x : self.get_item_number(item_id = x) for x in item_id_list if self.get_item_number(item_id = x) != 0}
+        return {x : self.get_item_number(item_id = x,count_equipped= count_equipped) for x in item_id_list 
+                                    if self.get_item_number(item_id = x , count_equipped= count_equipped) != 0}
         
     def get_money(self ) -> int:
         
@@ -128,11 +129,11 @@ class CompleteAccountData:
         
         return iter(self.accounts)
     
-    def get_by_id_list(self, id_list : list[int]) -> typing.Generator[tuple[AccountData, ExchangeDictType],None ,None]:
+    def get_by_id_list(self, id_list : list[int] , count_equipped : bool = True) -> typing.Generator[tuple[AccountData, ExchangeDictType],None ,None]:
         
         for account in self.accounts:
             
-            yield account ,account.get_items_by_item_list(item_id_list = id_list)
+            yield account ,account.get_items_by_item_list(item_id_list = id_list,count_equipped= count_equipped)
     
     def get_complete_dict_by_id_list(self , id_list : list[int]) :
         complete_dict = {}
@@ -153,7 +154,7 @@ class CompleteAccountData:
         
         return item_set.list_items
         
-    def get_all_set_items_by_item_ids(self , id_list : list[int]):
+    def get_all_set_items_by_item_ids(self , id_list : list[int] , count_equipped : bool = True):
         
         set_item_ids = set()
         
@@ -162,6 +163,6 @@ class CompleteAccountData:
             result_list = self._get_set_item_list_by_id(example_item_id=item_id)
             set_item_ids.update(result_list)
         
-        return self.get_by_id_list(id_list = set_item_ids)
+        return self.get_by_id_list(id_list = set_item_ids ,count_equipped=count_equipped)
     
     

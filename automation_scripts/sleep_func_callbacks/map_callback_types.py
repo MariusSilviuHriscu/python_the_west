@@ -186,6 +186,3 @@ class TypeMappingList:
         new_mapping_list.extend(other)
         
         return new_mapping_list
-    def __radd__(self, other: typing.Self | None) -> typing.Self:
-        
-        return self + other

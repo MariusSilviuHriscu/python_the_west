@@ -1,3 +1,5 @@
+import typing
+from the_west_inner.bag import Bag
 from the_west_inner.equipment import Equipment, Equipment_manager
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.reports import Reports_manager
@@ -7,6 +9,7 @@ from the_west_inner.work_manager import Work_manager
 from the_west_inner.skills import read_skill
 
 from automation_scripts.marketplace_scripts.marketplace_observer import MarketplaceProductObserver
+from automation_scripts.sleep_func_callbacks.recharge_health import select_usable
 
 
 from automation_scripts.stop_events.script_events import RestartEvent,StopEvent,ScriptPauseEvent
@@ -56,10 +59,18 @@ def recharge_health_equipment(handler: requests_handler,
                     player_data: Player_data,
                     work_manager: Work_manager,
                     consumable_handler: Consumable_handler,
-                    recharge_hp_consumable_id: int,
+                    recharge_hp_consumable_id: int | list[int],
                     equipment_manager : Equipment_manager,
                     hp_equipment : Equipment,
+                    bag : Bag,
+                    stop_event_callable : None |typing.Callable[[],None] = None
                     ) -> None:
+    
+    if not isinstance(recharge_hp_consumable_id, list):
+        
+        consumables = [recharge_hp_consumable_id]
+    else:
+        consumables = recharge_hp_consumable_id
     
     player_data.update_character_variables(handler=handler)
     
@@ -71,12 +82,18 @@ def recharge_health_equipment(handler: requests_handler,
                                           handler= handler
                                           )
         
-        consumable_handler.use_consumable(consumable_id=recharge_hp_consumable_id)
+        usable = select_usable(usable_list=consumables,
+                      bag= bag,
+                      stop_event_callable = stop_event_callable
+                      )
+        
+        consumable_handler.use_consumable(consumable_id = usable)
         
         equipment_manager.equip_equipment(equipment = current_equipment,
                                           handler= handler
                                           )
         
+        bag.update_inventory(handler=work_manager.handler)
         player_data.update_character_variables(handler=handler)
         
     

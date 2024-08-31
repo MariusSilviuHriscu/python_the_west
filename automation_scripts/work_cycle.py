@@ -1,13 +1,12 @@
 import typing
 
 from the_west_inner.game_classes import Game_classes
-from the_west_inner.misc_scripts import wait_until_date,wait_until_date_callback
+from the_west_inner.misc_scripts import wait_until_date_callback
 from the_west_inner.work_manager import Work_manager
 from the_west_inner.work import Work
 from the_west_inner.consumable import Consumable_handler
 from the_west_inner.reports import Reports_manager
 
-from automation_scripts.sleep_func_callbacks.misc_func_callback import read_report_rewards,recharge_health
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 
 class Script_work_task:

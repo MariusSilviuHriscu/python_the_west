@@ -11,7 +11,6 @@ from the_west_inner.consumable import Consumable_handler
 from the_west_inner.reports import Reports_manager
 
 
-from automation_scripts.sleep_func_callbacks.misc_func_callback import read_report_rewards,recharge_health
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 
 class CycleJobsProducts:

@@ -102,7 +102,7 @@ class Cycle_jobs:
     def get_work_callback_function(self) -> typing.Callable | None:
         if self.work_callback_chainer is None:
             return None
-        return self.work_callback_chainer.chain_function(report_manager = self.report_manager)
+        return self.work_callback_chainer.chain_function(report_manager = self.reports_manager)
     
     def update_consumable_callback_chainer(self,callback_chain:CallbackChainer):
         self.consumable_callback_chainer = callback_chain
@@ -110,7 +110,7 @@ class Cycle_jobs:
     def get_consumable_callback_function(self) -> typing.Callable | None:
         if self.consumable_callback_chainer is None:
             return None
-        return self.consumable_callback_chainer.chain_function(report_manager = self.report_manager)
+        return self.consumable_callback_chainer.chain_function(report_manager = self.reports_manager)
     def _analize_motivation(self) -> typing.List[Script_work_task]:
         """
         Analyze motivation levels and create a list of Script_work_task objects based on available actions.

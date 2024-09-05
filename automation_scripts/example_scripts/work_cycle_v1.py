@@ -1,3 +1,4 @@
+import datetime
 from the_west_inner.equipment import Equipment
 from the_west_inner.login import Game_login
 from the_west_inner.work import Work
@@ -14,6 +15,31 @@ def stop_works(work_manager : Work_manager):
     
     work_manager.cancel_all_tasks()
 
+
+class ScriptTimer:
+    
+    def __init__(self , time_data : None | datetime.timedelta | datetime.datetime):
+        
+        self.creation_date = datetime.datetime.now()
+        
+        self.end_time = time_data + self.creation_date if isinstance(time_data , datetime.timedelta) else time_data
+        print(self.end_time)
+        
+        self.stop_event = StopEvent()
+    def is_time_over(self) -> bool:
+        
+        if self.end_time is None:
+            return False
+        
+        return datetime.datetime.now() > self.end_time
+    
+    def check(self):
+        print(self.is_time_over())
+        if not self.is_time_over():
+            return
+        
+        self.stop_event.raise_exception()
+
 @handle_exceptions
 def cycle_work(game_login : Game_login ,
                hp_equipment : Equipment,
@@ -21,7 +47,8 @@ def cycle_work(game_login : Game_login ,
                job_data : list[Work],
                motivation_consumable : int ,
                energy_consumable : int,
-               number_of_cycles : int = 1
+               number_of_cycles : int = 1,
+               time_data : None | datetime.timedelta | datetime.datetime = None
                ):
     
     game = game_login.login()
@@ -31,7 +58,6 @@ def cycle_work(game_login : Game_login ,
         callback_function=stop_works,
         work_manager = game.work_manager
     )
-    
     
     
     chain = CallbackChainer()
@@ -49,10 +75,21 @@ def cycle_work(game_login : Game_login ,
     stop_event_callable = stop_work_chain.chain_function()
     )
     
+    timer = ScriptTimer(time_data=time_data)
+    
+    
+    chain.add_callback(
+        callback_function = timer.check
+    )
+    
     cycle = Cycle_jobs(
         game_classes= game,
         job_data = job_data,
         consumable_handler= game.consumable_handler
+    )
+    
+    cycle.update_work_callback_chainer(
+        callback_chain= chain
     )
     
     cycle.cycle(
@@ -60,5 +97,3 @@ def cycle_work(game_login : Game_login ,
         energy_consumable= energy_consumable,
         number_of_cycles= number_of_cycles
     )
-    
-    

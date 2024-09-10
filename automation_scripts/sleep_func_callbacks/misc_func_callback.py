@@ -1,4 +1,7 @@
 import typing
+import copy
+
+
 from the_west_inner.bag import Bag
 from the_west_inner.equipment import Equipment, Equipment_manager
 from the_west_inner.requests_handler import requests_handler
@@ -77,24 +80,36 @@ def recharge_health_equipment(handler: requests_handler,
     print('Checked HP')
     if player_data.hp / player_data.hp_max < 0.25:
         work_manager.cancel_all_tasks()
-        current_equipment = equipment_manager.current_equipment
+        print('Cancelling all tasks')
+        current_equipment = copy.deepcopy(equipment_manager.current_equipment)
         equipment_manager.equip_equipment(equipment = hp_equipment , 
                                           handler= handler
                                           )
+        
+        print('equipping hp set')
         
         usable = select_usable(usable_list=consumables,
                       bag= bag,
                       stop_event_callable = stop_event_callable
                       )
         
+        print(f'selected usable {usable}')
+        
         consumable_handler.use_consumable(consumable_id = usable)
+        
+        print(f'used usable ')
+        
         
         equipment_manager.equip_equipment(equipment = current_equipment,
                                           handler= handler
                                           )
         
+        print(f'equipped  {current_equipment.__dict__}')
+        
+        
         bag.update_inventory(handler=work_manager.handler)
         player_data.update_character_variables(handler=handler)
+        print(f'finished')
         
     
 

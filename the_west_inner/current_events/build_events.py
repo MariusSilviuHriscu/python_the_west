@@ -4,7 +4,7 @@ import typing
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.currency import Currency
 
-from the_west_inner.init_data import return_current_event_data,get_wof_id_by_event_name
+from the_west_inner.init_data import return_current_event_data,get_wof_id_by_event_name,return_current_fair_data
 
 from the_west_inner.current_events.independence.build_independence_event import IndependenceEventBuilder
 from the_west_inner.current_events.current_events import CurrentEvent
@@ -22,7 +22,8 @@ class EventBuilder(Protocol):
 
 
 EVENT_DICT : dict[str, EventBuilder] ={
-    'Independence' : IndependenceEventBuilder
+    'Independence' : IndependenceEventBuilder,
+    'fairwof' : None
 }
 
 
@@ -74,3 +75,20 @@ def make_event_loader(game_html : str) -> CurrentEventLoader|None:
                 currency_ammount = event_dict.get('counter').get('value'),
                 currency_name = event_dict.get('currency_id')
             )
+
+
+def make_fair_event_loader(game_html : str ) -> CurrentEventLoader|None:
+    
+    fair_event_data = return_current_fair_data(initialization_html= game_html)
+    
+    if fair_event_data == {}:
+        return None
+    
+    wof_id = get_wof_id_by_event_name(initialization_html = game_html , event_name = fair_event_data.get('name'))
+    
+    
+    return CurrentEventLoader(wof_id = wof_id,
+                              event_key= fair_event_data.get('name'),
+                              currency_ammount= 0,
+                              currency_name= 'free'
+                              )

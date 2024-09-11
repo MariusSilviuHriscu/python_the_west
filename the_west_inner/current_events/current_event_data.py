@@ -5,6 +5,7 @@ class EventCurrencyEnum(Enum):
     
     NUGGETS = 2
     FIREWORK = 16
+    OUP = 1
 
 StageType : typing.TypeAlias = int
 RewardID : typing.TypeAlias = int

@@ -42,7 +42,7 @@ class EventHandler():
         )
         return response
     
-    def init_event(self , wof_id : int):
+    def init_event(self , wof_id : int) -> dict:
         payload = {'wofid' : wof_id}
         
         response = self.handler.post(

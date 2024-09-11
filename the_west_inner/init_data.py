@@ -1,3 +1,4 @@
+import typing
 from bs4 import BeautifulSoup
 import time
 import datetime
@@ -18,7 +19,8 @@ return_wear_data : Extracts equipment data from the initialization HTML
 """
 
 CORRESPONDING_EVENT_WOF = {
-    'Independence' : 'independencewof'
+    'Independence' : 'independencewof',
+    'fairwof' : 'fairwof'
 }
 
 
@@ -91,10 +93,30 @@ def return_currency_data(initialization_html:str)->dict[str,int]:
             json_player_data = json.loads(string_found)
             return {key : json_player_data.get(key) for key in search_dict}
 
-def return_current_event_data(initialization_html : str) -> dict[str,str|int]:
+
+def return_current_fair_data(initialization_html : str) -> dict[str , str | int ]:
+    
+    jsonStr_list = re.findall(r'\{.*\}', str(initialization_html))
+    for json_item in jsonStr_list:
+        
+        try:
+            
+            dict_data = json.loads(json_item)
+            
+            if dict_data.get('type', None) == 'fairwof' :
+                
+                return dict_data
+        
+        except :
+            pass
+    return {}
+                
+
+def return_current_event_data(initialization_html : str) -> dict[str,str|int] | list[typing.Never]:
     
     jsonStr_list = re.findall(r'\{.*\}', str(initialization_html))
     json_item = json.loads(jsonStr_list[2])
+    
     return json_item["sesData"]
 
 

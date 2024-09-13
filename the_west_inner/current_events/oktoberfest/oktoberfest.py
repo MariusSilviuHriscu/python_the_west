@@ -84,18 +84,19 @@ class OktoberfestEventData:
         
         self.buildings = new_buildings
             
-    def _create_update_building(self , update_dict : dict) -> OktoberfestBuildingData:
+    def _create_update_building(self , update_dict : dict , fallback_value : None | int = None) -> OktoberfestBuildingData:
         
         finish_time = turn_game_time_to_datetime(game_time = update_dict.get('finish_date'))
-        
-        return OktoberfestBuildingData(
-            construction_id = update_dict.get('construction_id'),
-            being_built = True,
-            collected = True ,
-            finish_date = finish_time,
-            stage= update_dict.get('building_stage')
-        )
-        
+        try :
+            return OktoberfestBuildingData(
+                construction_id = update_dict.get('construction_id') if fallback_value is None else fallback_value,
+                being_built = True,
+                collected = True ,
+                finish_date = finish_time,
+                stage= update_dict.get('building_stage')
+            )
+        except :
+            print(update_dict)
         
     def update_buildings(self, updated_data : typing.Iterable[dict]) -> None:
         

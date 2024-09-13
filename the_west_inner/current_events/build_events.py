@@ -4,10 +4,12 @@ import typing
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.currency import Currency
 
+from the_west_inner.current_events.current_events import CurrentEvent
+
 from the_west_inner.init_data import return_current_event_data,get_wof_id_by_event_name,return_current_fair_data
 
 from the_west_inner.current_events.independence.build_independence_event import IndependenceEventBuilder
-from the_west_inner.current_events.current_events import CurrentEvent
+from the_west_inner.current_events.oktoberfest.build_oktoberfest_event import OktoberfestEventBuilder
 
 
 class EventBuilder(Protocol):
@@ -23,6 +25,7 @@ class EventBuilder(Protocol):
 
 EVENT_DICT : dict[str, EventBuilder] ={
     'Independence' : IndependenceEventBuilder,
+    'Octoberfest' : OktoberfestEventBuilder,
     'fairwof' : None
 }
 

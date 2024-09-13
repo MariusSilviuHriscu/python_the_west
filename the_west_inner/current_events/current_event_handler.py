@@ -42,6 +42,26 @@ class EventHandler():
         )
         return response
     
+    def bribe(self ,pay_id : int , wof_id : int):
+        
+        payload ={
+            'payid': pay_id ,
+            'action': 'bribe' ,
+            'wofid': wof_id ,
+        }
+        
+        response = self.handler.post(
+            window = 'wheeloffortune',
+            action= 'gamble',
+            payload= payload ,
+            use_h= True
+        )
+        
+        if 'error' in response and response.get('error') == True:
+            raise Exception(f"You couldn't bribe ! Error message is  : {response.get('msg', '')} ")
+        
+        return response
+    
     def init_event(self , wof_id : int) -> dict:
         payload = {'wofid' : wof_id}
         

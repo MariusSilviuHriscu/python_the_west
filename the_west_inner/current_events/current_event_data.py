@@ -46,7 +46,7 @@ class CostData:
         if action_name not in self.__dict__:
             raise ValueError(f'Incorrect action name : {action_name}')
         
-        return getattr('action_name' , self) * UNIVERSAL_EVENT_MULTIPLIER_DICT.get(event_currency.value)
+        return self.__dict__.get(action_name) * UNIVERSAL_EVENT_MULTIPLIER_DICT.get(event_currency.value)
 
 class CurrencyData:
     def __init__(self ,

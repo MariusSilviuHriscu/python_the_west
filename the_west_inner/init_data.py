@@ -20,7 +20,8 @@ return_wear_data : Extracts equipment data from the initialization HTML
 
 CORRESPONDING_EVENT_WOF = {
     'Independence' : 'independencewof',
-    'fairwof' : 'fairwof'
+    'fairwof' : 'fairwof',
+    'Octoberfest' : 'octoberwof'
 }
 
 

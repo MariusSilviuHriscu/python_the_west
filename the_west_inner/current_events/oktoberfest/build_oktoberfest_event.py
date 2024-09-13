@@ -39,9 +39,18 @@ class OktoberfestEventBuilder :
         )
     
     def build_oktoberfest_event_data(self , response : dict[str , str | dict]) -> OktoberfestEventData:
+        if response.get('mode').get('states') == []:
+            return OktoberfestEventData(
+                buildings= []
+            )
+        
+        search_data = response.get('mode').get('states')
+        
+        oktober_data = search_data if isinstance(search_data, list) else search_data.values()
+        
         return OktoberfestEventData(
             buildings = [OktoberfestBuildingData.build_from_dict(dict_data=x) for x in 
-                                            response.get('mode').get('states').values()
+                                            oktober_data
                                                 ]
         )
     

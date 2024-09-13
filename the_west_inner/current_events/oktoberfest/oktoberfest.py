@@ -87,16 +87,13 @@ class OktoberfestEventData:
     def _create_update_building(self , update_dict : dict , fallback_value : None | int = None) -> OktoberfestBuildingData:
         
         finish_time = turn_game_time_to_datetime(game_time = update_dict.get('finish_date'))
-        try :
-            return OktoberfestBuildingData(
+        return OktoberfestBuildingData(
                 construction_id = update_dict.get('construction_id') if fallback_value is None else fallback_value,
                 being_built = True,
                 collected = True ,
                 finish_date = finish_time,
                 stage= update_dict.get('building_stage')
             )
-        except :
-            print(update_dict)
         
     def update_buildings(self, updated_data : typing.Iterable[dict]) -> None:
         
@@ -206,7 +203,9 @@ class OktoberfestEvent(CurrentEvent):
                                      wof_id= self.current_event_data.event_wof
                                      )
             cost += bribe_cost
-            print(bribe_result)
+            stage = bribe_result.get('outcome').get('building_stage')
+        
+            result['building_stage'] = stage
         
         self._handle_succesful_construction(
             cost = cost,

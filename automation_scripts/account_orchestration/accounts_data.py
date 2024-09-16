@@ -135,29 +135,44 @@ class CompleteAccountData:
 
     def _load_account_async(self,
                             account_data: AccountData,
-                            session_builder_func : SessionBuilderFuncType
-                            ):
+                            session_builder_func: SessionBuilderFuncType):
         """
-        Helper function to load an account asynchronously.
+        Helper function to load an account asynchronously. 
+        Assumes program will crash on any exception, as per preference.
         """
-        load_generator = account_data.load(session_builder_func = session_builder_func)
+        load_generator = account_data.load(session_builder_func=session_builder_func)
         self._load_sets(load_generator=load_generator)
-        
-    def load_all_async(self,
-                   session_builder_func: SessionBuilderFuncType,
-                   max_workers: int = 5):  # Default to 5 concurrent threads
+
+    def _load_all_async_recursive(self,
+                                session_builder_func: SessionBuilderFuncType):
         """
-        Asynchronously loads all accounts using a ThreadPoolExecutor with a limit on the number of concurrent threads.
+        Recursively loads accounts asynchronously until all are loaded.
         """
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Create a list of future tasks, each loading one account
+        # Check which accounts are not yet loaded
+        unloaded_accounts = [account for account in self.accounts if not account.is_loaded]
+
+        if not unloaded_accounts:
+            # All accounts are loaded, end recursion
+            return
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Create a list of future tasks for each unloaded account
             futures = [
                 executor.submit(self._load_account_async, account_data, session_builder_func)
-                for account_data in self.accounts
+                for account_data in unloaded_accounts
             ]
             # Wait for all futures to complete
             concurrent.futures.wait(futures)
+        
+        # Recurse until all accounts are loaded
+        self._load_all_async_recursive(session_builder_func=session_builder_func)
 
+    def load_all_async(self,
+                    session_builder_func: SessionBuilderFuncType):
+        """
+        Public method to initiate recursive async loading.
+        """
+        self._load_all_async_recursive(session_builder_func=session_builder_func)
     def get_money(self) -> int:
         return sum([x.get_money() for x in self.accounts])
     

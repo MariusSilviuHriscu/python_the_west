@@ -144,15 +144,15 @@ class CompleteAccountData:
         self._load_sets(load_generator=load_generator)
         
     def load_all_async(self,
-                       session_builder_func : SessionBuilderFuncType
-                       ):
+                   session_builder_func: SessionBuilderFuncType,
+                   max_workers: int = 5):  # Default to 5 concurrent threads
         """
-        Asynchronously loads all accounts using a ThreadPoolExecutor.
+        Asynchronously loads all accounts using a ThreadPoolExecutor with a limit on the number of concurrent threads.
         """
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Create a list of future tasks, each loading one account
             futures = [
-                executor.submit(self._load_account_async, account_data , session_builder_func)
+                executor.submit(self._load_account_async, account_data, session_builder_func)
                 for account_data in self.accounts
             ]
             # Wait for all futures to complete

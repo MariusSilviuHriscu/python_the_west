@@ -1,5 +1,5 @@
 import typing
-
+import concurrent.futures
 
 from the_west_inner.login import Game_login
 from the_west_inner.game_classes import Game_classes
@@ -24,6 +24,9 @@ def update_dict(target_dict : ExchangeDictType , extension_dict : ExchangeDictTy
             target_dict[item_id] = item_number
     
     return target_dict
+
+
+SessionBuilderFuncType = typing.Callable[[Game_login],StandardRequestsSession]
 class AccountData:
     
     def __init__(self ,
@@ -41,10 +44,28 @@ class AccountData:
     @property
     def is_loaded(self) -> bool:
         return self.bag is not None and self.currency is not None and self.current_equipment is not None
-
-    def load(self) -> typing.Generator[Game_classes,None,None]:
+    
+    
+    def _login_by_func(self , 
+                       session_builder_func : SessionBuilderFuncType| None = None) -> Game_login:
         
-        game_classes = self.login.login()
+        if session_builder_func is None :
+            return self.login
+        
+        return Game_login(
+            player_name = self.login.player_name,
+            player_password= self.login.player_password,
+            world_id = self.login.world_id,
+            session_builder_func = session_builder_func
+        )
+        
+        
+    def load(self,
+             session_builder_func : SessionBuilderFuncType| None = None
+             ) -> typing.Generator[Game_classes,None,None]:
+        
+        login = self._login_by_func(session_builder_func = session_builder_func)
+        game_classes = login.login()
         
         yield game_classes
 
@@ -111,7 +132,32 @@ class CompleteAccountData:
             
             load_generator = account_data.load()
             self._load_sets(load_generator=load_generator)
-    
+
+    def _load_account_async(self,
+                            account_data: AccountData,
+                            session_builder_func : SessionBuilderFuncType
+                            ):
+        """
+        Helper function to load an account asynchronously.
+        """
+        load_generator = account_data.load(session_builder_func = session_builder_func)
+        self._load_sets(load_generator=load_generator)
+        
+    def load_all_async(self,
+                       session_builder_func : SessionBuilderFuncType
+                       ):
+        """
+        Asynchronously loads all accounts using a ThreadPoolExecutor.
+        """
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Create a list of future tasks, each loading one account
+            futures = [
+                executor.submit(self._load_account_async, account_data , session_builder_func)
+                for account_data in self.accounts
+            ]
+            # Wait for all futures to complete
+            concurrent.futures.wait(futures)
+
     def get_money(self) -> int:
         return sum([x.get_money() for x in self.accounts])
     

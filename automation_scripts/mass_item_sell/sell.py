@@ -42,7 +42,7 @@ class SellDecisionManager:
     def __init__(self, bag: Bag, items: Items, item_exception_list: list[int] | None = None):
         self.bag = bag
         self.items = items
-        self.item_exception_list = [] if item_exception_list is None else item_exception_list
+        self.item_exception_list = set() if item_exception_list is None else {x for x in item_exception_list}
     
     def decide_sell(self) -> typing.Generator[SellOrder, None, None]:
         """
@@ -57,12 +57,11 @@ class SellDecisionManager:
         sell_dict = {int(x) : y for x, y in self.items.items.items() 
                      if y.get('dropable') is True 
                      if y.get('type') not in bad_item_type 
-                     if x not in self.item_exception_list}
+                     if int(x) not in self.item_exception_list}
         
         for item_id, item_dict in sell_dict.items():
-            
+
             number = self.bag[item_id]
-            
             if number > 0:
                 
                 yield SellOrder(
@@ -87,11 +86,11 @@ class SellDecisionManager:
         sell_dict = {int(x) : y for x, y in self.items.items.items() 
                      if y.get('dropable') is True 
                      if y.get('type') not in bad_item_type 
-                     if x not in self.item_exception_list
+                     if int(x) not in self.item_exception_list
                      if x in list_items}
         
         for item_id, item_dict in sell_dict.items():
-            
+
             number = self.bag[item_id]
             
             if number > 0:

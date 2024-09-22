@@ -54,14 +54,14 @@ class SellDecisionManager:
         
         bad_item_type = ['yield', 'recipe']
         
-        sell_dict = {x: y for x, y in self.items.items.items() 
+        sell_dict = {int(x) : y for x, y in self.items.items.items() 
                      if y.get('dropable') is True 
                      if y.get('type') not in bad_item_type 
                      if x not in self.item_exception_list}
         
         for item_id, item_dict in sell_dict.items():
             
-            number = self.bag[int(item_id)]
+            number = self.bag[item_id]
             
             if number > 0:
                 
@@ -84,7 +84,7 @@ class SellDecisionManager:
         
         bad_item_type = ['yield', 'recipe']
         
-        sell_dict = {x: y for x, y in self.items.items.items() 
+        sell_dict = {int(x) : y for x, y in self.items.items.items() 
                      if y.get('dropable') is True 
                      if y.get('type') not in bad_item_type 
                      if x not in self.item_exception_list
@@ -92,7 +92,7 @@ class SellDecisionManager:
         
         for item_id, item_dict in sell_dict.items():
             
-            number = self.bag[int(item_id)]
+            number = self.bag[item_id]
             
             if number > 0:
                 

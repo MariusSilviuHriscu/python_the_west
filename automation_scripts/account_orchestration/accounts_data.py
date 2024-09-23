@@ -13,6 +13,7 @@ from the_west_inner.map import MapLoader
 
 ItemIDType = int
 ExchangeDictType = dict[ItemIDType, typing.Optional[int]]
+ScriptType = typing.Callable[[Game_classes],None]
 
 def update_dict(target_dict : ExchangeDictType , extension_dict : ExchangeDictType):
     
@@ -45,7 +46,12 @@ class AccountData:
     def is_loaded(self) -> bool:
         return self.bag is not None and self.currency is not None and self.current_equipment is not None
     
-    
+    def unload(self) -> None:
+        
+        self.bag = None
+        self.currency = None
+        self.current_equipment = None
+        
     def _login_by_func(self , 
                        session_builder_func : SessionBuilderFuncType| None = None) -> Game_login:
         
@@ -112,39 +118,60 @@ class CompleteAccountData:
     def is_loaded(self) -> bool:
         
         return all([x.is_loaded for x in self.accounts])
-
-    def _load_sets(self , load_generator : typing.Generator[Game_classes,None,None]):
+    
+    def unload_all(self) -> None:
+        
+        for account in self.accounts  :
+            account.unload()
+    
+    def _load_sets(self , game_classes : Game_classes):
         
         if self._sets is None:
-        
-            game_classes = next(load_generator)
-            
             sets = get_item_sets(requests_handler = game_classes.handler)
             self._sets = sets
-        
-        #consume the rest of the generator
-        for _ in load_generator:
-            pass
     
-    def load_all(self):
+    def load_all(self, callback_func : ScriptType | None = None):
         
         for account_data in self.accounts:
             
             load_generator = account_data.load()
-            self._load_sets(load_generator=load_generator)
+            
+            game_classes = next(load_generator)
+            
+            self._load_sets(game_classes = game_classes)
+            
+            #consume the rest of the generator
+            for _ in load_generator:
+                pass
+            
+            callback_func(Game_classes)
 
     def _load_account_async(self,
                             account_data: AccountData,
-                            session_builder_func: SessionBuilderFuncType):
+                            session_builder_func: SessionBuilderFuncType,
+                            callback_func : ScriptType | None = None
+                            ):
         """
         Helper function to load an account asynchronously. 
         Assumes program will crash on any exception, as per preference.
         """
         load_generator = account_data.load(session_builder_func=session_builder_func)
-        self._load_sets(load_generator=load_generator)
-
+        
+        game_classes = next(load_generator)
+            
+        self._load_sets(game_classes = game_classes)
+        
+        #consume the rest of the generator
+        for _ in load_generator:
+            pass
+        
+        callback_func(Game_classes)
+        
+        
     def _load_all_async_recursive(self,
-                                session_builder_func: SessionBuilderFuncType):
+                                session_builder_func: SessionBuilderFuncType,
+                                callback_func : ScriptType | None = None
+                                ):
         """
         Recursively loads accounts asynchronously until all are loaded.
         """
@@ -158,21 +185,27 @@ class CompleteAccountData:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Create a list of future tasks for each unloaded account
             futures = [
-                executor.submit(self._load_account_async, account_data, session_builder_func)
+                executor.submit(self._load_account_async, account_data, session_builder_func , callback_func)
                 for account_data in unloaded_accounts
             ]
             # Wait for all futures to complete
             concurrent.futures.wait(futures)
         
         # Recurse until all accounts are loaded
-        self._load_all_async_recursive(session_builder_func=session_builder_func)
+        self._load_all_async_recursive(session_builder_func=session_builder_func,
+                                       callback_func= callback_func
+                                       )
 
     def load_all_async(self,
-                    session_builder_func: SessionBuilderFuncType):
+                    session_builder_func: SessionBuilderFuncType,
+                    callback_func : ScriptType | None = None
+                    ):
         """
         Public method to initiate recursive async loading.
         """
-        self._load_all_async_recursive(session_builder_func=session_builder_func)
+        self._load_all_async_recursive(session_builder_func = session_builder_func,
+                                       callback_func = callback_func
+                                       )
     def get_money(self) -> int:
         return sum([x.get_money() for x in self.accounts])
     

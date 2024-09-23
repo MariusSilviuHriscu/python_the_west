@@ -2,11 +2,11 @@ import typing
 import concurrent.futures
 
 
-from automation_scripts.account_orchestration.accounts_data import CompleteAccountData,AccountData
+from automation_scripts.account_orchestration.accounts_data import CompleteAccountData , AccountData , ScriptType
 from connection_sessions.standard_request_session import StandardRequestsSession
+from the_west_inner.game_classes import Game_classes
 from the_west_inner.login import Game_login
 
-ScriptType = typing.Callable[[Game_login],None]
 SessionBuilderFuncType = typing.Callable[[Game_login],StandardRequestsSession]
 
 class AccountDataScriptManager:
@@ -47,11 +47,16 @@ class AccountDataScriptManager:
                       session_builder_func : SessionBuilderFuncType | None = None
                       ) :
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Create a list of future tasks for each unloaded account
-            futures = [
-                executor.submit(self._execute_script, account_data , account_script , session_builder_func)
-                for account_data in self.available_dict.values() if account_data not in self.unavailable_account
-            ]
-            # Wait for all futures to complete
-            concurrent.futures.wait(futures)
+        self.account_data.load_all_async(
+            session_builder_func = session_builder_func,
+            callback_func = account_script
+        )
+    
+    def execute(self ,
+                account_script : ScriptType 
+                ) :
+        
+        self.account_data.load_all(
+            callback_func = account_script
+        )
+        self.account_data.unload_all()

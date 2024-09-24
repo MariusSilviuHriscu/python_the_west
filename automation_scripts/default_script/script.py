@@ -307,7 +307,7 @@ class Script_comert_produs_clona:
         chosen_script.execute()
         
 
-def world_script_by_login(login : Game_login,
+def world_script_by_login(login : Game_login ,
                           target_product_id : int,
                           event_bet_offset : list[int] = None,
                           preview_ex_chainer :CallbackChainer = None
@@ -342,6 +342,42 @@ def world_script_by_login(login : Game_login,
     if isinstance(game.handler.session, StandardRequestsSession):
         print('Changing ip adress')
         game.handler.session.force_change_connection()
+
+def world_script_by_game_classes(
+    game_classes : Game_classes,
+    game_html : str ,
+    target_product_id : int,
+    event_bet_offset : list[int] = None,
+    preview_ex_chainer :CallbackChainer = None):
+    
+    if preview_ex_chainer is not None:
+        executable_func = preview_ex_chainer.chain_function(
+        game_html = game_html,
+        global_currency = game_classes.currency,
+        offset_list = event_bet_offset or [0 , 1],
+        handler = game_classes.handler,
+        game_classes = game_classes
+        )
+        executable_func()
+    
+    collect_daily_reward(handler = game_classes.handler)
+    
+    script = Script_comert_produs_clona(
+        game_classes=game_classes,
+        energy_consummable_id=0,
+        motivation_consummable_id=0,
+        luck_bonus_consumable_id=0,
+        target_mass_product_id=target_product_id,
+        target_seconds_work_id=0
+    )
+    
+    script.choose_path().execute()
+    
+
+    if isinstance(game_classes.handler.session, StandardRequestsSession):
+        print('Changing ip adress')
+        game_classes.handler.session.force_change_connection()
+    
 
 def world_script_instance(script_settings: Script_settings):
     """

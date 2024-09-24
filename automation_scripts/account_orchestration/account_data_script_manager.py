@@ -54,10 +54,12 @@ class AccountDataScriptManager:
         self.account_data.unload_all()
     
     def execute(self ,
-                account_script : ScriptType 
-                ) :
+                account_script : ScriptType,
+                session_builder_func : SessionBuilderFuncType | None = None
+                ):
         
         self.account_data.load_all(
+            session_builder_func=session_builder_func,
             callback_func = account_script
         )
         self.account_data.unload_all()

@@ -49,7 +49,8 @@ class AccountDataScriptManager:
 
         self.account_data.load_all_async(
             session_builder_func = session_builder_func,
-            callback_func = account_script
+            callback_func = account_script,
+            batch_size= 10
         )
         self.account_data.unload_all()
     

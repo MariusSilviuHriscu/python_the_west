@@ -58,7 +58,7 @@ def retry_on_exception(delay: int, repeat: int, exceptions: typing.Union[type, t
             while attempts <= repeat:
                 try:
                     return func(*args, **kwargs)
-                except exceptions as e:
+                except Exception as e:
                     attempts += 1
                     if attempts <= repeat:
                         print(f"Exception encountered: {e}. Retrying in {delay} seconds... (Attempt {attempts}/{repeat})")

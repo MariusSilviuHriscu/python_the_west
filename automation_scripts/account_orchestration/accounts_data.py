@@ -136,7 +136,6 @@ class CompleteAccountData:
                             ):
         """
         Helper function to load an account asynchronously. 
-        Assumes program will crash on any exception, as per preference.
         """
         load_generator = account_data.load(session_builder_func=session_builder_func)
         
@@ -185,11 +184,8 @@ class CompleteAccountData:
 
             # Check for exceptions and raise them
             for future in done:
-                future.result()  # This will raise the exception if one occurred
+                future.result()
             
-            if not_done:
-                # Raise an exception if any futures did not complete
-                raise Exception("Some accounts failed to load. Please check the logs for more details.")
         
         # Recurse until all accounts are loaded
         self._load_all_async_recursive(session_builder_func=session_builder_func,

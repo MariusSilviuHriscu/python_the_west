@@ -66,6 +66,6 @@ def make_check_if_can_change_class(game_classes : Game_classes) -> typing.Callab
     
     def check_if_can_change() -> bool:
         
-        return game_classes.player_data.level >= 15 and str(ClassTypeEnum.GREENHORN) == game_classes.player_data.class_name
+        return game_classes.player_data.level >= 15 and ClassTypeEnum.GREENHORN.value == game_classes.player_data.class_key
     
     return check_if_can_change

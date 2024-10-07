@@ -146,8 +146,8 @@ class CompleteAccountData:
         #consume the rest of the generator
         for _ in load_generator:
             pass
-        
-        callback_func(game_classes,login)
+        if callback_func:
+            callback_func(game_classes,login)
     def load_all(self, 
                 session_builder_func: SessionBuilderFuncType | None = None,
                  callback_func : ScriptType | None = None):
@@ -160,9 +160,9 @@ class CompleteAccountData:
                 callback_func= callback_func
             )
     def _load_all_async_recursive(self,
-                                session_builder_func: SessionBuilderFuncType,
-                                callback_func : ScriptType | None = None
-                                ):
+                                  session_builder_func: SessionBuilderFuncType,
+                                  callback_func: ScriptType | None = None,
+                                  batch_size: int | None = None):
         """
         Recursively loads accounts asynchronously until all are loaded.
         """
@@ -174,34 +174,45 @@ class CompleteAccountData:
             return
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Create a list of future tasks for each unloaded account
-            futures = [
-                executor.submit(self._load_account_async, account_data, session_builder_func , callback_func)
-                for account_data in unloaded_accounts
-            ]
+            if batch_size is None:
+                # If batch_size is None, load all unloaded accounts at once
+                futures = [
+                    executor.submit(self._load_account_async, account_data, session_builder_func, callback_func)
+                    for account_data in unloaded_accounts
+                ]
+            else:
+                # Split the unloaded accounts into batches
+                batches = [unloaded_accounts[i:i+batch_size] for i in range(0, len(unloaded_accounts), batch_size)]
+
+                for batch in batches:
+                    # Create a list of future tasks for each batch
+                    futures = [
+                        executor.submit(self._load_account_async, account_data, session_builder_func, callback_func)
+                        for account_data in batch
+                    ]
+
             # Wait for all futures to complete
             done, not_done = concurrent.futures.wait(futures)
 
             # Check for exceptions and raise them
-            for future in done:
-                future.result()
-            
-        
+            #for future in done:
+            #    future.result()
+
         # Recurse until all accounts are loaded
         self._load_all_async_recursive(session_builder_func=session_builder_func,
-                                       callback_func= callback_func
-                                       )
+                                       callback_func=callback_func,
+                                       batch_size=batch_size)
 
     def load_all_async(self,
-                    session_builder_func: SessionBuilderFuncType,
-                    callback_func : ScriptType | None = None
-                    ):
+                       session_builder_func: SessionBuilderFuncType,
+                       callback_func: ScriptType | None = None,
+                       batch_size: int | None = None):
         """
         Public method to initiate recursive async loading.
         """
-        self._load_all_async_recursive(session_builder_func = session_builder_func,
-                                       callback_func = callback_func
-                                       )
+        self._load_all_async_recursive(session_builder_func=session_builder_func,
+                                       callback_func=callback_func,
+                                       batch_size=batch_size)
     def get_money(self) -> int:
         return sum([x.get_money() for x in self.accounts])
     

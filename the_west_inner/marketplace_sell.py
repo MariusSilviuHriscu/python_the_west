@@ -275,7 +275,9 @@ class Auction_sell_manager:
             min_price : int = int (
                                     self.items.find_item(item_id=item_id).get('sell_price') 
                                 )
-            min_price = min_price if min_price != 0 else 5000
+            min_price = min_price if min_price != 0 else 20000
+            if item_id == 2162000 :
+                min_price = 1
         validation_market = TownSortKey(handler=self.handler)
         
         town_id = self.movement_manager.move_to_closest_town(key=validation_market.marketplace_available_sorting_key)

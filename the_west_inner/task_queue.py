@@ -42,7 +42,7 @@ class WayData():
             queue_id = data.get('queue_id'),
             start_date = turn_game_time_to_datetime(game_time = data.get('date_start')),
             end_date = turn_game_time_to_datetime(game_time = data.get('date_done')),
-            duration_seconds = data.get('data_obj').get('duration')
+            duration_seconds = data.get('data_obj').get('duration') if 'data_obj' in data else data.get('data').get('duration')
         )
         
         

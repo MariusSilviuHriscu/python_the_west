@@ -1,4 +1,6 @@
+import copy
 import typing
+from contextlib import contextmanager
 from dataclasses import dataclass
 
 from the_west_inner.requests_handler import requests_handler
@@ -146,6 +148,18 @@ class Equipment_manager():
             skill_change= response['bonus']['allBonuspoints']
         )
         return True
+    @contextmanager
+    def temporary_equipment(self, new_equipment: Equipment, handler: requests_handler):
+        # Step 1: Save the current equipment state
+        old_equipment = copy.deepcopy(self.current_equipment)
+
+        try:
+            # Step 2: Equip the new equipment
+            self.equip_equipment(new_equipment, handler)
+            yield
+        finally:
+            # Step 3: Re-equip the old equipment when exiting the context
+            self.equip_equipment(old_equipment, handler)
 def create_initial_equipment(item_list:typing.List[int],items:Items) -> Equipment:
     #Make sure the item_id is the basic one as the last character in the id reprezents the upgrade of the item
     #replace_last_char = lambda s: s#str(s)[:-1] + "0"

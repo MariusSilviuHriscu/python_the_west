@@ -27,6 +27,10 @@ class Work_list():
             int: The group ID of the work item.
         """
         return self.work_dict[work_id]["groupid"]
+    
+    def get_jobs_by_group_id(self, group_id : int) -> list[int]:
+        
+        return {x['id'] for x in self.work_dict.values() if x['groupid'] == group_id}
 
     def work_products(self):
         """Get a dictionary of possible products that can be produced by the work items.
@@ -79,3 +83,7 @@ class Work_list():
             dict: A dictionary mapping each skill to its required level.
         """
         return self.work_dict[work_id]["skills"]
+    
+    def get_work_level(self , work_id : int ) -> int:
+        
+        return self.work_dict.get(work_id).get('level')

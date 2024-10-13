@@ -2,6 +2,9 @@ from dataclasses import dataclass
 import requests
 from urllib.parse import urlparse
 import datetime
+import time
+from http.client import RemoteDisconnected
+from functools import wraps
 
 from connection_sessions.standard_request_session import StandardRequestsSession
 
@@ -13,6 +16,35 @@ def requests_url_decorator(funct):
         print(f"{a} at {datetime.datetime.now()}",end="\r")
         return a
     return inner
+
+def retry_on_remote_disconnection(retries=3, delay=2):
+    """
+    Retry decorator for handling RemoteDisconnected errors.
+
+    Args:
+        retries (int): Number of retry attempts. Defaults to 3.
+        delay (int): Delay between retry attempts in seconds. Defaults to 2.
+
+    Returns:
+        function: The wrapped function with retry logic.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < retries:
+                try:
+                    return func(*args, **kwargs)
+                except RemoteDisconnected as e:
+                    attempts += 1
+                    print(f"RemoteDisconnected encountered. Retry attempt {attempts}/{retries} after {delay} seconds.")
+                    if attempts < retries:
+                        time.sleep(delay)
+                    else:
+                        print("Max retries reached. Raising exception.")
+                        raise e
+        return wrapper
+    return decorator
 #@requests_url_decorator
 def request_url(base_url, window, action, h=None, action_name="action"):
     """
@@ -32,6 +64,7 @@ def request_url(base_url, window, action, h=None, action_name="action"):
         base_url)._replace(query=f'window={window}&action={action}&h={h}')
     return url.geturl()
 
+@retry_on_remote_disconnection(retries=3, delay=2)
 def request_game(session : requests.Session | StandardRequestsSession, base_url, window, action, payload=None, h=None, action_name="action"):
     """
     Make a game request to the specified server.

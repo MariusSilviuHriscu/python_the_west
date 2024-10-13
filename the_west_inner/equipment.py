@@ -2,6 +2,8 @@ import copy
 import typing
 from contextlib import contextmanager
 from dataclasses import dataclass
+import concurrent.futures
+import time
 
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.bag import Bag
@@ -147,6 +149,55 @@ class Equipment_manager():
         self.equipment_change_skill_update(
             skill_change= response['bonus']['allBonuspoints']
         )
+        return True
+    def equip_equipment_concurrently(self, equipment: Equipment, handler: requests_handler):
+        start_time = time.time()  # Start timing
+        responses = []
+        
+        # Define the function for equipping a single item
+        def equip_single_item(item_type, item_id):
+            # Check if the item needs to be equipped
+            if item_id is None or item_id in self.current_equipment:
+                return None  # Skip None items or items that are already equipped
+
+            # Send the equip request
+            response = self.equip_item(item_id=item_id, handler=handler)
+            
+            # Consume the equipped item and update the current equipment
+            self.bag.consume_item(item_id=item_id)
+            self.bag.add_item(item_id=getattr(self.current_equipment, f'{item_type}'), amount=1)
+            self.current_equipment.change_equipment({item_type: item_id})
+            
+            return response
+        
+        # Use ThreadPoolExecutor to equip items concurrently
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Submit all equipment tasks to the executor
+            futures = {
+                executor.submit(equip_single_item, item_type, item): item_type
+                for item_type, item in equipment if item is not None and item not in self.current_equipment
+            }
+
+            # Wait for all futures to complete and gather their results
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                if result:
+                    responses.append(result)
+        
+        # End timing
+        end_time = time.time()
+        total_time = end_time - start_time
+        print(f"Time taken to equip equipment concurrently: {total_time:.2f} seconds")
+        
+        # Check for successful responses
+        if not responses:
+            return False  # No items were equipped
+        
+        # Assuming all responses have similar skill changes
+        # Only updating skills once with the last response's skill change
+        last_response = responses[-1]
+        self.equipment_change_skill_update(skill_change=last_response['bonus']['allBonuspoints'])
+        
         return True
     @contextmanager
     def temporary_equipment(self, new_equipment: Equipment, handler: requests_handler):

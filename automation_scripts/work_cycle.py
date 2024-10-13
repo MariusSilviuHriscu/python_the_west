@@ -44,6 +44,9 @@ class Script_work_task:
         """
         Execute the work task by performing actions until the number_of_actions reaches zero.
         """
+        
+        response = None
+        
         while self.number_of_actions != 0:
             
             if self.clothes_changer is not None:
@@ -51,7 +54,7 @@ class Script_work_task:
             
             # Wait until the task queue is empty .
             wait_until_date_callback(
-                            wait_time = self.game_classes.task_queue.get_tasks_expiration(),
+                            wait_time = self.game_classes.task_queue.get_tasks_expiration(data= response),
                             handler = self.game_classes.handler,
                             callback_function = callback_function,
                             *args ,
@@ -65,7 +68,10 @@ class Script_work_task:
                 self.clothes_changer.handle_work()
 
             # Perform the work for the minimum of maximum allowed tasks and remaining actions
-            self.work_manager.work(work_object=self.work_data, number_of_tasks=min(maximum_number_of_task_allowed, self.number_of_actions))
+            response = self.work_manager.work(work_object=self.work_data, number_of_tasks=min(maximum_number_of_task_allowed, self.number_of_actions))
+            response = [x['task'] for x in response['tasks'] ]
+            
+            print(response)
 
             # Reduce the remaining actions
             self.number_of_actions -= min(maximum_number_of_task_allowed, self.number_of_actions)
@@ -75,7 +81,7 @@ class Script_work_task:
 
         # Wait for the task's expiration time again when the execution of the method is done.
         wait_until_date_callback(
-                            wait_time = self.game_classes.task_queue.get_tasks_expiration(),
+                            wait_time = self.game_classes.task_queue.get_tasks_expiration(data=response),
                             handler = self.game_classes.handler,
                             callback_function = callback_function,
                             *args ,

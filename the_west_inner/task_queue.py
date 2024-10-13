@@ -212,7 +212,7 @@ class TaskQueue():
         # Return the length of the task_queue attribute.
         return len(self.task_queue)
 
-    def get_tasks_expiration(self):
+    def get_tasks_expiration(self , data : None | dict = None):
         """Get the expiration date of the last task in the queue.
 
         Returns:
@@ -220,7 +220,7 @@ class TaskQueue():
                       If the queue is empty, returns -1.
         """
         # Update the task queue to get the current list of tasks.
-        self.update()
+        self.update(data= data)
         # Return the expiration_date attribute of the last task in the queue,
         # or -1 if the queue is empty.
         return self.task_queue[-1].expiration_date  if len(self.task_queue) != 0  else -1

@@ -64,7 +64,6 @@ class PreWorkEquipChangerManager:
             raise ValueError(f'The work id {work_id} cannot be found in the dict')
         
         equip_collection : EquipmentChangeCollection = self.work_equipment_table.get(work_id)
-        print('generated changer')
         
         return PreWorkEquipChanger(
             equipment_collection = equip_collection,

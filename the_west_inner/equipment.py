@@ -187,7 +187,7 @@ class Equipment_manager():
         # End timing
         end_time = time.time()
         total_time = end_time - start_time
-        print(f"Time taken to equip equipment concurrently: {total_time:.2f} seconds")
+        #print(f"Time taken to equip equipment concurrently: {total_time:.2f} seconds")
         
         # Check for successful responses
         if not responses:

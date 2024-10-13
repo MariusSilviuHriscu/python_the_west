@@ -28,9 +28,8 @@ class PreWorkEquipChanger:
     def _handle_change(self , work_flag : bool):
         
         
-        print(self.equipment_collection.work_equipment if work_flag else self.equipment_collection.reward_equipment)
         
-        self.equipment_manager.equip_equipment(
+        self.equipment_manager.equip_equipment_concurrently(
             equipment = self.equipment_collection.work_equipment if work_flag else self.equipment_collection.reward_equipment,
             handler = self.handler
         )

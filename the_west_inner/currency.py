@@ -72,6 +72,39 @@ class Currency:
         self.modify_money(new_cash = response.get('own_money') ,
                           new_deposit = response.get('deposit')
                           )
+    def _update_raw_oup(self, handler : requests_handler):
+        
+        response = handler.post(
+            window='daily',
+            action='log',
+            action_name='mode'
+        )
+        
+        if response.get('error', False):
+            
+            raise Exception(f'Could not raw update oup ! ')
+        
+        data = response.get('data')
+        received_oup_data = data.get('log')
+        
+        return received_oup_data
+    
+    def update_raw_update(self , handler : requests_handler):
+        
+        oup_data = self._update_raw_oup(
+            handler=handler
+        )
+        if len(oup_data) == 0 :
+            return
+        
+        
+        last_oup_data = oup_data[0]
+        new_oup = last_oup_data.get('coupon_carrying')
+        
+        self.set_oup(new_oup= new_oup)
+        
+        
+        
 
 def build_currency(input_dict:dict) -> Currency:
     return Currency(cash = input_dict['cash'],

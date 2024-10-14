@@ -11,13 +11,41 @@ Classes:
 
     The Task_type : This class is a simple enum-like class for storing constants representing the different types of tasks that can be added to the task queue.
 """
-
+from dataclasses import dataclass
 import datetime
 import time
+import typing
 
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.caching_decorators import retry_on_exception
 from the_west_inner.player_data import Player_data
+from the_west_inner.misc_scripts import turn_game_time_to_datetime
+
+
+@dataclass
+class WayData():
+    queue_id : int 
+    start_date : datetime.datetime
+    end_date : datetime.datetime
+    duration_seconds : int
+    
+    @staticmethod
+    def load_from_task_data(raw_task_data : dict[str,dict]) -> typing.Self | None :
+        
+        if 'wayData' not in raw_task_data:
+            
+            return None
+        
+        data :dict = raw_task_data.get('wayData')
+        
+        return WayData(
+            queue_id = data.get('queue_id'),
+            start_date = turn_game_time_to_datetime(game_time = data.get('date_start')),
+            end_date = turn_game_time_to_datetime(game_time = data.get('date_done')),
+            duration_seconds = data.get('data_obj').get('duration') if 'data_obj' in data else data.get('data').get('duration')
+        )
+        
+        
 
 class Task():
     """
@@ -50,8 +78,9 @@ class Task():
             self.task_data = raw_task_data['data']
         elif 'data_obj' in raw_task_data:
             self.task_data = raw_task_data["data_obj"]
+        self.way_time : None | WayData = WayData.load_from_task_data(raw_task_data = self.task_data)
         self.queue_id = raw_task_data["queue_id"]
-        self.queue_position = queue_position
+        self.queue_position     = queue_position
     
     def cancel(self):
         """
@@ -69,6 +98,15 @@ class Task():
         # Make a POST request to the "task" window with the "cancel" action,
         # including the constructed payload and the `h` query parameter.
         return self.handler.post("task", "cancel", payload=payload, use_h=True)
+    @property
+    def contains_walk(self) -> bool:
+        return self.way_time is not None
+    def get_end_way_time(self ) -> datetime.datetime:
+        
+        if not self.contains_walk:
+            raise Exception('There is no end walk time!')
+        
+        return self.way_time.end_date
 
 class Task_list():
     """A class for managing a list of tasks.
@@ -144,7 +182,7 @@ class TaskQueue():
         if data is None:
             # Initialize the task queue by sending an HTTP request if no data is provided.
             data = self.initialize()
-        self.task_queue = []
+        self.task_queue : list[Task] = []
         for position, task in enumerate(data):
             # Create a Task object for each task in the queue and append it to the task_queue attribute.
             self.task_queue.append(Task(self.handler, task, position))
@@ -174,7 +212,7 @@ class TaskQueue():
         # Return the length of the task_queue attribute.
         return len(self.task_queue)
 
-    def get_tasks_expiration(self):
+    def get_tasks_expiration(self , data : None | dict = None):
         """Get the expiration date of the last task in the queue.
 
         Returns:
@@ -182,7 +220,7 @@ class TaskQueue():
                       If the queue is empty, returns -1.
         """
         # Update the task queue to get the current list of tasks.
-        self.update()
+        self.update(data= data)
         # Return the expiration_date attribute of the last task in the queue,
         # or -1 if the queue is empty.
         return self.task_queue[-1].expiration_date  if len(self.task_queue) != 0  else -1
@@ -247,4 +285,11 @@ class TaskQueue():
         """
         # Return the number of tasks in the queue.
         return self.get_tasks_number()
+    
+    def get_walk_tasks(self) -> typing.Generator[Task,None,None]:
+        
+        for task in self.task_queue:
+            
+            if task.contains_walk :
+                yield task
 

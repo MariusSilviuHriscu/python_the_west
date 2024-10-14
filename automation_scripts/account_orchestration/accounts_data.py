@@ -136,7 +136,6 @@ class CompleteAccountData:
                             ):
         """
         Helper function to load an account asynchronously. 
-        Assumes program will crash on any exception, as per preference.
         """
         load_generator = account_data.load(session_builder_func=session_builder_func)
         

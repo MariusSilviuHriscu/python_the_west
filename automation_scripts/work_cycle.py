@@ -8,6 +8,7 @@ from the_west_inner.consumable import Consumable_handler
 from the_west_inner.reports import Reports_manager
 
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
+from automation_scripts.pre_work_managers.pre_work_change_equip import PreWorkEquipChangerManager,PreWorkEquipChanger
 
 class Script_work_task:
     """
@@ -26,20 +27,34 @@ class Script_work_task:
         game_classes (Game_classes): The game-related classes and data.
     """
 
-    def __init__(self, work_manager: Work_manager, work_data: Work, number_of_actions: int, game_classes: Game_classes):
+    def __init__(self, 
+                 work_manager: Work_manager,
+                 work_data: Work,
+                 number_of_actions: int,
+                 game_classes: Game_classes,
+                 clothes_changer : PreWorkEquipChanger | None = None
+                 ):
         self.work_manager = work_manager
         self.work_data = work_data
         self.number_of_actions = number_of_actions
         self.game_classes = game_classes
+        self.clothes_changer = clothes_changer
 
     def execute(self ,callback_function : typing.Callable[...,None]=None, *args, **kwargs):
         """
         Execute the work task by performing actions until the number_of_actions reaches zero.
         """
+        
+        response = None
+        
         while self.number_of_actions != 0:
+            
+            if self.clothes_changer is not None:
+                self.clothes_changer.handle_reward()
+            
             # Wait until the task queue is empty .
             wait_until_date_callback(
-                            wait_time = self.game_classes.task_queue.get_tasks_expiration(),
+                            wait_time = self.game_classes.task_queue.get_tasks_expiration(data= response),
                             handler = self.game_classes.handler,
                             callback_function = callback_function,
                             *args ,
@@ -48,21 +63,30 @@ class Script_work_task:
 
             # Determine the maximum number of tasks allowed
             maximum_number_of_task_allowed = self.work_manager.allowed_tasks()
+            
+            if self.clothes_changer is not None:
+                self.clothes_changer.handle_work()
 
             # Perform the work for the minimum of maximum allowed tasks and remaining actions
-            self.work_manager.work(work_object=self.work_data, number_of_tasks=min(maximum_number_of_task_allowed, self.number_of_actions))
+            response = self.work_manager.work(work_object=self.work_data, number_of_tasks=min(maximum_number_of_task_allowed, self.number_of_actions))
+            response = [x['task'] for x in response['tasks'] ]
+            
 
             # Reduce the remaining actions
             self.number_of_actions -= min(maximum_number_of_task_allowed, self.number_of_actions)
+            
+        if self.clothes_changer is not None:
+            self.clothes_changer.handle_reward()
 
         # Wait for the task's expiration time again when the execution of the method is done.
         wait_until_date_callback(
-                            wait_time = self.game_classes.task_queue.get_tasks_expiration(),
+                            wait_time = self.game_classes.task_queue.get_tasks_expiration(data=response),
                             handler = self.game_classes.handler,
                             callback_function = callback_function,
                             *args ,
                             **kwargs
                             )
+        
 
 #def read_report_rewards(report_manager:Reports_manager):
 #            report_manager._read_reports(retry_times=3)
@@ -85,7 +109,12 @@ class Cycle_jobs:
         consumable_handler (Consumable_handler): Handler for consumable items.
     """
 
-    def __init__(self, game_classes: Game_classes, job_data: typing.List[Work], consumable_handler: Consumable_handler):
+    def __init__(self,
+                 game_classes: Game_classes,
+                 job_data: typing.List[Work],
+                 consumable_handler: Consumable_handler,
+                 clothes_changer_manager : PreWorkEquipChangerManager | None = None
+                 ):
         self.handler = game_classes.handler
         self.job_data = job_data
         self.game_classes = game_classes
@@ -94,6 +123,7 @@ class Cycle_jobs:
         self.reports_manager = Reports_manager(handler=self.handler)
         self.work_callback_chainer = None
         self.consumable_callback_chainer = None
+        self.clothes_changer_manager = clothes_changer_manager
     
     
     def update_work_callback_chainer(self,callback_chain : CallbackChainer):
@@ -130,9 +160,22 @@ class Cycle_jobs:
             if motivation[str(job.job_id)] > 75 and possible_actions != 0:
                 actions = min(motivation[str(job.job_id)] - 75, possible_actions)
                 possible_actions -= actions
+                
+                if self.clothes_changer_manager is not None:
+                    
+                    clothes_changer = self.clothes_changer_manager.get_changer(work_id = job.job_id)
+                
+                else :
+                    clothes_changer = None
 
                 # Create Script_work_task object with work details
-                work_tasks_actions.append(Script_work_task(work_manager=self.work_manager, work_data=job, number_of_actions=actions, game_classes=self.game_classes))
+                work_tasks_actions.append(Script_work_task(work_manager=self.work_manager, 
+                                                           work_data=job,
+                                                           number_of_actions=actions,
+                                                           game_classes=self.game_classes,
+                                                           clothes_changer = clothes_changer
+                                                           )
+                                          )
 
             if possible_actions == 0:
                 break

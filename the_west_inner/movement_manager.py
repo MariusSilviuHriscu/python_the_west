@@ -1,10 +1,12 @@
+import datetime
 import typing
 
 from the_west_inner.map import MapLoader
 from the_west_inner.towns import Town,Town_list
 from the_west_inner.task_queue import TaskQueue
+from the_west_inner.work import Work
 from the_west_inner.work_manager import Work_manager
-from the_west_inner.misc_scripts import wait_until_date
+from the_west_inner.misc_scripts import wait_until_date,wait_until_date_callback
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.player_data import Player_data
 
@@ -128,3 +130,38 @@ class MovementManager:
         else:
             raise Exception('Invalid type of input')
         return self.player_data.absolute_distance_to(final_position=coordinates)
+    
+    def _handle_walks(self):
+        
+        for walk_task in self.task_queue.get_walk_tasks():
+            wait_until_date_callback(
+                wait_time = walk_task.get_end_way_time() + datetime.timedelta(seconds=1),
+                handler= self.handler
+            )
+            
+            
+            walk_task.cancel()
+            self.task_queue.update()
+
+    def move_to_job(self , job_id : int , x : int , y : int ):
+        
+        if self.player_data.energy == 0:
+            raise ValueError('You need at least 1 energy to move to a job ! ')
+        
+        if self.check_location(target_x=x,target_y=y):
+            return
+        
+        
+        self.work_manager.work(
+            Work(job_id=job_id,x=x,y=y,duration=15)
+        )
+        
+        self._handle_walks()
+        
+        self.player_data.update_all(handler=self.handler)
+        
+        if not self.check_location(target_x=x,target_y=y):
+            
+            raise Exception('You wanted to move but you have actually never arrived')
+        
+        

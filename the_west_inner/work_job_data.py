@@ -223,9 +223,9 @@ class WorkJobDataManager:
         
         return work_list
 
-    def get_by_id(self,item_id : int) -> WorkJobData:
+    def get_by_id(self,work_id : int) -> WorkJobData:
         
-        return self.work_dict.get(item_id)
+        return self.work_dict.get(work_id)
 
 class WorkDataLoader():
     def __init__(self, handler : requests_handler,player_data : Player_data,map : Map ):

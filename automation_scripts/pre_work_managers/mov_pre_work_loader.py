@@ -70,6 +70,7 @@ class PreWorkMovManagerBuilder:
         movement_table : WorkMovementTableType = {}
         for work in work_list:
             
+            
             target = self.decision_maker.decide(
                 job_data_manager = job_data_manager,
                 work = work

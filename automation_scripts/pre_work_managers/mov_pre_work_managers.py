@@ -61,11 +61,19 @@ class PreWorkMovementManager:
         
     def handle_movement(self , work : Work , handler : requests_handler, callback : typing.Callable[[],None] | None = None, *args , **kwargs):
         work_tuple : tuple[WorkIdType,XCoord,YCoord] = (work.job_id,work.x,work.y)
+        
+        
         if work_tuple not in self.work_table:
             
             raise ValueError(f'No value for work id :{work.job_id} !')
         
         self.work_manager.wait_until_free_queue(callback=callback , args= args , kwargs= kwargs)
+        
+        if self.movement_manager.check_location(target_x=work_tuple[1],
+                                                target_y=work_tuple[2]
+                                                ):
+            
+            return
         
         work_movement_obj = self.work_table.get(work_tuple)
         

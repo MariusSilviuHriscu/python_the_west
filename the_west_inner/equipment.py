@@ -206,14 +206,15 @@ class Equipment_manager():
 
         try:
             # Step 2: Equip the new equipment
-            self.equip_equipment(new_equipment, handler)
+            self.equip_equipment_concurrently(new_equipment, handler)
             yield
         finally:
             # Step 3: Re-equip the old equipment when exiting the context
-            self.equip_equipment(old_equipment, handler)
+            self.equip_equipment_concurrently(old_equipment, handler)
 def create_initial_equipment(item_list:typing.List[int],items:Items) -> Equipment:
     #Make sure the item_id is the basic one as the last character in the id reprezents the upgrade of the item
     #replace_last_char = lambda s: s#str(s)[:-1] + "0"
+
     item_to_item_type_dict ={items.get_item(x)['type'] : x for x in item_list}
     return Equipment(
         head_item_id = item_to_item_type_dict.get('head' , None) ,

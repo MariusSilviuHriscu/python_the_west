@@ -9,6 +9,7 @@ from the_west_inner.reports import Reports_manager
 
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 from automation_scripts.pre_work_managers.pre_work_change_equip import PreWorkEquipChangerManager,PreWorkEquipChanger
+from automation_scripts.pre_work_managers.mov_pre_work_managers import PreWorkMovementManager
 
 class Script_work_task:
     """
@@ -113,7 +114,9 @@ class Cycle_jobs:
                  game_classes: Game_classes,
                  job_data: typing.List[Work],
                  consumable_handler: Consumable_handler,
-                 clothes_changer_manager : PreWorkEquipChangerManager | None = None
+                 clothes_changer_manager : PreWorkEquipChangerManager | None = None,
+                 mov_pre_work_manager : PreWorkMovementManager | None = None
+                 
                  ):
         self.handler = game_classes.handler
         self.job_data = job_data
@@ -124,6 +127,7 @@ class Cycle_jobs:
         self.work_callback_chainer = None
         self.consumable_callback_chainer = None
         self.clothes_changer_manager = clothes_changer_manager
+        self.mov_pre_work_manager = mov_pre_work_manager
     
     
     def update_work_callback_chainer(self,callback_chain : CallbackChainer):
@@ -196,6 +200,11 @@ class Cycle_jobs:
         
         # Execute work tasks in the cycle
         for work_task in work_data:
+            if self.mov_pre_work_manager is not None:
+                self.mov_pre_work_manager.handle_movement(
+                    work = work_task.work_data,
+                    handler = self.handler
+                )
             work_task.execute(callback_function = self.get_work_callback_function())
 
         self.reports_manager._read_reports(retry_times=3)

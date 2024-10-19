@@ -1,7 +1,8 @@
 
 
 import copy
-from the_west_inner import requests_handler
+import typing
+from the_west_inner.requests_handler import requests_handler
 from the_west_inner.equipment import Equipment, Equipment_manager
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.movement_manager import MovementManager
@@ -58,13 +59,13 @@ class PreWorkMovementManager:
         raise Exception(f'Could not move to desired object {type(move_obj)}')
         
         
-    def handle_movement(self , work : Work , handler : requests_handler):
+    def handle_movement(self , work : Work , handler : requests_handler, callback : typing.Callable[[],None] | None = None, *args , **kwargs):
         work_tuple : tuple[WorkIdType,XCoord,YCoord] = (work.job_id,work.x,work.y)
         if work_tuple not in self.work_table:
             
             raise ValueError(f'No value for work id :{work.job_id} !')
         
-        self.work_manager.wait_until_free_queue()
+        self.work_manager.wait_until_free_queue(callback=callback , args= args , kwargs= kwargs)
         
         work_movement_obj = self.work_table.get(work_tuple)
         

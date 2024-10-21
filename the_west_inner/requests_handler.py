@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 import datetime
 import time
 from http.client import RemoteDisconnected
+from requests.exceptions import ConnectionError
 from functools import wraps
 
 from connection_sessions.standard_request_session import StandardRequestsSession
@@ -35,9 +36,9 @@ def retry_on_remote_disconnection(retries=3, delay=2):
             while attempts < retries:
                 try:
                     return func(*args, **kwargs)
-                except RemoteDisconnected as e:
+                except ConnectionError as e:
                     attempts += 1
-                    print(f"RemoteDisconnected encountered. Retry attempt {attempts}/{retries} after {delay} seconds.")
+                    print(f"ConnectionError encountered. Retry attempt {attempts}/{retries} after {delay} seconds.")
                     if attempts < retries:
                         time.sleep(delay)
                     else:

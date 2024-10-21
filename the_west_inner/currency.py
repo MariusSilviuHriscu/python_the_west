@@ -79,17 +79,17 @@ class Currency:
             action='log',
             action_name='mode'
         )
-        
+        print(response)
         if response.get('error', False):
             
             raise Exception(f'Could not raw update oup ! ')
         
-        data = response.get('data')
+        data = response.get('msg')
         received_oup_data = data.get('log')
         
         return received_oup_data
     
-    def update_raw_update(self , handler : requests_handler):
+    def update_raw_oup(self , handler : requests_handler):
         
         oup_data = self._update_raw_oup(
             handler=handler

@@ -87,6 +87,10 @@ class AccountData:
                                              requests_handler= game_classes.handler,
                                              player_data= game_classes.player_data
                                              )
+        if game_classes.currency.oup is None:
+            
+            game_classes.currency.update_raw_oup(
+                handler= game_classes.handler)
         
         self.current_equipment = game_classes.equipment_manager.current_equipment
         if isinstance(game_classes.handler.session, StandardRequestsSession):

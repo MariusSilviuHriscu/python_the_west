@@ -1,4 +1,6 @@
 import datetime
+from automation_scripts.pre_work_managers.mov_pre_work_managers import PreWorkMovementManager
+from automation_scripts.pre_work_managers.pre_work_change_equip import PreWorkEquipChangerManager
 from the_west_inner.equipment import Equipment
 from the_west_inner.login import Game_login
 from the_west_inner.work import Work
@@ -48,7 +50,9 @@ def cycle_work(game_login : Game_login ,
                motivation_consumable : int ,
                energy_consumable : int,
                number_of_cycles : int = 1,
-               time_data : None | datetime.timedelta | datetime.datetime = None
+               time_data : None | datetime.timedelta | datetime.datetime = None,
+               pre_work_change_manager : None | PreWorkEquipChangerManager = None,
+               pre_work_movement_manager : None | PreWorkMovementManager = None
                ):
     
     game = game_login.login()
@@ -85,7 +89,9 @@ def cycle_work(game_login : Game_login ,
     cycle = Cycle_jobs(
         game_classes= game,
         job_data = job_data,
-        consumable_handler= game.consumable_handler
+        consumable_handler= game.consumable_handler,
+        clothes_changer_manager = pre_work_change_manager,
+        mov_pre_work_manager = pre_work_movement_manager
     )
     
     cycle.update_work_callback_chainer(

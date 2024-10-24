@@ -16,11 +16,12 @@ class IncorrectBuyMapPosition(Exception):
 
 
 class Shop_building_interface():
-    def __init__(self,shop_name:str,handler:requests_handler):
+    def __init__(self,shop_name:str,handler:requests_handler,bag:Bag):
         self.handler = handler
         self.shop_name = shop_name
+        self.bag = bag
     def buy_item(self,item_id:int,town_id:int):
-        payload = {'item_id': f'{item_id}','town_id': f'{town_id}'}
+        payload = {'item_id': f'{item_id}','town_id': f'{town_id}','last_inv_id': self.bag.last_inv_id}
         response = self.handler.post(window= self.shop_name,action='buy',payload=payload,use_h= True)
         if 'error' in response:
             raise Exception("Could not buy !")

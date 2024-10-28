@@ -10,6 +10,7 @@ from the_west_inner.quest_requirements import (Quest_requirement_duel_quest_npc,
                                                Quest_requirement_get_n_attribute_points,
                                                Quest_requirement_equip_item,
                                                Quest_requirement_work_quest_item,
+                                               Quest_requirement_sell_item,
                                                Quest_requirement
                                                )
 from automation_scripts.quest_solver_scripts.work_n_times_quest_solver import WorkNTimesSolver
@@ -19,7 +20,7 @@ from automation_scripts.quest_solver_scripts.get_attribute_number_to_n_quest_sol
 from automation_scripts.quest_solver_scripts.second_item_quest_solver import WorkItemSecondsQuestSolver
 from automation_scripts.quest_solver_scripts.equip_item_quest_solver import EquipItemQuestSolver
 from automation_scripts.quest_solver_scripts.work_for_quest_item_quest_solver import WorkForQuestItemQuestSolver
-
+from automation_scripts.quest_solver_scripts.sell_to_merchant_solver import SellToMerchantQuestSolver
 
 class QuestSolverBuilder:
     
@@ -38,6 +39,14 @@ class QuestSolverBuilder:
                     player_data = self.game_classes.player_data,
                     game_classes = self.game_classes
                 )
+    def build_sell_to_merchant_solver(self , quest_requirement : Quest_requirement) -> QuestSolver:
+        return SellToMerchantQuestSolver(
+            quest_requirement = quest_requirement,
+            handler = self.game_classes.handler,
+            bag = self.game_classes.bag,
+            items = self.game_classes.items,
+            currency = self.game_classes.currency
+        )
     def build_npc_duel_quest_solver(self,quest_requirement:Quest_requirement) -> QuestSolver:
         return NpcDuelQuestSolver(
             quest_requirement=quest_requirement,
@@ -96,5 +105,7 @@ class QuestSolverBuilder:
             return self.build_equip_item_quest_solver(quest_requirement = quest_requirement)
         elif isinstance(quest_requirement,Quest_requirement_work_quest_item):
             return self.build_work_for_quest_item_quest_solver(quest_requirement=quest_requirement)
+        elif isinstance(quest_requirement,Quest_requirement_sell_item):
+            return self.build_sell_to_merchant_solver(quest_requirement= quest_requirement)
         else :
             raise Exception('Unkwnown type of quest requirement')

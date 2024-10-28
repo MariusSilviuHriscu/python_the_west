@@ -1,5 +1,5 @@
 import typing
-
+from automation_scripts.quest_solver_scripts.quest_requirement_data.quest_group_data import QuestGroupData
 
 
 class Quest_requirement:
@@ -260,15 +260,15 @@ class Quest_requirement_solve_other_quest(Quest_requirement):
     """
     priority = 1
 
-    def __init__(self, other_quest_id: int, solved: bool):
+    def __init__(self, other_quest_data: QuestGroupData, solved: bool):
         """
         Initialize the Quest_requirement_solve_other_quest object.
 
         Args:
-            other_quest_id (int): The ID of the other quest to solve.
+            other_quest_data (QuestGroupData): The group data of the other quest to solve.
             solved (bool): Indicates if the requirement is solved or not.
         """
-        self.other_quest_id = other_quest_id
+        self.other_quest_data = other_quest_data
         super().__init__(solved)
 
 

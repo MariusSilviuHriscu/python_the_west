@@ -10,6 +10,7 @@ from the_west_inner.init_data import return_current_event_data,get_wof_id_by_eve
 
 from the_west_inner.current_events.independence.build_independence_event import IndependenceEventBuilder
 from the_west_inner.current_events.oktoberfest.build_oktoberfest_event import OktoberfestEventBuilder
+from the_west_inner.current_events.muertos.build_muertos_event import MuertosEventBuilder
 
 
 class EventBuilder(Protocol):
@@ -26,6 +27,7 @@ class EventBuilder(Protocol):
 EVENT_DICT : dict[str, EventBuilder] ={
     'Independence' : IndependenceEventBuilder,
     'Octoberfest' : OktoberfestEventBuilder,
+    'DayOfDead' : MuertosEventBuilder ,
     'fairwof' : None
 }
 
@@ -76,7 +78,7 @@ def make_event_loader(game_html : str) -> CurrentEventLoader|None:
                 wof_id = wof_id,
                 event_key = event_name,
                 currency_ammount = event_dict.get('counter').get('value'),
-                currency_name = event_dict.get('currency_id')
+                currency_name = event_dict.get('currency_id') if event_dict.get('currency_id') else event_dict.get('counter').get('key')
             )
 
 

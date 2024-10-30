@@ -61,6 +61,12 @@ class EventHandler():
             raise Exception(f"You couldn't bribe ! Error message is  : {response.get('msg', '')} ")
         
         return response
+    def start_gamble(self , wof_id : int):
+        
+        payload = {
+            'action' : 'open',
+            'wofid' : f'{wof_id}'
+        }
     
     def init_event(self , wof_id : int) -> dict:
         payload = {'wofid' : wof_id}

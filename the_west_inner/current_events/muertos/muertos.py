@@ -77,6 +77,8 @@ class MuertosEvent(CurrentEvent):
         stage_data = data.get('stages')
         
         for stage in stage_data:
+            if stage == []:
+                continue
             if stage.get('id' , None) == self.muertos_game_data.stage:
                 return stage.get('rewards').get('item')
     def _update_muertos_game_data(self , data : dict , default_flag : bool = True ):

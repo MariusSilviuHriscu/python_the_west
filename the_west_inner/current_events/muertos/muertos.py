@@ -43,6 +43,10 @@ class MuertosGameData(BaseModel):
         
         return self.status == 'won'
     
+    def set_reward(self , new_reward : int | None) :
+        
+        self.current_prize = new_reward
+    
     
 
 
@@ -68,7 +72,66 @@ class MuertosEvent(CurrentEvent):
         
         return self.muertos_game_data.has_free_tries() and self.muertos_game_data.is_closed()
     
-    def bet(self) -> None:
-        pass
+    def _extract_current_reward(self , data : dict) -> int:
+        
+        stage_data = data.get('stages')
+        
+        for stage in stage_data:
+            if stage.get('id' , None) == self.muertos_game_data.stage:
+                return stage.get('rewards').get('item')
+    def _update_muertos_game_data(self , data : dict , default_flag : bool = True ):
+        
+        new_muertos_game_data = MuertosGameData.build_from_dict(dict_data = data.get('game'),
+                                                                current_prize = self._extract_current_reward(data=data) if default_flag else None
+                                                                )
+        
+        self.muertos_game_data = new_muertos_game_data
     
+    def start_betting(self) -> bool:
+        
+        if self.can_bet :
+            
+            result = self.event_handler.start_gamble(wof_id = self.current_event_data.event_wof )
+            
+            self._update_muertos_game_data(data= result,default_flag=False)
+
+        if self.muertos_game_data.can_choose_card():
+            return True
+        
+        return False
     
+    def bet(self , offset : typing.Literal[0,1,2]) -> bool:
+        
+        if not self.muertos_game_data.can_choose_card():
+            
+            raise Exception('You cannot bet !')
+        
+        result = self.event_handler.choose_card(
+            wof_id = self.current_event_data.event_wof,
+            card = offset
+        )
+        
+        self._update_muertos_game_data(data= result)
+        if not self.muertos_game_data.win():
+            self.muertos_game_data.set_reward(new_reward= None)
+        return self.muertos_game_data.win()
+    def advance(self) :
+        
+        if not self.muertos_game_data.win():
+            
+            raise Exception('You cannot advance to the next stage ! ')
+        
+        result = self.event_handler.continue_bet(wof_id = self.current_event_data.event_wof)
+        
+        self._update_muertos_game_data(data = result, default_flag=False)
+        
+    
+    def collect(self):
+        
+        if not self.muertos_game_data.is_lost() and not self.muertos_game_data.win():
+            
+            raise Exception('You cannot collect now ! ')
+        
+        result = self.event_handler.end_bet(wof_id = self.current_event_data.event_wof)
+        
+        self._update_muertos_game_data(data= result ,default_flag= False)

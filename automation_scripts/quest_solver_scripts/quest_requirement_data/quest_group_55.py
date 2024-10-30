@@ -37,8 +37,10 @@ GROUP_55 = QuestGroupData(
         533 : [],
         534 : [],
         535 : [Quest_requirement_sell_item(item_id=569000,
-                                            solved=True)
-               ]
+                                            solved=False)
+               ],
+        536 : [],
+        537 : [Quest_requirement_item_to_hand_work_product_seconds]
     },
     accept_quest_requirement = {}
 )

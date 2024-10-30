@@ -11,6 +11,7 @@ from the_west_inner.quest_requirements import (Quest_requirement_duel_quest_npc,
                                                Quest_requirement_equip_item,
                                                Quest_requirement_work_quest_item,
                                                Quest_requirement_sell_item,
+                                               Quest_requirement_solve_other_quest,
                                                Quest_requirement
                                                )
 from automation_scripts.quest_solver_scripts.work_n_times_quest_solver import WorkNTimesSolver
@@ -21,6 +22,7 @@ from automation_scripts.quest_solver_scripts.second_item_quest_solver import Wor
 from automation_scripts.quest_solver_scripts.equip_item_quest_solver import EquipItemQuestSolver
 from automation_scripts.quest_solver_scripts.work_for_quest_item_quest_solver import WorkForQuestItemQuestSolver
 from automation_scripts.quest_solver_scripts.sell_to_merchant_solver import SellToMerchantQuestSolver
+from automation_scripts.quest_solver_scripts.other_quest_solver import SolveOtherQuestSolver
 
 class QuestSolverBuilder:
     
@@ -39,6 +41,11 @@ class QuestSolverBuilder:
                     player_data = self.game_classes.player_data,
                     game_classes = self.game_classes
                 )
+    def build_solve_other_quest(self , quest_requirement : Quest_requirement) -> QuestSolver:
+        return SolveOtherQuestSolver(
+            quest_requirement = quest_requirement,
+            game_classes = self.game_classes
+        )
     def build_sell_to_merchant_solver(self , quest_requirement : Quest_requirement) -> QuestSolver:
         return SellToMerchantQuestSolver(
             quest_requirement = quest_requirement,

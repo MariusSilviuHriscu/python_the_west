@@ -309,7 +309,7 @@ class Script_comert_produs_clona:
 
 def world_script_by_login(login : Game_login ,
                           target_product_id : int,
-                          event_bet_offset : list[int] = None,
+                          event_bet_offset : list[int] | int | None = None,
                           preview_ex_chainer :CallbackChainer = None
                         ):
     
@@ -319,7 +319,7 @@ def world_script_by_login(login : Game_login ,
         executable_func = preview_ex_chainer.chain_function(
         game_html = login.game_html,
         global_currency = game.currency,
-        offset_list = event_bet_offset or [0 , 1],
+        event_bet_offset = event_bet_offset or 1,
         handler = game.handler,
         game_classes = game
         )
@@ -347,14 +347,14 @@ def world_script_by_game_classes(
     game_classes : Game_classes,
     game_html : str ,
     target_product_id : int,
-    event_bet_offset : list[int] = None,
+    event_bet_offset : list[int] | int | None = None,
     preview_ex_chainer :CallbackChainer = None):
     
     if preview_ex_chainer is not None:
         executable_func = preview_ex_chainer.chain_function(
         game_html = game_html,
         global_currency = game_classes.currency,
-        offset_list = event_bet_offset or [0 , 1],
+        event_bet_offset = event_bet_offset or 1,
         handler = game_classes.handler,
         game_classes = game_classes
         )

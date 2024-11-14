@@ -57,7 +57,7 @@ def play_try(muertos_event : MuertosEvent , target_level : typing.Literal[1,2,3,
 def muertos_script(game_html : str , 
                         handler : requests_handler , 
                         global_currency : Currency ,
-                        target_level : typing.Literal[1,2,3,4,5] , 
+                        event_bet_offset : typing.Literal[1,2,3,4,5] , 
                         exception_list : list[int]):
     event = load_game_event(
         game_html = game_html,
@@ -69,7 +69,7 @@ def muertos_script(game_html : str ,
     
     
     result = [play_try(muertos_event= event,
-             target_level = target_level,
+             target_level = event_bet_offset,
              exception_list= exception_list
               ) for _ in range(event.muertos_game_data.free_games) ]
     

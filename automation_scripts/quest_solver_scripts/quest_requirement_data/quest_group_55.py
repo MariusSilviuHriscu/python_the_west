@@ -48,7 +48,9 @@ GROUP_55 = QuestGroupData(
                ],
         536 : [],
         537 : [Quest_requirement_item_to_hand_work_product_seconds],
-        538 : [Quest_requirement_execute_script(script=build_solver_executable(quest_group_data = GROUP_55_ANNEX) )
+        538 : [Quest_requirement_execute_script(script=build_solver_executable(quest_group_data = GROUP_55_ANNEX),
+                                                solved= False
+                                                )
                ],
         540 : [Quest_requirement_work_n_times(work_id = 17,
                                             required_work_times = 4,

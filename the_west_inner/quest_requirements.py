@@ -70,7 +70,26 @@ class Quest_requirement_item_to_hand_work_product_hourly(Quest_requirement):
         self.number = number
         self.quest_id = quest_id
         super().__init__(solved)
+class Quest_requirement_item_to_hand_work_product_minutes(Quest_requirement):
+    """
+    Represents a quest requirement related to crafting a product hourly.
+    """
+    priority = 1
 
+    def __init__(self, item_id: int, number: int, quest_id: int, solved: bool):
+        """
+        Initialize the Quest_requirement_item_to_hand_work_product_minutes object.
+
+        Args:
+            item_id (int): The ID of the item to craft.
+            number (int): The number of items to craft.
+            quest_id (int): The ID of the quest.
+            solved (bool): Indicates if the requirement is solved or not.
+        """
+        self.item_id = item_id
+        self.number = number
+        self.quest_id = quest_id
+        super().__init__(solved)
 
 class Quest_requirement_item_to_hand_work_product_seconds(Quest_requirement):
     """

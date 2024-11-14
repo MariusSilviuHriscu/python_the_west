@@ -5,8 +5,15 @@ from the_west_inner.quest_requirements import (Quest_requirement_duel_quest_npc,
                                                Quest_requirement_work_n_times,
                                                Quest_requirement_get_n_skill_points,
                                                Quest_requirement_work_quest_item,
-                                               Quest_requirement_sell_item
+                                               Quest_requirement_sell_item,
+                                               Quest_requirement_execute_script,
+                                               Quest_requirement_item_to_hand_work_product_hourly
 )
+
+from automation_scripts.quest_solver_scripts.quest_requirement_data.quest_group_55_annex import GROUP_55_ANNEX
+from automation_scripts.quest_solver_scripts.quest_requirement_data.solve_quest_script_builder import build_solver_executable
+
+
 
 
 GROUP_55 = QuestGroupData(
@@ -40,7 +47,21 @@ GROUP_55 = QuestGroupData(
                                             solved=False)
                ],
         536 : [],
-        537 : [Quest_requirement_item_to_hand_work_product_seconds]
+        537 : [Quest_requirement_item_to_hand_work_product_seconds],
+        538 : [Quest_requirement_execute_script(script=build_solver_executable(quest_group_data = GROUP_55_ANNEX) )
+               ],
+        540 : [Quest_requirement_work_n_times(work_id = 17,
+                                            required_work_times = 4,
+                                            solved = False
+                                            )],
+        541 : [Quest_requirement_work_n_times(work_id = 20,
+                                            required_work_times = 4,
+                                            solved = False
+                                            )],
+        542 : [Quest_requirement_work_n_times(work_id = 22,
+                                            required_work_times = 4,
+                                            solved = False
+                                            )],
     },
     accept_quest_requirement = {}
 )

@@ -8,6 +8,7 @@ GROUP_55_ANNEX = QuestGroupData(
     quest_requirements = {
         539 : [Quest_requirement_item_to_hand_work_product_seconds(
             item_id = 711000,
+            number = 2,
             quest_id=539,
             solved=False
         )]

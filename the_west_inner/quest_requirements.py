@@ -1,4 +1,8 @@
 import typing
+
+from the_west_inner.game_classes import Game_classes
+
+from matplotlib.pylab import solve
 #from automation_scripts.quest_solver_scripts.quest_requirement_data.quest_group_data import QuestGroupData
 
 
@@ -271,7 +275,12 @@ class Quest_requirement_solve_other_quest(Quest_requirement):
         self.other_quest_data = other_quest_data
         super().__init__(solved)
 
-
+class Quest_requirement_execute_script(Quest_requirement):
+    priority = 1
+    
+    def __init__(self, script : typing.Callable[[Game_classes],bool] , solved : bool):
+        self.script = script
+        super().__init__(solved)
 class Quest_requirement_distribute_skill_point(Quest_requirement):
     """
     Represents a quest requirement related to distributing skill points.

@@ -12,6 +12,7 @@ from the_west_inner.quest_requirements import (Quest_requirement_duel_quest_npc,
                                                Quest_requirement_work_quest_item,
                                                Quest_requirement_sell_item,
                                                #Quest_requirement_solve_other_quest,
+                                               Quest_requirement_execute_script,
                                                Quest_requirement
                                                )
 from automation_scripts.quest_solver_scripts.work_n_times_quest_solver import WorkNTimesSolver
@@ -22,6 +23,7 @@ from automation_scripts.quest_solver_scripts.second_item_quest_solver import Wor
 from automation_scripts.quest_solver_scripts.equip_item_quest_solver import EquipItemQuestSolver
 from automation_scripts.quest_solver_scripts.work_for_quest_item_quest_solver import WorkForQuestItemQuestSolver
 from automation_scripts.quest_solver_scripts.sell_to_merchant_solver import SellToMerchantQuestSolver
+from automation_scripts.quest_solver_scripts.execute_script_quest_solver import ExecuteScriptQuestSolver
 #from automation_scripts.quest_solver_scripts.other_quest_solver import SolveOtherQuestSolver
 
 class QuestSolverBuilder:
@@ -46,6 +48,11 @@ class QuestSolverBuilder:
     #        quest_requirement = quest_requirement,
     #        game_classes = self.game_classes
     #    )
+    def build_execute_script_solver(self , quest_requirement : Quest_requirement) -> QuestSolver:
+        return ExecuteScriptQuestSolver(
+            game_classes = self.game_classes,
+            quest_requirement = quest_requirement
+        )
     def build_sell_to_merchant_solver(self , quest_requirement : Quest_requirement) -> QuestSolver:
         return SellToMerchantQuestSolver(
             quest_requirement = quest_requirement,
@@ -114,5 +121,7 @@ class QuestSolverBuilder:
             return self.build_work_for_quest_item_quest_solver(quest_requirement=quest_requirement)
         elif isinstance(quest_requirement,Quest_requirement_sell_item):
             return self.build_sell_to_merchant_solver(quest_requirement= quest_requirement)
+        elif isinstance(quest_requirement , Quest_requirement_execute_script):
+            return self.build_execute_script_solver(quest_requirement=quest_requirement)
         else :
             raise Exception('Unkwnown type of quest requirement')

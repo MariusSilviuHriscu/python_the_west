@@ -59,8 +59,9 @@ class QuestSolver :
         self.employer = self.employer.reload_data(handler = self.game_classes.handler)
         self.quest = self.employer.get_quest_by_id(quest_id=self.quest.quest_id)
     def go_to_employer(self):
-        requirement = Quest_requirement_travel(x = self.quest.employer_coords[0],
-                                               y = self.quest.employer_coords[1],
+        
+        requirement = Quest_requirement_travel(x = self.quest.employer_coords[0][0],
+                                               y = self.quest.employer_coords[0][1],
                                                employer_key = self.quest.employer_key,
                                                quest_id = self.quest.quest_id,
                                                solved = False
@@ -92,7 +93,7 @@ class QuestSolver :
             if (not self.quest.is_solved and not 
                 any((isinstance(x,Quest_requirement_duel_quest_npc) for x in self.quest_complete_requirements)) 
                 and not len(self.quest_complete_requirements) == 0
-                ):
+                and not self.quest.employer_coords):
                 print(self.quest.__dict__)
                 raise QuestNotCompletedError(f"You were about to try to finish a quest you didn't complete ")
         

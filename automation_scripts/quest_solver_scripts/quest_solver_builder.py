@@ -13,6 +13,7 @@ from the_west_inner.quest_requirements import (Quest_requirement_duel_quest_npc,
                                                Quest_requirement_sell_item,
                                                #Quest_requirement_solve_other_quest,
                                                Quest_requirement_execute_script,
+                                               Quest_requirement_travel,
                                                Quest_requirement
                                                )
 from automation_scripts.quest_solver_scripts.work_n_times_quest_solver import WorkNTimesSolver
@@ -25,6 +26,7 @@ from automation_scripts.quest_solver_scripts.work_for_quest_item_quest_solver im
 from automation_scripts.quest_solver_scripts.sell_to_merchant_solver import SellToMerchantQuestSolver
 from automation_scripts.quest_solver_scripts.execute_script_quest_solver import ExecuteScriptQuestSolver
 #from automation_scripts.quest_solver_scripts.other_quest_solver import SolveOtherQuestSolver
+from automation_scripts.quest_solver_scripts.travel_quest_solver import TravelQuestSolver
 
 class QuestSolverBuilder:
     
@@ -102,6 +104,12 @@ class QuestSolverBuilder:
             work_manager=self.game_classes.work_manager,
             game_classes=self.game_classes
         )
+    def build_travel_quest_solver(self , quest_requirement : Quest_requirement) -> QuestSolver:
+        
+        return TravelQuestSolver(
+            travel_quest_requirement= quest_requirement,
+            work_manager= self.game_classes.work_manager
+        )
     def build(self,quest_requirement:Quest_requirement) -> QuestSolver:
         if isinstance(quest_requirement,Quest_requirement_duel_quest_npc):
             return None
@@ -123,5 +131,7 @@ class QuestSolverBuilder:
             return self.build_sell_to_merchant_solver(quest_requirement= quest_requirement)
         elif isinstance(quest_requirement , Quest_requirement_execute_script):
             return self.build_execute_script_solver(quest_requirement=quest_requirement)
+        elif isinstance(quest_requirement , Quest_requirement_travel):
+            return self.build_travel_quest_solver(quest_requirement=quest_requirement)
         else :
-            raise Exception('Unkwnown type of quest requirement')
+            raise Exception(f'Unkwnown type of quest requirement : {quest_requirement}')

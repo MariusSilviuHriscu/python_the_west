@@ -47,7 +47,11 @@ GROUP_55 = QuestGroupData(
                                             solved=False)
                ],
         536 : [],
-        537 : [Quest_requirement_item_to_hand_work_product_seconds],
+        537 : [Quest_requirement_item_to_hand_work_product_seconds(item_id=702000,
+                                                                   number= 1,
+                                                                   quest_id= 537,
+                                                                   solved= False
+                                                                   )],
         538 : [Quest_requirement_execute_script(script=build_solver_executable(quest_group_data = GROUP_55_ANNEX),
                                                 solved= False
                                                 )
@@ -64,6 +68,9 @@ GROUP_55 = QuestGroupData(
                                             required_work_times = 4,
                                             solved = False
                                             )],
+        543 : [],
+        544 : [Quest_requirement_duel_quest_npc(quest_id=0,
+                                              solved=True)]
     },
     accept_quest_requirement = {}
 )

@@ -92,6 +92,8 @@ def parse_map_for_quest_employers(handler:requests_handler) -> typing.List[dict]
     
     for each in map_raw_data:
         tile_request_payload = {"tiles":f"{each}"}
+        if each ==[]:
+            continue
         tiles_data = handler.post(
                                 window="map",
                                 action="get_complete_data",

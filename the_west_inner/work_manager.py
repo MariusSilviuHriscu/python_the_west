@@ -152,16 +152,19 @@ class Work_manager():
             position_in_queue = 0
 
         # Create a dictionary to store the task data.
-        payload_deplasare = {
-            "x": f"{x}",
-            "y": f"{y}",
-            "employer": quest_employer_key
+        payload_walk = {
+            f"tasks['{position_in_queue}'][unitId]": quest_employer_key,
+            f"tasks['{position_in_queue}'][type]": "questgiver",
+            f"tasks['{position_in_queue}'][x]": x,
+            f"tasks['{position_in_queue}'][y]": y,
+            f"tasks['{position_in_queue}'][taskType]": "walk"
         }
 
         # Send the task to the server and get the response.
-        response = self.handler.post("quest_employer", "walk", payload=payload_deplasare, use_h=True)
+        response = self.handler.post("task", "add", payload=payload_walk, use_h=True)
 
         # Return the server's response.
+        
         return response
     
     def allowed_tasks(self):

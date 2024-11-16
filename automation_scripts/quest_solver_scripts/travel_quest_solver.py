@@ -28,6 +28,7 @@ class TravelQuestSolver:
         Returns:
             bool: True if the travel quest requirement is solved, False otherwise.
         """
+        
         # Move to the quest employer's location
         self.work_manager.move_to_quest_employer(
             quest_employer_key=self.travel_quest_requirement.employer_key,
@@ -36,7 +37,7 @@ class TravelQuestSolver:
         )
 
         # Wait until the work queue is free
-        self.work_manager.wait_until_free_queue()
+        self.work_manager.wait_until_free_queue(callback= None)
 
         # Declare the travel quest requirement as solved
         self.travel_quest_requirement.declare_solved()

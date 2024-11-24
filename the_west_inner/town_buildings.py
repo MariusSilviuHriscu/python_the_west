@@ -109,7 +109,7 @@ class Shop_building_preloader(Building_preloader):
         self.handler = handler
     def _get_item_list(self)  -> list[int]:
         response = self.handler.post(window = self.shop_type , action=f"{self.town_id}",action_name="town_id")
-        return [x for x in response['trader_inv'].values()]
+        return [x.get('item_id') for x in response['trader_inv']]
     def load(self) -> Shop_building:
         return build_shop_interface(
                                     town_id = self.town_id,
@@ -512,43 +512,43 @@ def load_town_buildings(handler : requests_handler,work_manager : Work_manager ,
     town_id = response['town_id']
 
     return Town_buildings(
-                    cityhall = City_hall_building_preloader(level=town_building_data['cityhall']['stage'],
+                    cityhall_loader=  City_hall_building_preloader(level=town_building_data['cityhall']['stage'],
                                                             town_id = town_id,
                                                             handler = handler
                                                             ),
-                    market = Token_preloader(),
-                    tenement = Token_preloader() ,
-                    bank =  Bank_building_preloader(level=town_building_data['bank']['stage'],
+                    market_loader = Token_preloader(),
+                    tenement_loader = Token_preloader() ,
+                    bank_loader =  Bank_building_preloader(level=town_building_data['bank']['stage'],
                                                     town_id = town_id,
                                                     handler=handler),
-                    hotel = Hotel_building_preloader(level = town_building_data['hotel']['stage'],
+                    hotel_loader = Hotel_building_preloader(level = town_building_data['hotel']['stage'],
                                                      town_id = town_id,
                                                      handler = handler,
                                                      work_manager = work_manager,
                                                      player_data= player_data
                                                      ) ,
-                    gunsmith = Shop_building_preloader(town_id = town_id ,
-                                                       shop_type='gunsmith_building' ,
+                    gunsmith_loader = Shop_building_preloader(town_id = town_id ,
+                                                       shop_type='building_gunsmith' ,
                                                        level = town_building_data['gunsmith']['stage'],
                                                        handler= handler) ,
-                    tailor = Shop_building_preloader(town_id = town_id ,
-                                                     shop_type='tailor_building' , 
+                    tailor_loader = Shop_building_preloader(town_id = town_id ,
+                                                     shop_type='building_tailor' , 
                                                      level = town_building_data['tailor']['stage'],
                                                      handler= handler) ,
-                    general = Shop_building_preloader(town_id = town_id ,
-                                                      shop_type='general_building' ,
+                    general_loader = Shop_building_preloader(town_id = town_id ,
+                                                      shop_type='building_general' ,
                                                       level = town_building_data['general']['stage'],
                                                       handler= handler) ,
-                    mortician = Mortician_building_preloader(
+                    mortician_loader = Mortician_building_preloader(
                                                             level = town_building_data['mortician']['stage'],
                                                             handler = handler ,
                                                             town_id = town_id) ,
-                    church = Church_building_preloader(
+                    church_loader = Church_building_preloader(
                                                         level = town_building_data['church']['stage'] ,
                                                         handler = handler,
                                                         town_id = town_id,
                                                         work_manager = work_manager ) ,
-                    sheriff = Token_preloader() ,
-                    saloon = Token_preloader() ,
-                    cinema = Cinema_building_preloader(level=1,town_id= town_id,handler = requests_handler)                         
+                    sheriff_loader = Token_preloader() ,
+                    saloon_loader = Token_preloader() ,
+                    cinema_loader = Cinema_building_preloader(level=1,town_id= town_id,handler = requests_handler)                         
                     )

@@ -73,7 +73,7 @@ class Quest():
             raise QuestNotFinishable(f"You tried to finish a quest that is not finishable! :{self.quest_id}")
         payload = {"quest_id": self.quest_id}
         if self.quest_reward_options is not None:
-            reward_number = next(self.quest_reward_options.keys())
+            reward_number = next(iter(self.quest_reward_options.keys()))
             
         payload.update({"reward_option_id": f"{reward_number}"})
         

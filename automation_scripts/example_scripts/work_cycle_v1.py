@@ -11,7 +11,7 @@ from automation_scripts.sleep_func_callbacks.misc_func_callback import recharge_
 from automation_scripts.stop_events.script_events import StopEvent
 from automation_scripts.stop_events.script_exception_handler import handle_exceptions
 from automation_scripts.work_cycle import Cycle_jobs
-
+from automation_scripts.pre_work_managers.mov_pre_work_loader import PreWorkMovManagerBuilder
 
 def stop_works(work_manager : Work_manager):
     
@@ -52,7 +52,8 @@ def cycle_work(game_login : Game_login ,
                number_of_cycles : int = 1,
                time_data : None | datetime.timedelta | datetime.datetime = None,
                pre_work_change_manager : None | PreWorkEquipChangerManager = None,
-               pre_work_movement_manager : None | PreWorkMovementManager = None
+               pre_work_movement_manager : None | PreWorkMovementManager = None,
+               movement_equipment : None | Equipment = None
                ):
     
     game = game_login.login()
@@ -85,6 +86,13 @@ def cycle_work(game_login : Game_login ,
     chain.add_callback(
         callback_function = timer.check
     )
+    
+    if movement_equipment is not None and pre_work_movement_manager is None:
+        pre_work_movement_manager_builder = PreWorkMovManagerBuilder(game_classes=game)
+        pre_work_movement_manager = pre_work_movement_manager_builder.build(
+            work_list=job_data,
+            movement_equipment = movement_equipment
+        )
     
     cycle = Cycle_jobs(
         game_classes= game,

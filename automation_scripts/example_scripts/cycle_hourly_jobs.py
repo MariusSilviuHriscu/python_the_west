@@ -17,7 +17,7 @@ from the_west_inner.misc_scripts import wait_until_date_callback
 
 TIME_DICT = {
             1 : 1,
-            60 : 6 ,
+            600 : 6 ,
             3600 : 12
         }
 class ContinuousTask:

@@ -34,7 +34,7 @@ class WorkForQuestItemQuestSolver :
         job_id,job_x,job_y = get_closest_workplace_data(
             handler = self.handler,
             job_id = self.quest_requirement.work_id,
-            job_list = self.work_list,
+            job_list = self.game_classes.work_list,
             player_data = self.player_data
         )
         

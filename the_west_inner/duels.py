@@ -182,6 +182,14 @@ class NpcDuelList :
         # Find the NPC ID with the smallest value for the specified key
         min_npc_id = min(value_dict, key=lambda npc_id: value_dict[npc_id])
         return min_npc_id
+    def get_npc_by_biggest(self, key: str) -> int:
+        # Create a dictionary with NPC IDs as keys and corresponding values for the specified key
+        value_dict = {npc.duelnpc_id: getattr(npc, key) for npc in self._npc_list}
+
+        # Find the NPC ID with the smallest value for the specified key
+        max_npc_id = max(value_dict, key=lambda npc_id: value_dict[npc_id])
+        return max_npc_id
+        
         
     def _duel_npc(self,handler:requests_handler,npc_id:int):
         
@@ -259,3 +267,21 @@ class NpcDuelManager():
         smallest_aim_npc_id = self.npc_list.get_npc_by_smallest(key='aim')
         
         return self.duel_npc(npc_id=smallest_aim_npc_id)
+    
+    def duel_biggest_aim_npc(self):
+        biggest_aim_npc_id = self.npc_list.get_npc_by_biggest(key='aim')
+        
+        return self.duel_npc(npc_id=biggest_aim_npc_id)
+    
+    @property
+    def can_afford(self) -> bool:
+        
+        self.player_data.update_character_variables(handler=self.handler)
+        
+        return self.player_data.energy >= 5
+    
+    def reload(self):
+        
+        if self.npc_list.has_to_reload():
+            
+            self.npc_list._reload_data(handler= self.handler)

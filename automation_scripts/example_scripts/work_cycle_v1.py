@@ -53,7 +53,8 @@ def cycle_work(game_login : Game_login ,
                time_data : None | datetime.timedelta | datetime.datetime = None,
                pre_work_change_manager : None | PreWorkEquipChangerManager = None,
                pre_work_movement_manager : None | PreWorkMovementManager = None,
-               movement_equipment : None | Equipment = None
+               movement_equipment : None | Equipment = None,
+               work_eq_dict : dict | None = None
                ):
     
     game = game_login.login()
@@ -93,6 +94,14 @@ def cycle_work(game_login : Game_login ,
             work_list=job_data,
             movement_equipment = movement_equipment
         )
+    
+    if work_eq_dict is not None and pre_work_change_manager is None:
+        pre_work_change_manager = PreWorkEquipChangerManager(
+                                        work_equipment_table = work_eq_dict,
+                                        handler = game.handler,
+                                        equipment_manager= game.equipment_manager
+                                        )
+
     
     cycle = Cycle_jobs(
         game_classes= game,

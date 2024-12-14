@@ -259,13 +259,19 @@ class CompleteAccountData:
         
         return item_set.list_items
         
-    def get_all_set_items_by_item_ids(self , id_list : list[int] , count_equipped : bool = True):
+    def get_all_set_items_by_item_ids(self ,
+                                      id_list : list[int] , 
+                                      count_equipped : bool = True,
+                                      strictly_sets : bool = True
+                                      ):
         
         set_item_ids = set()
         
         for item_id in id_list:
             
             result_list = self._get_set_item_list_by_id(example_item_id=item_id)
+            if result_list == [] and strictly_sets == False:
+                result_list = [item_id]
             set_item_ids.update(result_list)
         
         return self.get_by_id_list(id_list = set_item_ids ,count_equipped=count_equipped)

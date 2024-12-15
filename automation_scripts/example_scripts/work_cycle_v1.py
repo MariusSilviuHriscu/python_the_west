@@ -1,7 +1,7 @@
 import datetime
 from automation_scripts.pre_work_managers.mov_pre_work_managers import PreWorkMovementManager
 from automation_scripts.pre_work_managers.pre_work_change_equip import PreWorkEquipChangerManager
-from the_west_inner.equipment import Equipment
+from the_west_inner.equipment import Equipment,SavedEquipmentManager
 from the_west_inner.login import Game_login
 from the_west_inner.work import Work
 from the_west_inner.work_manager import Work_manager
@@ -42,6 +42,7 @@ class ScriptTimer:
         
         self.stop_event.raise_exception()
 
+
 @handle_exceptions
 def cycle_work(game_login : Game_login ,
                hp_equipment : Equipment,
@@ -54,7 +55,7 @@ def cycle_work(game_login : Game_login ,
                pre_work_change_manager : None | PreWorkEquipChangerManager = None,
                pre_work_movement_manager : None | PreWorkMovementManager = None,
                movement_equipment : None | Equipment = None,
-               work_eq_dict : dict | None = None
+               work_eq_dict : dict[int, Equipment|int] | None = None
                ):
     
     game = game_login.login()
@@ -94,6 +95,32 @@ def cycle_work(game_login : Game_login ,
             work_list=job_data,
             movement_equipment = movement_equipment
         )
+    
+    if work_eq_dict is not None :
+        
+        saved_equipment_manager = SavedEquipmentManager(
+            handler = game.handler,
+            bag= game.bag
+        )
+        
+        new_work_dict = {}
+        
+        for job_id, job_work_equipment in work_eq_dict.items():
+            
+            if type(job_work_equipment) == int :
+                
+                saved_eq = saved_equipment_manager.get_saved_equipment_by_id(equipment_id = job_work_equipment)
+                
+                if saved_eq is None:
+                    raise Exception('Tried to get incorrect save set !')
+                
+                new_work_dict[job_id] = saved_eq
+            else :
+                
+                new_work_dict[job_id] = job_work_equipment
+        
+        work_eq_dict = new_work_dict
+            
     
     if work_eq_dict is not None and pre_work_change_manager is None:
         pre_work_change_manager = PreWorkEquipChangerManager(

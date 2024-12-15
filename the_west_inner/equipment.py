@@ -298,19 +298,7 @@ class Equipment_manager():
         self.equipment_change_skill_update(skill_change=last_response['bonus']['allBonuspoints'])
         
         return True
-    @contextmanager
-    def temporary_equipment(self, new_equipment: Equipment, handler: requests_handler):
-        # Step 1: Save the current equipment state
-        
-        old_equipment = copy.deepcopy(self.current_equipment)
-
-        try:
-            # Step 2: Equip the new equipment
-            self.equip_equipment_concurrently(new_equipment, handler)
-            yield
-        finally:
-            # Step 3: Re-equip the old equipment when exiting the context
-            self.equip_equipment_concurrently(old_equipment, handler)
+    
     def _equip_saved_equipment(self , saved_equipment : SavedEquipment , handler : requests_handler) -> dict:
         payload = {
             'id': saved_equipment.equipment_id,
@@ -349,6 +337,23 @@ class Equipment_manager():
         self.equipment_change_skill_update(skill_change=changes['bonus']['allBonuspoints'])
         
         return True
+    
+    @contextmanager
+    def temporary_equipment(self, new_equipment: Equipment | SavedEquipment, handler: requests_handler):
+        # Step 1: Save the current equipment state
+        
+        old_equipment = copy.deepcopy(self.current_equipment)
+
+        try:
+            # Step 2: Equip the new equipment
+            if isinstance(new_equipment , SavedEquipment):
+                self.equip_saved_equipment(saved_equipment= new_equipment , handler= handler)
+            else :
+                self.equip_equipment_concurrently(new_equipment, handler)
+            yield
+        finally:
+            # Step 3: Re-equip the old equipment when exiting the context
+            self.equip_equipment_concurrently(old_equipment, handler)
         
         
 def create_initial_equipment(item_list:typing.List[int],items:Items) -> Equipment:

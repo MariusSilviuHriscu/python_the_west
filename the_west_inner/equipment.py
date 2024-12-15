@@ -63,6 +63,105 @@ class Equipment:
             if equipment_item_id == item_id:
                 return item_type
 
+class SavedEquipment:
+    
+    def __init__(self ,
+                 name : str ,
+                 equipment_id : int,
+                 equipment_items : Equipment
+                 ):
+        
+        self.name = name
+        self.equipment_id = equipment_id
+        self.equipment_items = equipment_items
+    
+    @staticmethod
+    def build_from_dict(input_dict : dict) -> typing.Self:
+        
+        equipment = Equipment(
+            head_item_id = input_dict.get('head'),
+            neck_item_id = input_dict.get('neck'),
+            left_arm_item_id = input_dict.get('left_arm'),
+            body_item_id= input_dict.get('body'),
+            right_arm_item_id = input_dict.get('right_arm'),
+            foot_item_id = input_dict.get('foot'),
+            animal_item_id = input_dict.get('animal'),
+            belt_item_id = input_dict.get('belt'),
+            pants_item_id = input_dict.get('pants'),
+            yield_item_id = input_dict.get('yield')
+        )
+        
+        return SavedEquipment(
+            name = input_dict.get('name'),
+            equipment_id = input_dict.get('equip_manager_id'),
+            equipment_items = equipment
+        )
+    
+    def is_valid(self , bag : Bag) -> bool :
+        
+        return all( y in bag for _,y in self.equipment_items)
+    
+
+class SavedEquipmentManager:
+    
+    def __init__(self , 
+                 handler : requests_handler ,
+                 bag : Bag ):
+        
+        self.handler = handler
+        self.bag = bag
+        
+        self._saved_equipment_list : None | list[SavedEquipment] = None
+    
+    @property
+    def is_loaded(self) -> bool:
+        
+        return self._saved_equipment_list is not None
+    
+    
+    def _load_saved_equipment(self , response_list : list[dict]) -> list[SavedEquipment]:
+        
+        return [
+            SavedEquipment.build_from_dict(input_dict = x) for x in response_list
+        ]
+    def load_saved_equipment(self) -> None:
+        
+        response = self.handler.post(window = 'inventory',
+                                     action= 'show_equip',
+                                     action_name= 'mode'
+                                     )
+        
+        self._saved_equipment_list =  self._load_saved_equipment(response_list = response.get('data'))
+    
+    def get_saved_equipment_by_id(self , equipment_id : int) -> SavedEquipment|None :
+        
+        if not self.is_loaded:
+            
+            self.load_saved_equipment()
+            
+        for saved_equip in self._saved_equipment_list:
+            
+            if saved_equip.equipment_id == equipment_id:
+                return saved_equip
+    def get_saved_equipment_by_name(self , equipment_name : str) -> SavedEquipment|None :
+        
+        if not self.is_loaded:
+            
+            self.load_saved_equipment()
+            
+        for saved_equip in self._saved_equipment_list:
+            
+            if saved_equip.name == equipment_name:
+                return saved_equip
+    
+    def is_valid_saved_equipment(self , saved_equipment : SavedEquipment ) -> bool:
+        
+        return saved_equipment.is_valid(bag = self.bag)
+        
+
+
+
+
 class Equipment_manager():
     def __init__(self,current_equipment:Equipment,bag:Bag,items:Items,skills:Skills):
         self.current_equipment = current_equipment
@@ -202,6 +301,7 @@ class Equipment_manager():
     @contextmanager
     def temporary_equipment(self, new_equipment: Equipment, handler: requests_handler):
         # Step 1: Save the current equipment state
+        
         old_equipment = copy.deepcopy(self.current_equipment)
 
         try:
@@ -211,6 +311,46 @@ class Equipment_manager():
         finally:
             # Step 3: Re-equip the old equipment when exiting the context
             self.equip_equipment_concurrently(old_equipment, handler)
+    def _equip_saved_equipment(self , saved_equipment : SavedEquipment , handler : requests_handler) -> dict:
+        payload = {
+            'id': saved_equipment.equipment_id,
+            'last_inv_id': self.bag.last_inv_id
+        }
+        response = handler.post(
+            window = 'inventory',
+            action= 'switch_equip',
+            payload= payload,
+            use_h= True
+        )
+        
+        if response.get('error') :
+            raise Exception('Something went wrong when trying to equip a saved equipment ! ')
+        
+        return response
+
+    def equip_saved_equipment(self , saved_equipment : SavedEquipment , handler : requests_handler):
+        
+        changes = self._equip_saved_equipment(
+            saved_equipment=saved_equipment,
+            handler=handler
+        )
+        
+        
+        for _ , item_id in self.current_equipment:
+            
+            self.bag.add_item(item_id = item_id)
+            
+        self.current_equipment = saved_equipment.equipment_items
+        
+        for _ , item_id in self.current_equipment:
+            
+            self.bag.consume_item(item_id = item_id)
+        
+        self.equipment_change_skill_update(skill_change=changes['bonus']['allBonuspoints'])
+        
+        return True
+        
+        
 def create_initial_equipment(item_list:typing.List[int],items:Items) -> Equipment:
     #Make sure the item_id is the basic one as the last character in the id reprezents the upgrade of the item
     #replace_last_char = lambda s: s#str(s)[:-1] + "0"

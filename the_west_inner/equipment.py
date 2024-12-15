@@ -291,7 +291,6 @@ class Equipment_manager():
         # Check for successful responses
         if not responses:
             return False  # No items were equipped
-        
         # Assuming all responses have similar skill changes
         # Only updating skills once with the last response's skill change
         last_response = responses[-1]
@@ -328,7 +327,9 @@ class Equipment_manager():
             
             self.bag.add_item(item_id = item_id)
             
-        self.current_equipment = saved_equipment.equipment_items
+        self.current_equipment.change_equipment(
+            change_equipment_dict= {x:y for x,y in saved_equipment.equipment_items}
+        )
         
         for _ , item_id in self.current_equipment:
             

@@ -1,17 +1,46 @@
+import time
 import typing
 from dataclasses import dataclass
 
 from the_west_inner.requests_handler import requests_handler
-from the_west_inner.equipment import Equipment,SavedEquipment,Equipment_manager
+from the_west_inner.equipment import Equipment,SavedEquipment,SavedEquipmentManager,Equipment_manager
 
 
 @dataclass
 class EquipmentChangeCollection:
     
-    work_equipment : Equipment | SavedEquipment
-    reward_equipment : Equipment | SavedEquipment
-
-
+    work_equipment : Equipment | SavedEquipment | int | str
+    reward_equipment : Equipment | SavedEquipment | int | str
+    
+    @property
+    def loaded(self) -> bool:
+        
+        return (type(self.work_equipment) not in [ int , str]
+                and type(self.reward_equipment) not in [ int , str]
+        )
+    def load(self , saved_equip_manager : SavedEquipmentManager):
+        
+        if type(self.work_equipment) == int:
+            value = saved_equip_manager.get_saved_equipment_by_id(equipment_id= self.work_equipment)
+            if value is None:
+                raise Exception('Invalid load id for saved equipment ')
+            self.work_equipment = value
+        if type(self.work_equipment) == str:
+            value = saved_equip_manager.get_saved_equipment_by_name(equipment_name = self.work_equipment)
+            if value is None:
+                raise Exception('Invalid load name for saved equipment ')
+            self.work_equipment = value
+        
+        if type(self.reward_equipment) == int:
+            value = saved_equip_manager.get_saved_equipment_by_id(equipment_id= self.reward_equipment)
+            if value is None:
+                raise Exception('Invalid load id for saved equipment ')
+            self.reward_equipment = value
+        if type(self.reward_equipment) == str:
+            value = saved_equip_manager.get_saved_equipment_by_name(equipment_name = self.reward_equipment)
+            if value is None:
+                raise Exception('Invalid load name for saved equipment ')
+            self.reward_equipment = value
 WorkIdType = int
 
 class PreWorkEquipChanger:
@@ -29,21 +58,21 @@ class PreWorkEquipChanger:
         
         if work_flag and isinstance(self.equipment_collection.work_equipment , SavedEquipment):
             
-            self.equipment_manager.equip_saved_equipment(saved_equipment = self.equipment_collection.work_equipment)
+            self.equipment_manager.equip_saved_equipment(saved_equipment = self.equipment_collection.work_equipment,
+                                                         handler=self.handler)
             return
         
-        if not work_flag and isinstance(self.equipment_collection.work_equipment , SavedEquipment):
+        if not work_flag and isinstance(self.equipment_collection.reward_equipment , SavedEquipment):
             
-            self.equipment_manager.equip_saved_equipment(saved_equipment = self.equipment_collection.reward_equipment)
+            self.equipment_manager.equip_saved_equipment(saved_equipment = self.equipment_collection.reward_equipment,
+                                                         handler= self.handler)
             return
-        
         self.equipment_manager.equip_equipment_concurrently(
             equipment = self.equipment_collection.work_equipment if work_flag else self.equipment_collection.reward_equipment,
             handler = self.handler
         )
     
     def handle_work(self ):
-        
         self._handle_change(
                             work_flag = True
                             )

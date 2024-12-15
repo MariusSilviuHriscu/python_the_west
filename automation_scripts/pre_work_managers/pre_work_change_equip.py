@@ -2,14 +2,14 @@ import typing
 from dataclasses import dataclass
 
 from the_west_inner.requests_handler import requests_handler
-from the_west_inner.equipment import Equipment,Equipment_manager
+from the_west_inner.equipment import Equipment,SavedEquipment,Equipment_manager
 
 
 @dataclass
 class EquipmentChangeCollection:
     
-    work_equipment : Equipment
-    reward_equipment : Equipment
+    work_equipment : Equipment | SavedEquipment
+    reward_equipment : Equipment | SavedEquipment
 
 
 WorkIdType = int
@@ -27,7 +27,15 @@ class PreWorkEquipChanger:
     
     def _handle_change(self , work_flag : bool):
         
+        if work_flag and isinstance(self.equipment_collection.work_equipment , SavedEquipment):
+            
+            self.equipment_manager.equip_saved_equipment(saved_equipment = self.equipment_collection.work_equipment)
+            return
         
+        if not work_flag and isinstance(self.equipment_collection.work_equipment , SavedEquipment):
+            
+            self.equipment_manager.equip_saved_equipment(saved_equipment = self.equipment_collection.reward_equipment)
+            return
         
         self.equipment_manager.equip_equipment_concurrently(
             equipment = self.equipment_collection.work_equipment if work_flag else self.equipment_collection.reward_equipment,

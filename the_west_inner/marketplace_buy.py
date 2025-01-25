@@ -259,6 +259,15 @@ class Marketplace_offer():
         if fech_response["error"] == True:
             raise Exception("Could not fetch this offer")
         return fech_response["msg"]
+    def cancel_offer(self, handler: requests_handler) -> typing.Optional[dict]:
+        cancel_response = handler.post(window="building_market",
+                                     action="offtake",
+                                     payload={ 'offer_id':f'{self.dict_offer["market_offer_id"]}'},
+                                     use_h=True)
+        if cancel_response["error"] == True:
+            raise Exception("Could not cancel this offer")
+        
+        return cancel_response
 
 class NotEnoughMoneyException(Exception):
     pass
@@ -371,6 +380,11 @@ class Marketplace_offer_list():
     
     def __len__(self):
         return len(self.offer_list)
+    
+    def cancel_all(self):
+        
+        for offer in self.offer_list:
+            offer.cancel_offer(handler = self.handler)
 
 def marketplace_buy_offer_builder(offer_dict_list:list[dict],handler:requests_handler,items:Items) ->Marketplace_offer_list:
     offer_list = []

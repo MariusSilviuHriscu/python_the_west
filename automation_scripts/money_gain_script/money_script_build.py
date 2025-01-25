@@ -73,7 +73,7 @@ def make_money_gain_script(
                                         )
     
     money_gain_script = MoneyGainScript(
-        work_id_list = work_id_list,
+        work_list = job_data,
         motivation_consumable= motivation_consumable,
         recharge_usable_list= recharge_usable_list,
         hp_equipment= hp_equipment,

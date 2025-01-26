@@ -79,7 +79,8 @@ class MoneyGainScript():
             game_classes=game_classes,
             job_data=self.work_list,
             consumable_handler=game_classes.consumable_handler,
-            
+            clothes_changer_manager=self.pre_work_changer,
+            mov_pre_work_manager=self.mov_manager
         )
         
         stop_work_chain = CallbackChainer()

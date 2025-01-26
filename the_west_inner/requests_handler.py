@@ -3,7 +3,6 @@ import requests
 from urllib.parse import urlparse
 import datetime
 import time
-from http.client import RemoteDisconnected
 from requests.exceptions import ConnectionError
 from functools import wraps
 
@@ -65,7 +64,7 @@ def request_url(base_url, window, action, h=None, action_name="action"):
         base_url)._replace(query=f'window={window}&action={action}&h={h}')
     return url.geturl()
 
-@retry_on_remote_disconnection(retries=3, delay=2)
+@retry_on_remote_disconnection(retries=30, delay=3)
 def request_game(session : requests.Session | StandardRequestsSession, base_url, window, action, payload=None, h=None, action_name="action"):
     """
     Make a game request to the specified server.

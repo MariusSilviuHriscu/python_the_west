@@ -68,6 +68,8 @@ class MoneyGainScript():
             game_classes=game_classes,
             job_data=self.work_list,
             consumable_handler=game_classes.consumable_handler,
+            clothes_changer_manager=self.pre_work_changer,
+            mov_pre_work_manager=self.mov_manager
             
         )
         
@@ -141,41 +143,29 @@ class RegenerationManager:
 class MoneyScript:
     
     def __init__(self ,
-                 login : Game_login,
+                 game_classes : Game_classes,
                  regeneration_manager  : RegenerationManager,
                  repeatable_script : RepeatableScript                 
                  ):
         
         self.regeneration_manager = regeneration_manager
         self.repeatable_script = repeatable_script
-        self.login = login
+        self.game_classes = game_classes
         
-        self._game_classes = None
-    
-    @property
-    def game_classes(self) -> Game_classes:
-        if self._game_classes is None:
-            self._game_classes = self.login.login()
-        return self._game_classes
-    
-    def delete_game_classes(self):
-        self._game_classes = None
-    
-    def _run(self):
+        self.mov_table = repeatable_script.mov_manager.work_table
+        self.work_eq_table = repeatable_script.pre_work_changer.work_equipment_table
+
+    def run(self):
         
-        if not self.repeatable_script.can_run(game_classes=self.game_classes):
+        game_classes = self.game_classes
+        
+        if not self.repeatable_script.can_run(game_classes=game_classes):
             print('Cannot run')
             return
         print('Running')
-        self.regeneration_manager.cancel_sleep(game_classes=self.game_classes)
-        self.repeatable_script.run(game_classes=self.game_classes)
+        self.regeneration_manager.cancel_sleep(game_classes=game_classes)
+        self.repeatable_script.run(game_classes=game_classes)
         
         print('Finished')
-        self.regeneration_manager.sleep(game_classes=self.game_classes)
+        self.regeneration_manager.sleep(game_classes=game_classes)
         print('Sleep')
-    
-    def run(self):
-        while True:
-            self._run()
-            time.sleep(600)
-            self.delete_game_classes()

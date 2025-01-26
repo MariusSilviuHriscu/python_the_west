@@ -14,6 +14,7 @@ def set_class_to_adventurer(player_data: Player_data, handler: requests_handler)
     Returns:
         None
     """
+    return
     player_data.select_class(
         handler=handler,
         class_type_enum=ClassTypeEnum.ADVENTURER

@@ -70,8 +70,11 @@ class Script_work_task:
 
             # Perform the work for the minimum of maximum allowed tasks and remaining actions
             response = self.work_manager.work(work_object=self.work_data, number_of_tasks=min(maximum_number_of_task_allowed, self.number_of_actions))
-            response = [x['task'] for x in response['tasks'] ]
-            
+            try:
+                response = [x['task'] for x in response['tasks'] ]
+            except :
+                print(response)
+                response = None
 
             # Reduce the remaining actions
             self.number_of_actions -= min(maximum_number_of_task_allowed, self.number_of_actions)

@@ -235,7 +235,7 @@ class CycleJobsProducts:
             dropped_items = self.report_manager.rewards.item_drop.get(self.product_id, 0)
     
             # Check if no more actions are available.
-            if possible_actions == 0:
+            if possible_actions <= 0:
                 return self.report_manager.rewards
         
         # Return the rewards obtained during the entire cycle.

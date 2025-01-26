@@ -227,15 +227,18 @@ class Consumable_handler:
         result = self._use_consumable(consumable_id=box_id)['msg']
         
         # Update the cooldown based on the result's cooldown information
-        self._update_cooldown(new_cooldown_raw_date=result['cooldown'])
+        if 'cooldown' in result:
+            self._update_cooldown(new_cooldown_raw_date=result['cooldown'])
         
         # Extract changes and reverse them for proper handling
-        changes: list = result['changes']
-        changes.reverse()
+        if 'changes' in result:
+            changes: list = result['changes']
+            changes.reverse()
         
-        # Handle buy/sell changes in the player's bag
-        self.bag.handle_buy_sell_changes(changes=changes)
-        
+            # Handle buy/sell changes in the player's bag
+            self.bag.handle_buy_sell_changes(changes=changes)
+        else:
+            self.bag.update_inventory(handler=self.handler)
         # Introduce a sleep delay if time_sleep is provided
         if time_sleep is not None:
             time.sleep(time_sleep)

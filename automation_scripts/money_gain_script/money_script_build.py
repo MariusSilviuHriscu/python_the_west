@@ -83,7 +83,7 @@ def make_money_gain_script(
     )
     
     return MoneyScript(
-        login = login,
+        game_classes = game,
         regeneration_manager= regeneration_manager,
         repeatable_script= money_gain_script
     )

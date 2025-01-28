@@ -39,7 +39,9 @@ class FreeProxySession:
     def test_connection(self) -> bool:
         
         try :
-            response = self.session.get(self.base_website)
+            response = self.session.get(self.base_website,
+                                        timeout= 50
+                                        )
             return response.status_code == 200
         
         except requests.ConnectTimeout as e:
@@ -83,7 +85,7 @@ class FreeProxySession:
     def post(self,
              url : str , 
              data : dict | None = None ,
-             timeout : int = 50 ,
+             timeout : int = 50,
              retry_per_connection : int = 3 ,
              allow_redirects : bool | None = None):
         for _ in range(retry_per_connection):

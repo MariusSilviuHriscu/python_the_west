@@ -21,6 +21,9 @@ def clone_equip(game_classes : Game_classes):
         game_data= game_classes,
         fitness_rule_set = rule_set
     )
+    
+    
+    print(new_equipment)
     new_equipment.equip(handler = game_classes.handler,
                         equipment_manager = game_classes.equipment_manager
                         )

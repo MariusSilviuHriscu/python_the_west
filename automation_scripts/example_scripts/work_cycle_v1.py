@@ -128,9 +128,13 @@ def cycle_work(game_login : Game_login ,
     cycle.update_work_callback_chainer(
         callback_chain= chain
     )
-    
-    cycle.cycle(
-        motivation_consumable=motivation_consumable,
-        energy_consumable= energy_consumable,
-        number_of_cycles= number_of_cycles
-    )
+    try :
+        cycle.cycle(
+            motivation_consumable=motivation_consumable,
+            energy_consumable= energy_consumable,
+            number_of_cycles= number_of_cycles
+        )
+    except Exception as e:
+        
+        print(cycle.reports_manager.rewards)
+        raise e

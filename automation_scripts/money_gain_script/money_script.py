@@ -37,6 +37,17 @@ class RepeatableScript(Protocol):
     
     def run(self , game_classes : Game_classes):
         pass
+    
+    def replace_pre_work_changer(self ,game_classes : Game_classes , pre_work_changer_table : dict):
+        
+        pass
+    
+    def replace_mov_manager(self , game_classes : Game_classes , mov_manager_table : dict):
+        
+        pass
+    def replace_manager(self , game_classes : Game_classes):
+        
+        pass
 
 class MoneyGainScript():
     
@@ -70,7 +81,6 @@ class MoneyGainScript():
             consumable_handler=game_classes.consumable_handler,
             clothes_changer_manager=self.pre_work_changer,
             mov_pre_work_manager=self.mov_manager
-            
         )
         
         stop_work_chain = CallbackChainer()
@@ -102,6 +112,26 @@ class MoneyGainScript():
             energy_consumable=0,
             number_of_cycles=1
         )
+    def replace_pre_work_changer(self ,game_classes : Game_classes ):
+        
+        self.pre_work_changer = PreWorkEquipChangerManager(
+            work_equipment_table=self.pre_work_changer.work_equipment_table,
+            handler=game_classes.handler,
+            equipment_manager= game_classes.equipment_manager)
+    
+    def replace_mov_manager(self , game_classes : Game_classes ):
+        
+        self.mov_manager = PreWorkMovementManager(
+            work_table= self.mov_manager.work_table,
+            work_manager = game_classes.work_manager,
+            movement_equipment = self.mov_manager.movement_equipment,
+            equipment_manager= game_classes.equipment_manager,
+            movement_manager= game_classes.movement_manager
+            )
+    def replace_manager(self , game_classes : Game_classes):
+        
+        self.replace_pre_work_changer(game_classes=game_classes)
+        self.replace_mov_manager(game_classes=game_classes)
         
 
 class RegenerationManager:
@@ -143,29 +173,34 @@ class RegenerationManager:
 class MoneyScript:
     
     def __init__(self ,
-                 game_classes : Game_classes,
+                 login : Game_login,
                  regeneration_manager  : RegenerationManager,
                  repeatable_script : RepeatableScript                 
                  ):
         
         self.regeneration_manager = regeneration_manager
         self.repeatable_script = repeatable_script
-        self.game_classes = game_classes
+        self.login = login
         
-        self.mov_table = repeatable_script.mov_manager.work_table
-        self.work_eq_table = repeatable_script.pre_work_changer.work_equipment_table
-
-    def run(self):
+    
+    def _run(self):
         
-        game_classes = self.game_classes
+        game_classes = self.login.login()
+        
+        self.repeatable_script.replace_manager(game_classes=game_classes)
         
         if not self.repeatable_script.can_run(game_classes=game_classes):
             print('Cannot run')
             return
         print('Running')
-        self.regeneration_manager.cancel_sleep(game_classes=game_classes)
-        self.repeatable_script.run(game_classes=game_classes)
+        self.regeneration_manager.cancel_sleep(game_classes= game_classes)
+        self.repeatable_script.run(game_classes= game_classes)
         
         print('Finished')
-        self.regeneration_manager.sleep(game_classes=game_classes)
+        self.regeneration_manager.sleep(game_classes= game_classes)
         print('Sleep')
+    
+    def run(self):
+        while True:
+            self._run()
+            time.sleep(600)

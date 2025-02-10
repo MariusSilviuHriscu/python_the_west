@@ -1,3 +1,4 @@
+import time
 import typing
 from enum import Enum
 from dataclasses import dataclass, fields
@@ -189,7 +190,25 @@ class NpcDuelList :
         # Find the NPC ID with the smallest value for the specified key
         max_npc_id = max(value_dict, key=lambda npc_id: value_dict[npc_id])
         return max_npc_id
+    def get_npc_by_smallest(self, key: str) -> typing.Optional[int]:
+        # Filter only NPCs that have arrived
+        available_npcs = [npc for npc in self._npc_list if datetime.datetime.now().timestamp() >= npc.arrival]
         
+        if not available_npcs:
+            return None  # No valid NPCs available
+
+        # Find the NPC ID with the smallest value for the specified key
+        return min(available_npcs, key=lambda npc: getattr(npc, key)).duelnpc_id
+
+    def get_npc_by_biggest(self, key: str) -> typing.Optional[int]:
+        # Filter only NPCs that have arrived
+        available_npcs = [npc for npc in self._npc_list if datetime.datetime.now().timestamp() >= npc.arrival]
+        
+        if not available_npcs:
+            return None  # No valid NPCs available
+
+        # Find the NPC ID with the largest value for the specified key
+        return max(available_npcs, key=lambda npc: getattr(npc, key)).duelnpc_id
         
     def _duel_npc(self,handler:requests_handler,npc_id:int):
         
@@ -205,6 +224,24 @@ class NpcDuelList :
             raise ValueError('This npc is not available for duel!')
         
         return self._duel_npc(handler = handler,npc_id = npc_id)
+
+    def yield_npcs_by_arrival(self) -> typing.Generator[int, None, None]:
+        """Yields NPC IDs in order of their arrival time.
+        - NPCs that are already available are yielded first.
+        - If no more NPCs are available, it waits for the next NPC.
+        """
+
+        # Sort NPCs by arrival time (earliest first)
+        sorted_npcs = sorted(self._npc_list, key=lambda npc: npc.arrival)
+
+        for npc in sorted_npcs:
+            wait_time = npc.arrival - datetime.datetime.now().timestamp()
+
+            if wait_time > 0:
+                # If the NPC hasn't arrived yet, wait until it becomes available
+                time.sleep(wait_time)
+
+            yield npc.duelnpc_id  # Yield the NPC ID when it's available
 
 def get_npc_duel_data(handler:requests_handler) -> NpcDuelList:
     

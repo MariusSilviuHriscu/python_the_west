@@ -89,16 +89,17 @@ class InfiniteDuelsManager:
                                                         handler= self.handler):
                 
                 self.consumable_handler.use_consumable(consumable_id= settings.motivation_recharge_id)
-                self.duel_manager.reload()
+                time.sleep(20)
         
     
     def advance_duel(self , settings  : InfiniteDuelsSettings) -> DuelResultData:
         
         result = next(self.duel_loop_generator)
-        
+        print(result)
         self.recharge_health_and_energy(settings= settings)
         time.sleep(10)
         self.recharge_motivation(settings= settings)
+        time.sleep(10)
         
         return result
     
@@ -107,7 +108,6 @@ class InfiniteDuelsManager:
         while self.duel_manager.npc_list._difficulty < target_lvl:
             
             result = self.advance_duel(settings= settings)
-            print(result)
             results.append(result)
         
         return results

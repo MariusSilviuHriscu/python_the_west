@@ -4,6 +4,12 @@ from urllib.parse import urlparse
 import datetime
 import time
 from requests.exceptions import ConnectionError
+#from urllib3.exceptions import ConnectionError
+
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from http.client import RemoteDisconnected
+from urllib3.exceptions import ProtocolError
+
 from functools import wraps
 
 from connection_sessions.standard_request_session import StandardRequestsSession
@@ -45,6 +51,26 @@ def retry_on_remote_disconnection(retries=3, delay=2):
                         raise e
         return wrapper
     return decorator
+
+def retry_on_remote_disconnection(retries=3, delay=2):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < retries:
+                try:
+                    return func(*args, **kwargs)
+                except (RequestsConnectionError, RemoteDisconnected, ProtocolError) as e:
+                    attempts += 1
+                    print(f"Connection error encountered: {e}. Retry attempt {attempts}/{retries} after {delay} seconds.")
+                    if attempts < retries:
+                        time.sleep(delay)
+                    else:
+                        print("Max retries reached. Raising exception.")
+                        raise e
+        return wrapper
+    return decorator
+
 #@requests_url_decorator
 def request_url(base_url, window, action, h=None, action_name="action"):
     """

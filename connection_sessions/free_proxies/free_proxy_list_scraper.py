@@ -4,6 +4,7 @@ import json
 import typing
 
 import requests
+from json.decoder import JSONDecodeError
 
 from connection_sessions.free_proxies.proxy_data import ProxyList,ProxyData
 
@@ -159,7 +160,12 @@ class FreeProxyManager:
     def get_ip(self) -> typing.Generator[ProxyData,None,None]:
         
         while True :
-            proxy_list = self.get_proxy_list()
+            while True:
+                try:
+                    proxy_list = self.get_proxy_list()
+                    break
+                except JSONDecodeError:
+                    continue
             
             selected_proxy = self._select_unused(proxy_list_generator = proxy_list.get_proxy_generator())
             

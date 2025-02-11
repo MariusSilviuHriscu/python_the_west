@@ -128,7 +128,7 @@ class DuelResultData:
         )
     def __str__(self):
         
-        return f'Won: {self.won}, KO: {self.ko}, Experience: {self.experience}, Money: {self.money}, Attacker Dead: {self.attacker_dead}'
+        return f'DuelResult(Won: {self.won}, KO: {self.ko}, Experience: {self.experience}, Money: {self.money}, Attacker Dead: {self.attacker_dead})'
     
     def __repr__(self):
         

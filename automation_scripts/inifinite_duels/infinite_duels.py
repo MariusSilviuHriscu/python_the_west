@@ -25,6 +25,7 @@ class InfiniteDuelsSettings:
         
     
     def should_recharge_motivation(self , current_motivation : int) -> bool:
+        print(f'current_motivation is {current_motivation}')
         return current_motivation <= 100 - self.motivation_recharge_amount
     
     def should_recharge_health(self , current_health : int , max_health : int) -> bool:
@@ -88,6 +89,7 @@ class InfiniteDuelsManager:
                                                         handler= self.handler):
                 
                 self.consumable_handler.use_consumable(consumable_id= settings.motivation_recharge_id)
+                self.duel_manager.reload()
         
     
     def advance_duel(self , settings  : InfiniteDuelsSettings) -> DuelResultData:
@@ -95,6 +97,7 @@ class InfiniteDuelsManager:
         result = next(self.duel_loop_generator)
         
         self.recharge_health_and_energy(settings= settings)
+        time.sleep(10)
         self.recharge_motivation(settings= settings)
         
         return result

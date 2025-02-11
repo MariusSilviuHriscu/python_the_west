@@ -274,6 +274,8 @@ class NpcDuelList :
         
         data = self._duel_npc(handler = handler,npc_id = npc_id)
         
+        self._npc_duel_motivation = data.get('motivation_npc')
+        
         return DuelResultData.load_from_dict(result_dict = data.get('data') , attacker_dead = data.get('attacker_died',False))
     
     def is_ready(self, npc_id: int) -> bool:

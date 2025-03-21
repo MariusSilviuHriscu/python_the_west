@@ -166,6 +166,9 @@ class DuelNpcData:
         # Use the dictionary to create an instance of DuelNpcData
         return DuelNpcData(**valid_fields)
 
+class NpcDuelException(Exception):
+    pass
+
 class NpcDuelList :
     def __init__(self ,
                  npc_duel_motivation : float ,
@@ -263,7 +266,8 @@ class NpcDuelList :
         
         response = handler.post(window = 'duel',action = 'duel_npc',payload = {'duelnpc_id': f'{npc_id}'},use_h=True)
         if response.get('error',False) == True:
-            raise Exception('Something went wrong when trying to duel an npc')
+            
+            raise NpcDuelException(f'Something went wrong when trying to duel an npc {response}')
         
         return response
     

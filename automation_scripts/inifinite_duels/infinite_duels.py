@@ -3,7 +3,9 @@
 
 import time
 from the_west_inner.consumable import Consumable_handler
-from the_west_inner.duels import NpcDuelManager , DuelResultData
+from the_west_inner.duels import (NpcDuelManager , 
+                                  DuelResultData ,
+                                  NpcDuelException)
 from the_west_inner.equipment import Equipment_manager, Equipment
 from the_west_inner.player_data import Player_data
 from the_west_inner.requests_handler import requests_handler
@@ -106,9 +108,13 @@ class InfiniteDuelsManager:
     def loop_duels(self , settings : InfiniteDuelsSettings , target_lvl : int) -> list[DuelResultData]:
         results = []
         while self.duel_manager.npc_list._difficulty < target_lvl:
-            
-            result = self.advance_duel(settings= settings)
-            results.append(result)
+            try:
+                result = self.advance_duel(settings= settings)
+                results.append(result)
+            except NpcDuelException :
+                pass
+            except Exception as e:
+                raise e
         
         return results
         

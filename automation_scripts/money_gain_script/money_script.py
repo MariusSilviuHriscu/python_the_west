@@ -1,5 +1,5 @@
 
-from datetime import time
+import time
 import typing
 from automation_scripts.example_scripts.work_cycle_v1 import stop_works
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer

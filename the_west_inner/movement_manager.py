@@ -139,6 +139,8 @@ class MovementManager:
                 handler= self.handler
             )
             
+            self.player_data.update_all(handler=self.handler)
+            
             
             walk_task.cancel()
             self.task_queue.update()

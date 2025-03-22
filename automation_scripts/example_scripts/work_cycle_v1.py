@@ -12,6 +12,7 @@ from automation_scripts.stop_events.script_events import StopEvent
 from automation_scripts.stop_events.script_exception_handler import handle_exceptions
 from automation_scripts.work_cycle import Cycle_jobs
 from automation_scripts.pre_work_managers.mov_pre_work_loader import PreWorkMovManagerBuilder
+from automation_scripts.sleep_func_callbacks.universal_callback_map import UNIVERSAL_MAPPING
 
 def stop_works(work_manager : Work_manager):
     
@@ -55,7 +56,8 @@ def cycle_work(game_login : Game_login ,
                pre_work_change_manager : None | PreWorkEquipChangerManager = None,
                pre_work_movement_manager : None | PreWorkMovementManager = None,
                movement_equipment : None | Equipment = None,
-               work_eq_dict : dict[int,EquipmentChangeCollection] | None = None
+               work_eq_dict : dict[int,EquipmentChangeCollection] | None = None,
+               additional_chainer : None | CallbackChainer = None
                ):
     
     game = game_login.login()
@@ -67,7 +69,7 @@ def cycle_work(game_login : Game_login ,
     )
     
     
-    chain = CallbackChainer()
+    chain = CallbackChainer(UNIVERSAL_MAPPING)
 
     chain.add_callback(
     callback_function=recharge_health_equipment,
@@ -89,6 +91,11 @@ def cycle_work(game_login : Game_login ,
         callback_function = timer.check
     )
     
+    if additional_chainer is not None:
+        new_func = additional_chainer.chain_function(game_classes=game)
+        chain.add_callback(
+            callback_function=new_func
+        )
     if movement_equipment is not None and pre_work_movement_manager is None:
         pre_work_movement_manager_builder = PreWorkMovManagerBuilder(game_classes=game)
         pre_work_movement_manager = pre_work_movement_manager_builder.build(

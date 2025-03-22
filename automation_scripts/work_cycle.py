@@ -71,7 +71,20 @@ class Script_work_task:
             # Perform the work for the minimum of maximum allowed tasks and remaining actions
             response = self.work_manager.work(work_object=self.work_data, number_of_tasks=min(maximum_number_of_task_allowed, self.number_of_actions))
             try:
-                response = [x['task'] for x in response['tasks'] ]
+                if type(response['tasks']) == list and next(iter(response['tasks'])).get('task') is not None:
+                    response = [x['task'] for x in response['tasks'] ]
+                else:
+                    job_data = []
+
+                    # Iterate through the tasks
+                    for _ , task_info in response['tasks'].items():
+                        task = task_info['task']
+                        job_data.append(task)
+                        
+                    
+                    response = job_data
+
+                        
             except :
                 print(response)
                 response = None
@@ -90,6 +103,7 @@ class Script_work_task:
                             *args ,
                             **kwargs
                             )
+        self.game_classes.work_manager.wait_until_free_queue(callback=None)
         
 
 #def read_report_rewards(report_manager:Reports_manager):

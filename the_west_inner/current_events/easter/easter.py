@@ -16,7 +16,9 @@ class EasterBanditData(BaseModel):
     won_last : bool
 
     def check_duel_cooldown(self) -> bool:
-        result =  self.finish_date is not None and self.finish_date < datetime.now()
+        
+        result =  self.finish_date is None or self.finish_date < datetime.now()
+        
         return result
     
     def duel_cost(self, event_currency: EventCurrencyEnum , stage_data : EventStageData) -> int:
@@ -71,7 +73,7 @@ class EasterBanditData(BaseModel):
         
         return EasterBanditData(
             bandit_id = bandit_id,
-            finish_date = finish_date if finish_date is not None else datetime.now(),
+            finish_date = finish_date,
             won_last = won_last
         )
 
@@ -148,6 +150,7 @@ class EasterEvent(CurrentEvent):
             wof_id= self.current_event_data.event_wof
         )
         
+        
         cost = self.current_event_data.currency_data.get_bribe_cost(currency=currency_type)
         if currency_type.value == 2:
             new_nuggets = self.global_currency.nuggets - cost
@@ -178,7 +181,6 @@ class EasterEvent(CurrentEvent):
     def duel_bandit(self,bandit_data : EasterBanditData|OffsetType ,currency_type : EventCurrencyEnum) -> int:
         
         bandit_id = self.get_bandit_id(easter_bandit = bandit_data)
-        print(f'Trying to duel bandit {bandit_id}')
         
         response = self.event_handler.gamble(
             pay_id= currency_type.value,
@@ -192,7 +194,7 @@ class EasterEvent(CurrentEvent):
         self.update_bandits()
         return item_id
         
-    def build_by_offset(self, offset : typing.Literal[0,1,2,3] , currency_type : EventCurrencyEnum):
+    def duel_by_offset(self, offset : typing.Literal[0,1,2,3] , currency_type : EventCurrencyEnum):
         
         self.duel_bandit(bandit_data = offset , currency_type = currency_type)
     @property

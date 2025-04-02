@@ -11,6 +11,7 @@ from the_west_inner.init_data import return_current_event_data,get_wof_id_by_eve
 from the_west_inner.current_events.independence.build_independence_event import IndependenceEventBuilder
 from the_west_inner.current_events.oktoberfest.build_oktoberfest_event import OktoberfestEventBuilder
 from the_west_inner.current_events.muertos.build_muertos_event import MuertosEventBuilder
+from the_west_inner.current_events.easter.build_easter_event import EasterEventBuilder
 
 
 class EventBuilder(Protocol):
@@ -28,6 +29,7 @@ EVENT_DICT : dict[str, EventBuilder] ={
     'Independence' : IndependenceEventBuilder,
     'Octoberfest' : OktoberfestEventBuilder,
     'DayOfDead' : MuertosEventBuilder ,
+    'Easter' : EasterEventBuilder,
     'fairwof' : None
 }
 

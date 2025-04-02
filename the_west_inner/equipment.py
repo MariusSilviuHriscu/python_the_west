@@ -168,7 +168,11 @@ class Equipment_manager():
         self.bag = bag
         self.items = items
         self.skills = skills
-    def equip_item(self,item_id:int,handler:requests_handler) -> dict:
+    def equip_item(self,
+                   item_id:int,
+                   handler:requests_handler,
+                   retry_count:int=0
+                   ) -> dict:
         #replace_last_char = lambda s: str(s)[:-1] + "0"
         if item_id not in self.items:
             raise Exception(f"You tried to equip item that does not exist! : {item_id} ")
@@ -184,8 +188,10 @@ class Equipment_manager():
         )
         
         if response['error'] :
-            raise Exception(f"Error when trying to equip id_{item_id} : {response['error']}")
-        
+            if retry_count == 0:
+                raise Exception(f"Error when trying to equip id_{item_id} : {response['error']}")
+            else:
+                return self.equip_item(item_id=item_id,handler=handler,retry_count=retry_count-1)
         return response
     def _unequip_item(self , 
                      item_id : int ,
@@ -228,14 +234,20 @@ class Equipment_manager():
     
     def equipment_change_skill_update(self,skill_change:dict)->None:
         self.skills.set_skills_and_attributes_bonus(change_dict=skill_change)
-    def equip_equipment(self,equipment:Equipment,handler:requests_handler):
+    def equip_equipment(self,equipment:Equipment,
+                        handler:requests_handler,
+                        retry_count:int=0
+                        ):
         response = dict()
         for item_type,item in equipment :
             if item is None :
                 continue
             if item in self.current_equipment:
                 continue
-            response = self.equip_item(item_id=item,handler=handler)
+            response = self.equip_item(item_id=item,
+                                       handler=handler,
+                                       retry_count=retry_count
+                                       )
             self.bag.consume_item(item_id= item)
             self.bag.add_item(
                 item_id=getattr(self.current_equipment,f'{item_type}'),
@@ -249,7 +261,11 @@ class Equipment_manager():
             skill_change= response['bonus']['allBonuspoints']
         )
         return True
-    def equip_equipment_concurrently(self, equipment: Equipment, handler: requests_handler):
+    def equip_equipment_concurrently(self,
+                                     equipment: Equipment,
+                                     handler: requests_handler,
+                                     retry_count: int = 0
+                                     ):
         start_time = time.time()  # Start timing
         responses = []
         
@@ -260,7 +276,10 @@ class Equipment_manager():
                 return None  # Skip None items or items that are already equipped
 
             # Send the equip request
-            response = self.equip_item(item_id=item_id, handler=handler)
+            response = self.equip_item(item_id=item_id, 
+                                       handler=handler,
+                                       retry_count=retry_count
+                                       )
             
             # Consume the equipped item and update the current equipment
             self.bag.consume_item(item_id=item_id)

@@ -69,7 +69,8 @@ class PreWorkEquipChanger:
             return
         self.equipment_manager.equip_equipment_concurrently(
             equipment = self.equipment_collection.work_equipment if work_flag else self.equipment_collection.reward_equipment,
-            handler = self.handler
+            handler = self.handler,
+            retry_count= 3
         )
     
     def handle_work(self ):

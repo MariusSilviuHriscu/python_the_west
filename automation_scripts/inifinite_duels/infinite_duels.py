@@ -113,6 +113,8 @@ class InfiniteDuelsManager:
                 results.append(result)
             except NpcDuelException :
                 pass
+            except StopIteration:
+                pass
             except Exception as e:
                 raise e
         

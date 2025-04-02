@@ -7,6 +7,7 @@ from connection_sessions.tor_handler import create_tor_session
 from connection_sessions.standard_request_session import StandardRequestsSession
 
 from the_west_inner.game_classes import Game_classes
+from the_west_inner.game_server import GameServer
 from the_west_inner.requests_handler import requests_handler
 
 
@@ -176,6 +177,7 @@ class Game_login():
                  player_name:str ,
                  player_password:str,
                  world_id : typing.Union[str,int] ,
+                 server: GameServer = GameServer.RO,
                  use_tor_flag : bool = False ,
                  session_builder_func : typing.Callable[[typing.Self],StandardRequestsSession] | None = None
                  ):
@@ -183,6 +185,7 @@ class Game_login():
         self.player_password = player_password
         self.world_id = world_id
         self.session_builder_func = session_builder_func
+        self.server = server
         self.session = self._create_session(use_tor_flag=use_tor_flag)
         self.url = ""
         self.game_html = None
@@ -209,7 +212,10 @@ class Game_login():
             return session
     def _login_account(self) -> typing.Tuple[str,str]:    
         # Send a POST request to the "check_login" endpoint with the player name and password
-        password_id  = self.session.post("https://www.the-west.ro//index.php?ajax=check_login&locale=ro_RO", 
+        #password_id  = self.session.post("https://www.the-west.ro//index.php?ajax=check_login&locale=ro_RO", 
+        #                        data ={"name": f"{self.player_name}","password": f"{self.player_password}"}).text
+        login_url = f"{self.server.base_url}/index.php?ajax=check_login&locale={self.server.locale}"
+        password_id  = self.session.post(login_url, 
                                 data ={"name": f"{self.player_name}","password": f"{self.player_password}"}).text
 
         # Parse the response as JSON
@@ -222,9 +228,14 @@ class Game_login():
         return player_id , password_hash
     def _select_world(self,player_id :str , password_hash:str) -> str:
         # Send a POST request to the "login" endpoint with the world_id, player_id, and password_hash
-        login_response = self.session.post("https://www.the-west.ro/?action=login", 
-                              data={"world_id": f"{self.world_id}","player_id": f"{player_id}","password": f"{password_hash}","set_cookie": ""},allow_redirects=False)
+        #login_response = self.session.post("https://www.the-west.ro/?action=login", 
+        #                      data={"world_id": f"{self.world_id}","player_id": f"{player_id}","password": f"{password_hash}","set_cookie": ""},allow_redirects=False)
+        
+        login_url = f"{self.server.base_url}/?action=login"
+        login_response = self.session.post(login_url, 
+                      data={"world_id": f"{self.world_id}","player_id": f"{player_id}","password": f"{password_hash}","set_cookie": ""},allow_redirects=False)
 
+        
         # Send another POST request to the URL specified in the Location header of the previous response
         game_page_response = self.session.post(f"{login_response.headers['Location']}",allow_redirects=False)
 

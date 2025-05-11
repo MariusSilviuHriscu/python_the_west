@@ -244,7 +244,7 @@ class NpcDuelList :
         return max_npc_id
     def get_npc_by_smallest(self, key: str) -> typing.Optional[int]:
         # Filter only NPCs that have arrived
-        available_npcs = [npc for npc in self._npc_list if datetime.datetime.now().timestamp() >= npc.arrival]
+        available_npcs = [npc for npc in self._npc_list if (npc.arrival is None or datetime.datetime.now().timestamp() >= npc.arrival)]
         
         if not available_npcs:
             return None  # No valid NPCs available
@@ -274,7 +274,7 @@ class NpcDuelList :
     def duel_npc(self, npc_id : int,handler : requests_handler) -> DuelResultData:
         
         if npc_id not in self:
-            raise ValueError('This npc is not available for duel!')
+            raise ValueError(f'This npc is not available for duel! {npc_id}')
         
         data = self._duel_npc(handler = handler,npc_id = npc_id)
         

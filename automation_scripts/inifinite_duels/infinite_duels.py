@@ -106,11 +106,12 @@ class InfiniteDuelsManager:
         return result
     
     def loop_duels(self , settings : InfiniteDuelsSettings , target_lvl : int) -> list[DuelResultData]:
-        results = []
+        results : list[DuelResultData] = []
         while self.duel_manager.npc_list._difficulty < target_lvl:
             try:
                 result = self.advance_duel(settings= settings)
                 results.append(result)
+                print('Duel result:', sum([x.experience for x in results]))
             except NpcDuelException :
                 pass
             except StopIteration:

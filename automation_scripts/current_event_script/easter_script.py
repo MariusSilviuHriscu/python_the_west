@@ -41,7 +41,7 @@ def play_bets(offset_list : list[typing.Literal[0,1,2,3]],
 def easter_script(game_html : str , 
                         handler : requests_handler , 
                         global_currency : Currency ,
-                        offset_list : list[typing.Literal[0,1,2,3]]):
+                        event_bet_offset : list[typing.Literal[0,1,2,3]]):
     event = load_game_event(
         game_html = game_html,
         handler = handler,
@@ -50,6 +50,6 @@ def easter_script(game_html : str ,
     if not isinstance(event,EasterEvent):
         return 
     
-    play_bets(offset_list= offset_list ,
+    play_bets(offset_list= event_bet_offset ,
               event = event
               )

@@ -8,7 +8,7 @@ from automation_scripts.work_cycle import Cycle_jobs
 from the_west_inner.equipment import Equipment
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.login import Game_login
-from the_west_inner.misc_scripts import sleep_closest_town
+from the_west_inner.misc_scripts import sleep_closest_town,collect_daily_reward
 from the_west_inner.reports import Job_report_reward_data
 from the_west_inner.work import Work, get_closest_workplace_data
 from the_west_inner.work_job_data import WorkJobData
@@ -186,6 +186,7 @@ class MoneyScript:
     def _run(self):
         
         game_classes = self.login.login()
+        collect_daily_reward(handler = game_classes.handler)
         
         self.repeatable_script.replace_manager(game_classes=game_classes)
         

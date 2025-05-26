@@ -256,6 +256,9 @@ class CycleScriptManager:
         """
         while True:
             self.execute_cycle_script(level=level,additional_chainer=additional_chainer)
+            if self.game_data.player_data.level == level:
+                print('Level reached')
+                break
             time.sleep(3600 / 4)
             yield
 

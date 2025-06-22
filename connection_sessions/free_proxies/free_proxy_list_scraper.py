@@ -167,6 +167,8 @@ class FreeProxyManager:
                 except JSONDecodeError:
                     continue
             
+            proxy_list = ProxyList(proxy_list = [x for x in proxy_list.proxy_list if x.ip_data.asname not in ['CLOUDFLARENET','CLOUDFLARESPECTRUM']])
+            
             selected_proxy = self._select_unused(proxy_list_generator = proxy_list.get_proxy_generator())
             
             self.player_cache[selected_proxy] = PlayerCacheInfo(player_name  = self.current_player_name , proxy_data= selected_proxy)

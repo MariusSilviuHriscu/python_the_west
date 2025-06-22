@@ -243,6 +243,8 @@ class Consumable_handler:
         if time_sleep is not None:
             time.sleep(time_sleep)
         
+        if 'effects' not in result:
+            print(f"No effects found in the result. Returning an empty dictionary. {result}")
         # Extract and process the effects of opening the box
         return self._extract_box_result_dict(raw_data=result['effects'])
 

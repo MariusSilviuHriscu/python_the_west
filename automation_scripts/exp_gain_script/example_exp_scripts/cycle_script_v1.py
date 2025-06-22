@@ -15,6 +15,9 @@ from automation_scripts.exp_gain_script.example_exp_scripts.sleep_func_v1 import
 
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 
+
+from automation_scripts.stop_events.script_events import NestedStopEventException, StopEventException, CompleteStopEventException
+
 class CycleScriptEquipmentChanger:
     
     def __init__(self , 
@@ -215,6 +218,12 @@ class CycleScriptManager:
                                                             )
             try:
                 executable()
+            except CompleteStopEventException as e:
+                raise e
+            except NestedStopEventException as e:
+                raise e
+            except StopEventException as e:
+                raise e
             except Exception as e:
                 print(e)
         

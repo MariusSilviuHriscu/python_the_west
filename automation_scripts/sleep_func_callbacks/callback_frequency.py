@@ -181,14 +181,18 @@ class DatetimeIntervalRule():
     """
     def __init__(self, start_hour: int, start_minute: int, end_hour: int, end_minute: int):
         self.start_time = time(start_hour, start_minute)
-        self.end_time = time(end_hour, end_minute)
-
-    def should_run(self) -> bool:
-        current_time = datetime.now().time()
         
+        # Treat 00:00 as the very end of the day
+        if end_hour == 0 and end_minute == 0:
+            self.end_time = time(23, 59, 59, 999999)
+        else:
+            self.end_time = time(end_hour, end_minute)
+
+    def should_run(self, current_time: time = None) -> bool:
+        if current_time is None:
+            current_time = datetime.now().time()
+
         if self.start_time <= self.end_time:
-            # Interval does not span midnight
             return self.start_time <= current_time <= self.end_time
         else:
-            # Interval spans midnight
             return current_time >= self.start_time or current_time <= self.end_time

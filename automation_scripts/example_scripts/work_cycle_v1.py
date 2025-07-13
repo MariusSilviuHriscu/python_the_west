@@ -143,5 +143,5 @@ def cycle_work(game_login : Game_login ,
         )
     except Exception as e:
         
-        print(cycle.reports_manager.rewards)
+        print(cycle.reports_manager.rewards.pretty_print(items=game.items))
         raise e

@@ -153,14 +153,14 @@ class Items():
         :rtype: bool
         """
         return 'usetype' in self.items[item_id] and self.items[item_id]['usetype'] == "use"
-    def name(self) -> str:
+    def name(self, item_id : int) -> str:
         """
         Get the name of the item.
 
         :return: The name of the item.
         :rtype: str
         """
-        return self.item["name"]
+        return self.get_item(item_id=item_id).get('name')
 
     def price(self) -> int:
         """
@@ -169,7 +169,7 @@ class Items():
         :return: The price of the item.
         :rtype: int
         """
-        return self.item["price"]
+        return self.get_item()
     def __contains__(self,item_id:typing.Union[int,str]) -> bool:
         """
         Checks if the ID of specified item exists in the item pool.

@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from dataclasses import dataclass
 import os
 
+from the_west_inner.items import Items
 from the_west_inner.requests_handler import requests_handler
 
 
@@ -146,6 +147,20 @@ class Job_report_reward_data():
             luck=luck,
             oup=oup,
             item_drop=item_drop
+        )
+    def pretty_print(self, items : Items) -> str:
+        item_drop_str = ", ".join(
+            f"'{items.name(item_id=item_id)}': {quantity}"
+            for item_id, quantity in self.item_drop.items()
+        )
+        return (
+            f"Job_report_reward_data("
+            f"job_duration={self.job_duration}, "
+            f"experience={self.experience}, "
+            f"dollars={self.dollars}, "
+            f"luck={self.luck}, "
+            f"oup={self.oup}, "
+            f"item_drop={{ {item_drop_str} }})"
         )
 
 @dataclass

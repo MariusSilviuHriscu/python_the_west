@@ -1,4 +1,5 @@
 import typing
+from enum import IntEnum
 
 from the_west_inner.game_classes import Game_classes
 from the_west_inner.misc_scripts import wait_until_date_callback
@@ -10,6 +11,15 @@ from the_west_inner.reports import Reports_manager
 from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChainer
 from automation_scripts.pre_work_managers.pre_work_change_equip import PreWorkEquipChangerManager,PreWorkEquipChanger
 from automation_scripts.pre_work_managers.mov_pre_work_managers import PreWorkMovementManager
+
+class WorkMotivation(IntEnum):
+    """
+    Enum representing different levels of work motivation.
+    """
+    ZERO = 0
+    LOW = 25
+    MEDIUM = 50
+    HIGH = 75
 
 class Script_work_task:
     """
@@ -162,7 +172,7 @@ class Cycle_jobs:
         if self.consumable_callback_chainer is None:
             return None
         return self.consumable_callback_chainer.chain_function(report_manager = self.reports_manager)
-    def _analize_motivation(self) -> typing.List[Script_work_task]:
+    def _analize_motivation(self,motivation_treshold : int = WorkMotivation.HIGH) -> typing.List[Script_work_task]:
         """
         Analyze motivation levels and create a list of Script_work_task objects based on available actions.
 
@@ -178,8 +188,8 @@ class Cycle_jobs:
 
         # Loop through available jobs and motivation levels
         for job in self.job_data:
-            if motivation[str(job.job_id)] > 75 and possible_actions != 0:
-                actions = min(motivation[str(job.job_id)] - 75, possible_actions)
+            if motivation[str(job.job_id)] > motivation_treshold and possible_actions != 0:
+                actions = min(motivation[str(job.job_id)] - motivation_treshold, possible_actions)
                 possible_actions -= actions
                 
                 if self.clothes_changer_manager is not None:
@@ -203,14 +213,14 @@ class Cycle_jobs:
 
         return work_tasks_actions
 
-    def work_cycle(self, motivation_consumable: int):
+    def work_cycle(self, motivation_consumable: int , motivation_treshold: int = WorkMotivation.HIGH) -> bool:
         """
         Execute the work tasks cycle based on available motivation and energy.
 
         Args:
             motivation_consumable (int): The ID of the motivation consumable item.
         """
-        work_data = self._analize_motivation()
+        work_data = self._analize_motivation(motivation_treshold=motivation_treshold)
 
         if len(work_data) == 0:
             return True
@@ -229,7 +239,7 @@ class Cycle_jobs:
         # Recursive call to continue the cycle
         return self.work_cycle(motivation_consumable=motivation_consumable)
 
-    def cycle(self, motivation_consumable: int, energy_consumable: int, number_of_cycles=1):
+    def cycle(self, motivation_consumable: int, energy_consumable: int, number_of_cycles=1 , motivation_treshold: int = WorkMotivation.HIGH):
         """
         Execute the work cycle for a specified number of cycles.
 
@@ -265,7 +275,8 @@ class Cycle_jobs:
                 number_of_cycles -= 1
 
             # Execute the work cycle and update energy
-            solution = self.work_cycle(motivation_consumable=motivation_consumable)
+            solution = self.work_cycle(motivation_consumable=motivation_consumable ,
+                                       motivation_treshold=motivation_treshold)
             player_data = self.game_classes.player_data
             player_data.update_character_variables(self.handler)
             energy = player_data.energy

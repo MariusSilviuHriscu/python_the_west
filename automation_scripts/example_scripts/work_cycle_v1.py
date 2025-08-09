@@ -10,7 +10,7 @@ from automation_scripts.sleep_func_callbacks.callback_chain import CallbackChain
 from automation_scripts.sleep_func_callbacks.misc_func_callback import recharge_health_equipment
 from automation_scripts.stop_events.script_events import StopEvent
 from automation_scripts.stop_events.script_exception_handler import handle_exceptions
-from automation_scripts.work_cycle import Cycle_jobs
+from automation_scripts.work_cycle import Cycle_jobs , WorkMotivation
 from automation_scripts.pre_work_managers.mov_pre_work_loader import PreWorkMovManagerBuilder
 from automation_scripts.sleep_func_callbacks.universal_callback_map import UNIVERSAL_MAPPING
 
@@ -57,6 +57,7 @@ def cycle_work(game_login : Game_login ,
                pre_work_movement_manager : None | PreWorkMovementManager = None,
                movement_equipment : None | Equipment = None,
                work_eq_dict : dict[int,EquipmentChangeCollection] | None = None,
+               motivation_treshold : int = WorkMotivation.HIGH,
                additional_chainer : None | CallbackChainer = None
                ):
     
@@ -139,7 +140,8 @@ def cycle_work(game_login : Game_login ,
         cycle.cycle(
             motivation_consumable=motivation_consumable,
             energy_consumable= energy_consumable,
-            number_of_cycles= number_of_cycles
+            number_of_cycles= number_of_cycles,
+            motivation_treshold= motivation_treshold
         )
     except Exception as e:
         

@@ -82,7 +82,7 @@ class Consumable_handler:
         self.bag = bag
         self.cooldown = cooldown
 
-    def _use_consumable(self, consumable_id: int):
+    def _use_consumable(self, consumable_id: int , number : int = 1):
         """
         Attempts to use the specified consumable item.
 
@@ -95,13 +95,19 @@ class Consumable_handler:
         Returns:
             dict: The result of using the item.
         """
-        if consumable_id not in self.bag:
+        if consumable_id not in self.bag or self.bag[consumable_id] < number :
             raise Exception("You do not have enough consumables of this type")
+        
+        payload = {"item_id": f"{consumable_id}",
+                   'item_count' : number
+                   }
+        
+        
         result = self.handler.post(
                     window="itemuse",
                     action="use_item",
                     action_name="action",
-                    payload={"item_id": f"{consumable_id}"},
+                    payload=payload,
                     use_h=True,
                     )
         if result["error"] == True:
@@ -179,7 +185,7 @@ class Consumable_handler:
             new_dict = self._add_result_dict(new_dict, result_dict)
     
         return new_dict
-    
+
     def _extract_box_result_dict(self, raw_data: list) -> dict[int, int]:
         """
         Extract and process the lottery result data from the raw data.
@@ -209,10 +215,10 @@ class Consumable_handler:
     
         # Apply get_dict to each filtered dictionary to get processed dictionaries
         lottery_result_dict = map(get_dict, lottery_result_dict_filter)
-    
-        # Combine processed dictionaries into a single dictionary using _add_result_dict_iterator
-        return self._add_result_dict_iterator(result_dict_iterator=lottery_result_dict)      
-    def _open_box(self, box_id: int, time_sleep: int = None):
+        
+        
+        return self._add_result_dict_iterator(lottery_result_dict)
+    def _open_box(self, box_id: int,number: int = 1, time_sleep: int = None):
         """
         Open a box with the specified ID, process the result, and update the player's bag.
 
@@ -224,7 +230,7 @@ class Consumable_handler:
             dict[int, int]: Processed dictionary with item IDs and their corresponding counts obtained from opening the box.
         """
         # Use the consumable with the specified box ID and retrieve the result
-        result = self._use_consumable(consumable_id=box_id)['msg']
+        result = self._use_consumable(consumable_id=box_id,number=number)['msg']
         
         # Update the cooldown based on the result's cooldown information
         if 'cooldown' in result:
@@ -262,7 +268,7 @@ class Consumable_handler:
             dict[int, int]: Accumulated dictionary with combined counts of items obtained from opening the boxes.
         """
         # Use a generator expression to open the box 'number' times and accumulate the results
-        opening_results = (self._open_box(box_id=box_id, time_sleep=time_sleep) for _ in range(number))
+        opening_results = self._open_box(box_id= box_id , number= number , time_sleep= time_sleep)
 
         # Combine results into a single dictionary using _add_result_dict_iterator
-        return self._add_result_dict_iterator(result_dict_iterator=opening_results)
+        return opening_results

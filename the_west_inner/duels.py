@@ -10,6 +10,7 @@ from the_west_inner.equipment import Equipment_manager,Equipment
 from the_west_inner.misc_scripts import turn_game_time_to_datetime
 from the_west_inner.player_data import Player_data
 
+
 STANCE_NUM : int = 4
 
 class DuelWeaponEnum(StrEnum):
@@ -173,6 +174,9 @@ class DuelNpcData:
 
 class NpcDuelException(Exception):
     pass
+
+NpcFilterFuncType = typing.Callable[[DuelNpcData],bool]
+
 
 class NpcDuelList :
     def __init__(self ,

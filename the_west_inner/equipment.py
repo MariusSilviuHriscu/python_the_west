@@ -62,6 +62,10 @@ class Equipment:
         for item_type , equipment_item_id in self.__dict__.items():
             if equipment_item_id == item_id:
                 return item_type
+    
+    def copy(self) -> typing.Self:
+        
+        return copy.deepcopy(self)
 
 class SavedEquipment:
     

@@ -305,10 +305,15 @@ class NpcDuelList :
         time.sleep(smallest_delta)
         time.sleep(1)
     
-    def get_npc_by_weapon_type(self ,items: Items, weapon_type : DuelWeaponEnum) -> list[DuelNpcData]:
+    def get_npc_by_func(self, key : typing.Callable[[DuelNpcData] , bool]) -> list[DuelNpcData]:
         
         return [ x for x in self._npc_list 
-                                    if items.weapon_type(item_id= x.weapon_id) == weapon_type]
+                                    if key(x) ]
+    
+    def get_npc_by_weapon_type(self ,items: Items, weapon_type : DuelWeaponEnum) -> list[DuelNpcData]:
+        
+        return self.get_npc_by_func(key = lambda x : items.weapon_type(item_id= x.weapon_id) == weapon_type)
+
     
     def yield_npcs_by_arrival(self , handler : requests_handler) -> typing.Generator[DuelResultData, None, None]:
         while True:

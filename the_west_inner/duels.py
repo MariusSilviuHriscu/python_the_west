@@ -1,15 +1,20 @@
 import time
 import typing
-from enum import Enum
+from enum import Enum,StrEnum
 from dataclasses import dataclass, fields
 import datetime
 
+from the_west_inner.items import Items
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.equipment import Equipment_manager,Equipment
 from the_west_inner.misc_scripts import turn_game_time_to_datetime
 from the_west_inner.player_data import Player_data
 
 STANCE_NUM : int = 4
+
+class DuelWeaponEnum(StrEnum):
+    MELEE = 'hand'
+    FIRE = 'shot'
 class DuelTargetStanceEnum(Enum):
     
     HEAD = 'head'
@@ -299,7 +304,11 @@ class NpcDuelList :
         
         time.sleep(smallest_delta)
         time.sleep(1)
+    
+    def get_npc_by_weapon_type(self ,items: Items, weapon_type : DuelWeaponEnum) -> list[DuelNpcData]:
         
+        return [ x for x in self._npc_list 
+                                    if items.weapon_type(item_id= x.weapon_id) == weapon_type]
     
     def yield_npcs_by_arrival(self , handler : requests_handler) -> typing.Generator[DuelResultData, None, None]:
         while True:
@@ -350,7 +359,9 @@ class NpcDuelManager():
                  ):
         self.handler = handler
         self.equipment_manager = equipment_manager
+        
         self.player_data = player_data
+        self.items = self.equipment_manager.items
         
         self.npc_list = get_npc_duel_data(handler=self.handler)
         
@@ -408,3 +419,11 @@ class NpcDuelManager():
                 break
             
             yield self.duel_npc(npc_id=npc_id)
+    
+    def get_npc_data_by_weapon(self, weapon_type : DuelWeaponEnum ) -> list[DuelNpcData]:
+        
+        return self.npc_list.get_npc_by_weapon_type(
+            items= self.items,
+            weapon_type= weapon_type
+        )
+        

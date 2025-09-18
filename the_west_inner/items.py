@@ -170,6 +170,25 @@ class Items():
         :rtype: int
         """
         return self.get_item()
+    
+    def is_weapon(self, item_id) -> bool:
+        
+        item_data = self.get_item(item_id = item_id)
+        
+        return item_data.get('for_duel' , False)
+    
+    def weapon_type(self , item_id : int) -> str:
+        
+        item_data = self.get_item(item_id = item_id)
+        
+        
+        if not self.is_weapon(item_id = item_id):
+            
+            raise ValueError(f'Item {self.name(item_id=item_id)} with id {item_id} is not weapon !')
+        
+        return item_data.get('sub_type' , '')
+        
+        
     def __contains__(self,item_id:typing.Union[int,str]) -> bool:
         """
         Checks if the ID of specified item exists in the item pool.

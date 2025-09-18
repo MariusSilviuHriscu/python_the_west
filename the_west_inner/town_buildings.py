@@ -279,8 +279,7 @@ class Bank_building_preloader(Building_preloader):
         self.town_id = town_id
         self.handler = handler
     def _get_bank_data(self):
-        bank_data_response = self.handler.post(window='bank_building',action='get_data' , payload={'town_id' : f'{self.town_id}'})
-        
+        bank_data_response = self.handler.post(window='building_bank',action='get_data' ,action_name='mode', payload={'town_id' : f'{self.town_id}'})
         if 'error' in bank_data_response and bank_data_response.get('error') is not False :
             raise Exception(f'Something went wrong getting the bank info of the city : {self.town_id}')
         
@@ -295,7 +294,7 @@ class Bank_building_preloader(Building_preloader):
                             player_in_town = bank_info['in_town'],
                             own_bank = bank_info['own_town'],
                             deposit_fee = bank_info['deposit_fee'],
-                            can_transfer = bank_info['trasfer'],
+                            can_transfer = bank_info['transfer'],
                             transfer_fee = bank_info['transfer_fee']
                             )
 @dataclass

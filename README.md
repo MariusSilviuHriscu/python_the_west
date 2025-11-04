@@ -6,13 +6,7 @@ This project is a Python-based bot for the browser game "The West". It is design
 
 ```bash
 pip install python-the-west
-
-
-4.  Activate the virtual environment created by Poetry:
-
-    ```bash
-    poetry shell
-    ```
+```
 
 
 The project is divided into three main parts:

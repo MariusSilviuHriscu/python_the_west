@@ -109,7 +109,7 @@ game_classes.consumable_handler.use_consumable(consumable_id=item_id_to_use)
 
 ### Using an Automation Script
 
-Here's an example of how to use the `Cycle_jobs` automation script to work a list of jobs and use a `CallbackChainer` to print the player's health every 30 seconds.
+Here's an example of how to use the `Cycle_jobs` automation script to work a list of jobs and use a `CallbackChainer` to print the player's health every 30 seconds and the energy every time.
 
 ```python
 from the_west_inner.work import Work
@@ -139,9 +139,15 @@ def print_player_health(player_data: Player_data, handler: requests_handler):
     player_data.update_all(handler=handler) # Make sure we have the latest data
     print(f"Player health: {player_data.hp}")
 
+# Define a callback function that prints the player's energy
+def print_player_energy(player_data: Player_data):
+    print(f"Player energy: {player_data.energy}")
+
 # Add the callback to the chainer with a frequency rule
 callback_chainer.add_callback(print_player_health)
 callback_chainer.set_frequency(EveryNSeconds(time_seconds=30))
+
+callback_chainer.add_callback(print_player_energy)
 
 
 # Instantiate the Cycle_jobs class

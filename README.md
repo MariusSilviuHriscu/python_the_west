@@ -4,24 +4,8 @@ This project is a Python-based bot for the browser game "The West". It is design
 
 ## Installation
 
-To use this project, you'll need to have [Poetry](https://python-poetry.org/) installed.
-
-1.  Clone the repository:
-
     ```bash
-    git clone <repository-url>
-    ```
-
-2.  Navigate to the project directory:
-
-    ```bash
-    cd python_the_west
-    ```
-
-3.  Install the dependencies using Poetry:
-
-    ```bash
-    poetry install
+    pip install python-the-west
     ```
 
 4.  Activate the virtual environment created by Poetry:

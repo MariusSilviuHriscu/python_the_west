@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from the_west_inner.bag import Bag
 from the_west_inner.currency import Currency
 from the_west_inner.consumable import Consumable_handler
+from the_west_inner.game_classes import Game_classes
 
 
 OUP_LETTER_VALUES : dict[int,int] = {
@@ -66,5 +67,39 @@ def get_letters(currency : Currency ,
     return letter_count
 
 
-def use_oup_letters():
+def use_oup_letters(game_classes : Game_classes):
     
+    currency = game_classes.currency
+    bag = game_classes.bag
+    consumable_handler = game_classes.consumable_handler
+    
+    currency.update_raw_oup(
+            game_classes.handler
+        )
+    
+    
+    use_letter_dict = get_letters(
+        currency= currency,
+        bag= bag
+    )
+    start_oup = currency.oup
+    
+    
+    for letter,num in use_letter_dict.items():
+        
+        current_oup = currency.oup
+        
+        consumable_handler._use_consumable(
+            consumable_id = letter,
+            number= num
+        )
+        
+        currency.update_raw_oup(
+            game_classes.handler
+        )
+        
+        if current_oup + OUP_LETTER_VALUES.get(letter)  * num != currency.oup:
+            
+            raise ValueError('You have more oup than expected!')
+    
+    print(f'We used oup letters for a total of {currency.oup - start_oup}')

@@ -22,6 +22,8 @@ class NotebookEquipSaver:
     def get_notebook_equipment(self) -> Equipment | None:
         
         equipment_str = self.notebook.content
+        if equipment_str is None:
+            return None
         
         try:
             return Equipment(

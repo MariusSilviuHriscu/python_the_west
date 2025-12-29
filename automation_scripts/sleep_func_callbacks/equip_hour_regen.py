@@ -1,9 +1,10 @@
 from automation_scripts.notebook_storage.equipment_changer import build_notebook_changer, NotebookChanger
 from the_west_inner.equipment import Equipment
 from the_west_inner.game_classes import Game_classes
+from the_west_inner.requests_handler import requests_handler
 
 
-def change_regen(game_classes: Game_classes, regen_equip: Equipment):
+def change_regen(regen_equip: Equipment , game_classes: Game_classes,handler : requests_handler ):
     """
     Changes equipment based on current energy levels and queued tasks.
     """
@@ -17,7 +18,6 @@ def change_regen(game_classes: Game_classes, regen_equip: Equipment):
 
     energy = game_classes.player_data.energy
     max_energy = game_classes.player_data.energy_max
-    handler = game_classes.handler
     task_queue = game_classes.task_queue
 
     # If there are no active tasks (assuming we can check emptiness)

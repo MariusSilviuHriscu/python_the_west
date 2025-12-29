@@ -5,7 +5,8 @@ from the_west_inner.requests_handler import requests_handler
 from the_west_inner.traveling_merchant import Travelling_merchant_manager
 
 def christmas_open_bags(game_classes : Game_classes , item_id: int):
-    
+    if game_classes.bag[item_id] == 0:
+        return
     result = game_classes.consumable_handler.open_box(
         box_id = item_id,
         number = game_classes.bag[item_id]

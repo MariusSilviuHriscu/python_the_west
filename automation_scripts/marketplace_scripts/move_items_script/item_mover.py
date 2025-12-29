@@ -125,7 +125,7 @@ class ItemMoverAgent:
             max_price=self.exchange_price
         )
     
-    def sell_item(self, item_id: int, number: int = 1) -> bool:
+    def sell_item(self, item_id: int, number: int = 1 , is_token :bool = False , token_min_price : int = 50_000) -> bool:
         """
         Sells an item in the nearest town.
 
@@ -143,6 +143,16 @@ class ItemMoverAgent:
                 item_id = item_id,
                 handler=self.game_classes.handler
             )
+        
+        if is_token:
+            return self.marketplace_managers.marketplace_sell_manager.sell_in_nearest_town(
+                item_id=item_id,
+                number_of_items=number,
+                unitary_price=int(self.exchange_price / number),
+                min_price= token_min_price
+                
+            )
+        
         return self.marketplace_managers.marketplace_sell_manager.sell_in_nearest_town(
             item_id=item_id,
             number_of_items=number,
@@ -207,7 +217,11 @@ class ItemMover:
             item_id (int): The item ID.
             item_number (int): The number of items to exchange.
         """
-        seller_agent.sell_item(item_id=item_id, number=item_number)
+        
+        if item_id == self.exchange_token_item:
+            seller_agent.sell_item(item_id=item_id, number=item_number, is_token=True)
+        else:
+            seller_agent.sell_item(item_id=item_id, number=item_number)
         buyer_agent.buy_from_marketplace(item_id=item_id, player_id=seller_agent.player_id)
         seller_agent.collect_sold()
         

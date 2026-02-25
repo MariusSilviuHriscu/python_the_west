@@ -219,7 +219,7 @@ class PlayerRatingManager():
         category_data = PlayerCategoryRating(rating_category= CategoryEnum.EXPERIENCE)
         
         for page in range(self.player_pages):
-            result = self.get_page_normal(category= CategoryEnum.EXPERIENCE , page=page)
+            result = self.rating_handler.get_page_normal(category= CategoryEnum.EXPERIENCE , page=page)
             self.process_player_data(
                 ranking_data= result.get('ranking'),
                 category_data= category_data,

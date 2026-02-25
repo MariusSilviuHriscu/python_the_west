@@ -1,10 +1,19 @@
 import math
+from enum import StrEnum
 
 from the_west_inner.requests_handler import requests_handler
 from the_west_inner.task_queue import TaskQueue
 from the_west_inner.premium import Premium
 from the_west_inner.player_data import Player_data
 from the_west_inner.misc_scripts import wait_until_date,wait_until_date_callback
+
+
+
+class WalkTypeEnum(StrEnum):
+    
+    FORT = 'fort'
+    TOWN = 'town'
+    QUESTGIVER = 'questgiver'
 
 class Work_manager():
     """A class for managing work tasks in a task queue.
@@ -96,6 +105,48 @@ class Work_manager():
 
         # Return the server's response.
         return response
+    
+    def _move_job(self, entity_id : int| str , walk_type : WalkTypeEnum | str , coord_tuple : tuple[int,int] | None = None) -> dict:
+        
+        """Add a task to move to a given entity.
+
+        Args:
+            entity_id (str): The ID of the entity to move to.
+
+        Returns:
+            dict: A dictionary containing the server's response.
+        """
+        # Get the current position in the task queue.
+        position_in_queue = len(self.task_queue)
+
+        # Get the maximum number of tasks that can be added to the queue.
+        allowed_tasks = {True: 9, False: 4}[self.premium.automation]
+
+        # If the task queue is full, wait until the earliest task finishes before adding the new task.
+        if position_in_queue + 1 > allowed_tasks:
+            wait_until_date(wait_time=self.task_queue.get_tasks_expiration(), handler=self.handler)
+            position_in_queue = 0
+
+        # Create a dictionary to store the task data.
+        walk_payload = {
+            f"tasks['{position_in_queue}'][unitId]": f"{entity_id}",
+            f"tasks['{position_in_queue}'][type]": walk_type,
+            f"tasks['{position_in_queue}'][taskType]": "walk"
+        }
+        
+        if coord_tuple is not None:
+            
+            if len(coord_tuple) != 2:
+                raise ValueError('You need to have a tuple of 2 !')
+            
+            walk_payload['x'] = coord_tuple[0]
+            walk_payload['y'] = coord_tuple[1]
+
+        # Send the task to the server and get the response.
+        response = self.handler.post("task", "add", payload=walk_payload, use_h=True)
+
+        # Return the server's response.
+        return response
 
     def move_to_town(self, town_id: str):
         """Add a task to move to a given town.
@@ -130,6 +181,48 @@ class Work_manager():
         # Return the server's response.
         return response
     
+    def move_to_town(self, town_id: str):
+        """Add a task to move to a given town.
+
+        Args:
+            town_id (str): The ID of the town to move to.
+
+        Returns:
+            dict: A dictionary containing the server's response.
+        """
+        return self._move_job(
+            entity_id= town_id,
+            walk_type= WalkTypeEnum.TOWN
+        )
+    def move_to_fort(self, fort_id: str):
+        """Add a task to move to a given fort.
+
+        Args:
+            fort_id (str): The ID of the fort to move to.
+
+        Returns:
+            dict: A dictionary containing the server's response.
+        """
+        return self._move_job(
+            entity_id= fort_id,
+            walk_type= WalkTypeEnum.FORT
+        )
+    def move_to_quest_employer(self, quest_employer_key: str,x:int,y:int):
+        """Add a task to move to a given quest employer.
+
+        Args:
+            quest_employer_key (str): The ID of the quest employer to move to.
+            x , y (int): The position of the quest employer on the map
+
+        Returns:
+            dict: A dictionary containing the server's response.
+        """
+        
+        self._move_job(
+            entity_id=quest_employer_key,
+            walk_type= WalkTypeEnum.QUESTGIVER,
+            coord_tuple= (x , y)
+        )
     def move_to_quest_employer(self, quest_employer_key: str,x:int,y:int):
         """Add a task to move to a given quest employer.
 

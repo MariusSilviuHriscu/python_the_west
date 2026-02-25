@@ -181,7 +181,17 @@ class Marketplace_offer():
         int: The id of the seller of this offer.
         """
         return self.dict_offer["seller_player_id"]
+    
+    @property
+    def offer_id(self) -> int:
+        """
+        This property returns the id of this offer.
 
+        Returns:
+        int: The id of this offer.
+        """
+        return self.dict_offer["market_offer_id"]
+    
     @property
     def item_count(self) -> int:
         """

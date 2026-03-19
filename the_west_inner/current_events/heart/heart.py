@@ -84,6 +84,17 @@ class HeartEvent(CurrentEvent):
         
         return result.get('prize').get('itemId')
     
+    def get_bet_cost(self,currency_type : EventCurrencyEnum) -> int :
+        
+        if currency_type == EventCurrencyEnum.FIREWORK:
+            
+            raise ValueError('Firework currency invalid!')
+        
+        if currency_type == EventCurrencyEnum.NUGGETS:
+            return HEART_COSTS.oup_bet_cost
+        
+        return HEART_COSTS.nugget_bet_cost
+    
     def play(self , currency_type : EventCurrencyEnum) -> int:
         
         self.check_currency_ammounts(currency_type = currency_type)

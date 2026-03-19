@@ -31,8 +31,12 @@ def build_currency_data(response :dict[str , str|dict]) -> CurrencyData:
     )
 
 def build_event_stage_data(response : dict[str,str|dict]) -> EventStageData:
+    
+    normalize = lambda x: {i: v for i, v in enumerate(x)} if isinstance(x, list) else x
+    
+    normalized_response = normalize(response.get('prizes').get('gamblePrizes'))
     return EventStageData(
-        gamble_prizes = response.get('prizes').get('gamblePrizes')
+        gamble_prizes = normalized_response
     )
 
 def build_current_event_data(

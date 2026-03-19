@@ -184,8 +184,8 @@ class EasterEvent(CurrentEvent):
         
         response = self.event_handler.gamble(
             pay_id= currency_type.value,
-            gamble_level= bandit_id,
-            wof_id = self.current_event_data.event_wof
+            wof_id = self.current_event_data.event_wof,
+            gamble_level= bandit_id
         )
         
         

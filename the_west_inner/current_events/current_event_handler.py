@@ -7,14 +7,18 @@ class EventHandler():
     def __init__(self , handler : requests_handler):
         self.handler = handler
     
-    def gamble(self,pay_id : int , gamble_level : int , wof_id):
+    def gamble(self,pay_id : int , wof_id : int , gamble_level : int | None = None):
         
         payload = {
             'payid' : pay_id,
             'enhance' : gamble_level,
             'action' : 'main',
             'wofid' : wof_id
-        }
+        } if gamble_level is not None else {
+                                            'payid' : pay_id,
+                                            'action' : 'main',
+                                            'wofid' : wof_id
+                                        }
         
         
         response = self.handler.post(

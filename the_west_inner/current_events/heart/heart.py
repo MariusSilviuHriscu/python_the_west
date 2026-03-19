@@ -98,17 +98,17 @@ class HeartEvent(CurrentEvent):
 
         raise ValueError('Invalid type of currency !')
         
-    def get_play_times(self, currency_type : EventCurrencyEnum) -> int:
+    def get_play_times(self, currency_type : EventCurrencyEnum , limit : int = 0) -> int:
         
         if currency_type == EventCurrencyEnum.FIREWORK:
             
             raise ValueError('Firework currency invalid!')
         
         if currency_type == EventCurrencyEnum.OUP:
-            return self.global_currency.oup // self.get_bet_cost(currency_type= currency_type) + self.free_trials
+            return (self.global_currency.oup - limit )// self.get_bet_cost(currency_type= currency_type) + self.free_trials
         
         if currency_type == EventCurrencyEnum.NUGGETS:
-            return self.global_currency.nuggets // self.get_bet_cost(currency_type= currency_type) + self.free_trials
+            return (self.global_currency.nuggets - limit )// self.get_bet_cost(currency_type= currency_type) + self.free_trials
 
         raise ValueError('Invalid type of currency !')
     

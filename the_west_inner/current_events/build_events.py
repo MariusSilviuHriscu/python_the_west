@@ -12,6 +12,7 @@ from the_west_inner.current_events.independence.build_independence_event import 
 from the_west_inner.current_events.oktoberfest.build_oktoberfest_event import OktoberfestEventBuilder
 from the_west_inner.current_events.muertos.build_muertos_event import MuertosEventBuilder
 from the_west_inner.current_events.easter.build_easter_event import EasterEventBuilder
+from the_west_inner.current_events.heart.build_heart_event import HeartEventBuilder
 
 
 class EventBuilder(Protocol):
@@ -30,9 +31,13 @@ EVENT_DICT : dict[str, EventBuilder] ={
     'Octoberfest' : OktoberfestEventBuilder,
     'DayOfDead' : MuertosEventBuilder ,
     'Easter' : EasterEventBuilder,
+    'Hearts' : HeartEventBuilder,
     'fairwof' : None
 }
 
+INCONSISTENT_NAMING : dict[str,str] = {
+    'Hearts' : 'Heart'
+}
 
 class CurrentEventLoader:
     def __init__(self ,
@@ -74,7 +79,9 @@ def make_event_loader(game_html : str) -> CurrentEventLoader|None:
         
         if event_name in EVENT_DICT:
             
-            wof_id = get_wof_id_by_event_name(initialization_html = game_html , event_name = event_name)
+            wof_event_key = event_name if event_name not in INCONSISTENT_NAMING else INCONSISTENT_NAMING.get(event_name)
+            
+            wof_id = get_wof_id_by_event_name(initialization_html = game_html , event_name = wof_event_key)
             
             return CurrentEventLoader(
                 wof_id = wof_id,

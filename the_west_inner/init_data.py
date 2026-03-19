@@ -23,7 +23,8 @@ CORRESPONDING_EVENT_WOF = {
     'fairwof' : 'fairwof',
     'Octoberfest' : 'octoberwof',
     'DayOfDead' : 'dayofdeadwof',
-    'Easter' : 'easterwof'
+    'Easter' : 'easterwof',
+    'Heart' : 'heartswof'
 }
 
 

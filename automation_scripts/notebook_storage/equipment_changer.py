@@ -46,7 +46,8 @@ class NotebookChanger:
         
         self.equipment_manager.equip_equipment(
             equipment = self.regen_equip,
-            handler = handler
+            handler = handler,
+            retry_count= 3
         )
     
     def equip_work(self, handler : requests_handler):
@@ -57,7 +58,8 @@ class NotebookChanger:
         
         self.equipment_manager.equip_equipment(
             equipment = self.notebook_saver.get_notebook_equipment(),
-            handler= handler
+            handler= handler,
+            retry_count = 3
         )
 
 def build_notebook_changer(game_classes : Game_classes , regen_equip : Equipment) -> NotebookChanger:

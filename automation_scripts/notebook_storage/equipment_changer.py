@@ -27,7 +27,7 @@ class NotebookChanger:
     def has_items(self , equipment : Equipment) -> bool:
         
         return all(
-            [self.has_item(item_id = x) for _,x in equipment]
+            [self.has_item(item_id = x) for _ , x in equipment]
         )
     
     def check_saved_equipment(self) -> bool:
